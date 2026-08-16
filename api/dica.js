@@ -48,7 +48,11 @@ function sourcesFrom(response, tipoKey) {
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido." });
-  const groqKey = String(process.env.GROQ_API_KEY || "").trim();
+  const groqKey = String(process.env.GROQ_API_KEY || "")
+    .trim()
+    .replace(/^Bearer\s+/i, "")
+    .replace(/^['\"]|['\"]$/g, "")
+    .trim();
   if (!groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
 
   const areaKey = Object.hasOwn(AREAS, req.body?.area) ? req.body.area : "geral";
