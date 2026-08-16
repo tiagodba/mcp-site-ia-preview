@@ -7,7 +7,7 @@ const AREAS = {
 };
 
 const TIPOS = {
-  aleatoria: "escolha entre jurisprudência, legislação, questão comentada ou dica estratégica",
+  aleatoria: "escolha entre legislação, questão comentada ou dica estratégica",
   jurisprudencia: "jurisprudência recente e relevante para provas",
   questao: "questão comentada autoral inspirada no padrão das bancas, sem reproduzir questão protegida",
   legislacao: "alteração legislativa ou ponto de lei atualizado",
@@ -73,11 +73,15 @@ export default async function handler(req, res) {
   const area = AREAS[areaKey];
   const tipo = TIPOS[tipoKey];
   const variedade = Number(req.body?.variedade || 0) % 20;
+  const limiteJurisprudencial = tipoKey === "jurisprudencia"
+    ? "Use apenas uma decisão localizada em fonte oficial de STF, STJ ou CNJ."
+    : "Não cite jurisprudência, número de processo, tema repetitivo, súmula ou tese judicial; isso é reservado ao formato Jurisprudência.";
 
   const prompt = `Produza uma dica estendida, em português do Brasil, para candidato de ${area}.
 Formato desejado: ${tipo}.
 Identificador interno de diversidade: V${variedade} (isso não representa quantidade de itens).
 Data desta solicitação: ${new Date().toISOString().slice(0, 10)}.
+Restrição específica: ${limiteJurisprudencial}
 
 Regras obrigatórias:
 - Execute obrigatoriamente a ferramenta de pesquisa web antes de responder. Não responda apenas com conhecimento interno.
