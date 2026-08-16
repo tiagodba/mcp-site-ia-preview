@@ -163,9 +163,7 @@ Regras obrigatórias:
             .map((result) => String(result.content).trim())
             .filter(Boolean);
           tavilySources = sources;
-          tavilyContext = snippets.slice(0, aprofundado ? 6 : 3).join("
-
-").slice(0, aprofundado ? 9000 : 4500);
+          tavilyContext = snippets.slice(0, aprofundado ? 6 : 3).join("\n\n").slice(0, aprofundado ? 9000 : 4500);
           tavilyFallback = String(tavilyData.answer || "").trim();
           if (!tavilyContext && !tavilyFallback) {
             console.error("Tavily response missing usable official content");
