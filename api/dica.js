@@ -76,8 +76,9 @@ function geminiResult(data, tipoKey) {
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido." });
   const geminiKey = cleanKey(process.env.GEMINI_API_KEY);
+  const tavilyKey = cleanKey(process.env.TAVILY_API_KEY);
   const groqKey = cleanKey(process.env.GROQ_API_KEY);
-  if (!geminiKey && !groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
+  if (!tavilyKey && !geminiKey && !groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
 
   const areaKey = Object.hasOwn(AREAS, req.body?.area) ? req.body.area : "geral";
   const tipoKey = Object.hasOwn(TIPOS, req.body?.tipo) ? req.body.tipo : "aleatoria";
@@ -118,6 +119,55 @@ Regras obrigatórias:
   const searchDomains = tipoKey === "jurisprudencia" ? COURT_HOSTS : OFFICIAL_HOSTS;
 
   try {
+    if (tavilyKey) {
+      try {
+        const tavilyQuery = `Para candidato de ${area}, produza exatamente uma ${tipo}. Consulte informação jurídica brasileira atual e explique de forma didática, terminando com Como pode cair na prova. Use somente fonte oficial.`;
+        const tavilyResponse = await fetch("https://api.tavily.com/search", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${tavilyKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: tavilyQuery,
+            search_depth: "basic",
+            chunks_per_source: 2,
+            max_results: 4,
+            topic: "general",
+            include_answer: "advanced",
+            include_raw_content: false,
+            include_domains: searchDomains,
+            country: "brazil",
+          }),
+        });
+        const tavilyData = await tavilyResponse.json();
+        if (tavilyResponse.ok) {
+          const sources = (tavilyData.results || [])
+            .filter((result) => result?.url && hostAllowed(result.url, tipoKey))
+            .map((result) => ({ title: result.title || "Fonte oficial", url: result.url }))
+            .filter((source, index, list) => list.findIndex((item) => item.url === source.url) === index)
+            .slice(0, 4);
+          const text = String(tavilyData.answer || "").trim();
+          if (text && sources.length) {
+            res.setHeader("Cache-Control", "private, no-store");
+            return res.status(200).json({
+              text,
+              sources,
+              consultedAt: new Date().toISOString(),
+              area: areaKey,
+              tipo: tipoKey,
+              provider: "tavily",
+            });
+          }
+          console.error("Tavily response missing answer or official sources");
+        } else {
+          console.error("Tavily request failed", tavilyResponse.status, String(tavilyData?.detail?.error || tavilyData?.detail || "unknown").slice(0, 180));
+        }
+      } catch (tavilyError) {
+        console.error("Tavily fallback error", tavilyError?.message || "unknown");
+      }
+    }
+
     if (geminiKey) {
       try {
         const geminiResponse = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
@@ -197,7 +247,11 @@ Regras obrigatórias:
         });
       }
       if (apiResponse.status === 401) {
-        return res.status(502).json({ error: "A chave da IA precisa ser atualizada pelo administrador." });
+        return res.status(502).json({
+          error: tavilyKey
+            ? "A pesquisa principal falhou temporariamente. Tente outra dica."
+            : "A chave da IA precisa ser atualizada pelo administrador.",
+        });
       }
       return res.status(502).json({ error: "Não foi possível gerar a dica agora. Tente novamente em instantes." });
     }
