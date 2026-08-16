@@ -59,9 +59,11 @@ export default async function handler(req, res) {
   const prompt = `Produza uma dica estendida, em português do Brasil, para candidato de ${area}.
 Formato desejado: ${tipo}.
 Variação temática: ${variedade}.
+Data desta solicitação: ${new Date().toISOString().slice(0, 10)}.
 
 Regras obrigatórias:
-- Pesquise a internet antes de responder e priorize STF, STJ, CNJ, Planalto, Senado, Câmara e portais oficiais do governo.
+- Execute obrigatoriamente a ferramenta de pesquisa web antes de responder. Não responda apenas com conhecimento interno.
+- Priorize STF, STJ, CNJ, Planalto, Senado, Câmara e portais oficiais do governo.
 - Traga um título curto e depois uma explicação objetiva, didática e útil para concursos policiais.
 - Se houver jurisprudência, informe tribunal, órgão julgador, número do processo ou tema quando disponível e explique a tese sem inventar dados.
 - Se for questão comentada, crie uma questão autoral de Certo/Errado, forneça o gabarito e explique; não copie questão de banca.
@@ -79,7 +81,7 @@ Regras obrigatórias:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "groq/compound-mini",
+        model: "groq/compound",
         messages: [{ role: "user", content: prompt }],
         search_settings: {
           include_domains: [
