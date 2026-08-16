@@ -105,7 +105,7 @@ Regras obrigatórias:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "groq/compound-mini",
+        model: "groq/compound",
         messages: [{ role: "user", content: prompt }],
         search_settings: {
           include_domains: searchDomains,
