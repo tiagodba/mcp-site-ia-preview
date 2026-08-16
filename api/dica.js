@@ -28,13 +28,30 @@ function allow(ip) {
   return current.count <= 8;
 }
 
-function sourcesFrom(response) {
+const OFFICIAL_HOSTS = [
+  "stf.jus.br", "portal.stf.jus.br", "stj.jus.br", "cnj.jus.br",
+  "planalto.gov.br", "gov.br", "senado.leg.br", "camara.leg.br",
+];
+
+const COURT_HOSTS = ["stf.jus.br", "portal.stf.jus.br", "stj.jus.br", "cnj.jus.br"];
+
+function hostAllowed(url, tipoKey) {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    const allowed = tipoKey === "jurisprudencia" ? COURT_HOSTS : OFFICIAL_HOSTS;
+    return allowed.some((domain) => host === domain || host.endsWith(`.${domain}`));
+  } catch {
+    return false;
+  }
+}
+
+function sourcesFrom(response, tipoKey) {
   const sources = [];
   const message = response?.choices?.[0]?.message;
   for (const tool of message?.executed_tools || []) {
     const results = tool?.search_results?.results || tool?.search_results || [];
     for (const result of results) {
-      if (!result?.url || !/^https:\/\//i.test(result.url)) continue;
+      if (!result?.url || !/^https:\/\//i.test(result.url) || !hostAllowed(result.url, tipoKey)) continue;
       if (!sources.some((source) => source.url === result.url)) {
         sources.push({ title: result.title || "Fonte oficial", url: result.url });
       }
@@ -66,12 +83,17 @@ Regras obrigatórias:
 - Priorize STF, STJ, CNJ, Planalto, Senado, Câmara e portais oficiais do governo.
 - Traga um título curto e depois uma explicação objetiva, didática e útil para concursos policiais.
 - Se houver jurisprudência, informe tribunal, órgão julgador, número do processo ou tema quando disponível e explique a tese sem inventar dados.
+- Só mencione número de processo, tema, artigo, data, órgão julgador ou tese quando isso estiver expressamente sustentado por uma fonte oficial encontrada na pesquisa.
+- Para jurisprudência, use exclusivamente resultado oficial de STF, STJ ou CNJ. Se a busca não trouxer decisão oficial pertinente, diga que não há base suficiente; não improvise.
+- A primeira fonte encontrada deve sustentar diretamente o assunto central, e o tribunal ou órgão citado no texto deve corresponder ao domínio dessa fonte.
 - Se for questão comentada, crie uma questão autoral de Certo/Errado, forneça o gabarito e explique; não copie questão de banca.
 - Diferencie claramente lei vigente, entendimento jurisprudencial e dica de memorização.
 - Use no máximo 320 palavras.
 - Não faça propaganda de material e não afirme que algo é recente sem confirmação na fonte.
 - Use apenas fontes oficiais retornadas pela pesquisa e não inclua links no corpo da resposta; eles serão exibidos separadamente.
 - Termine com “Como pode cair na prova:” e uma aplicação prática.`;
+
+  const searchDomains = tipoKey === "jurisprudencia" ? COURT_HOSTS : OFFICIAL_HOSTS;
 
   try {
     const apiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -84,10 +106,7 @@ Regras obrigatórias:
         model: "groq/compound",
         messages: [{ role: "user", content: prompt }],
         search_settings: {
-          include_domains: [
-            "stf.jus.br", "portal.stf.jus.br", "stj.jus.br", "cnj.jus.br",
-            "planalto.gov.br", "gov.br", "senado.leg.br", "camara.leg.br"
-          ],
+          include_domains: searchDomains,
           country: "brazil"
         }
       }),
@@ -100,7 +119,7 @@ Regras obrigatórias:
     }
 
     const text = String(data?.choices?.[0]?.message?.content || "").trim();
-    const sources = sourcesFrom(data);
+    const sources = sourcesFrom(data, tipoKey);
     if (!text || !sources.length) {
       return res.status(502).json({ error: "Não encontrei uma resposta com fonte oficial. Escolha outro tema e tente novamente." });
     }
