@@ -260,7 +260,7 @@ Regras obrigatórias:
         String(data?.error?.message || "no_message").slice(0, 180)
       );
       if (apiResponse.status === 429) {
-        const retryAfter = Math.max(60, Number(apiResponse.headers.get("retry-after")) || 60);
+        const retryAfter = 5;
         res.setHeader("Retry-After", String(retryAfter));
         return res.status(429).json({
           error: "O limite gratuito da IA foi atingido.",
