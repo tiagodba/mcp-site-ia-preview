@@ -46,14 +46,38 @@ function sourcesFrom(response, tipoKey) {
   return sources.slice(0, 4);
 }
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido." });
-  const groqKey = String(process.env.GROQ_API_KEY || "")
+function cleanKey(value) {
+  return String(value || "")
     .trim()
     .replace(/^Bearer\s+/i, "")
     .replace(/^['\"]|['\"]$/g, "")
     .trim();
-  if (!groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
+}
+
+function geminiResult(data, tipoKey) {
+  const textParts = [];
+  const sources = [];
+  for (const step of data?.steps || []) {
+    if (step?.type !== "model_output") continue;
+    for (const block of step.content || []) {
+      if (block?.type !== "text") continue;
+      if (block.text) textParts.push(block.text);
+      for (const citation of block.annotations || []) {
+        if (citation?.type !== "url_citation" || !hostAllowed(citation.url, tipoKey)) continue;
+        if (!sources.some((source) => source.url === citation.url)) {
+          sources.push({ title: citation.title || "Fonte oficial", url: citation.url });
+        }
+      }
+    }
+  }
+  return { text: textParts.join("\n\n").trim(), sources: sources.slice(0, 4) };
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido." });
+  const geminiKey = cleanKey(process.env.GEMINI_API_KEY);
+  const groqKey = cleanKey(process.env.GROQ_API_KEY);
+  if (!geminiKey && !groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
 
   const areaKey = Object.hasOwn(AREAS, req.body?.area) ? req.body.area : "geral";
   const tipoKey = Object.hasOwn(TIPOS, req.body?.tipo) ? req.body.tipo : "aleatoria";
@@ -94,6 +118,44 @@ Regras obrigatórias:
   const searchDomains = tipoKey === "jurisprudencia" ? COURT_HOSTS : OFFICIAL_HOSTS;
 
   try {
+    if (geminiKey) {
+      try {
+        const geminiResponse = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+          method: "POST",
+          headers: {
+            "x-goog-api-key": geminiKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "gemini-3.6-flash",
+            input: prompt + `\nInclua nas buscas termos site:${searchDomains.join(" OR site:")} e use somente essas fontes oficiais.`,
+            tools: [{ type: "google_search" }],
+          }),
+        });
+        const geminiData = await geminiResponse.json();
+        if (geminiResponse.ok) {
+          const generated = geminiResult(geminiData, tipoKey);
+          if (generated.text && generated.sources.length) {
+            res.setHeader("Cache-Control", "private, no-store");
+            return res.status(200).json({
+              text: generated.text,
+              sources: generated.sources,
+              consultedAt: new Date().toISOString(),
+              area: areaKey,
+              tipo: tipoKey,
+              provider: "gemini",
+            });
+          }
+          console.error("Gemini response missing official citations");
+        } else {
+          console.error("Gemini request failed", geminiResponse.status, String(geminiData?.error?.message || "unknown").slice(0, 180));
+        }
+      } catch (geminiError) {
+        console.error("Gemini fallback error", geminiError?.message || "unknown");
+      }
+    }
+
+    if (!groqKey) return res.status(502).json({ error: "A pesquisa principal está temporariamente indisponível." });
     const apiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
