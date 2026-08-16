@@ -1,4 +1,4 @@
-name: Highlight Spotify link
+name: Promote Spotify on hero
 
 on:
   push:
@@ -14,20 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Highlight Spotify in footer
+      - name: Add highlighted Spotify CTA to hero
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          old = '<a target="_blank" rel="noopener noreferrer" href="https://open.spotify.com/show/0346uOO4gZCKFpd7dQoQdL">Spotify</a>'
-          new = '<a target="_blank" rel="noopener noreferrer" href="https://open.spotify.com/show/0346uOO4gZCKFpd7dQoQdL" aria-label="Ouvir MCP Concursos Policiais no Spotify" title="Ouça no Spotify" style="display:inline-flex;align-items:center;gap:9px;background:#1ED760;color:#06162f;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;box-shadow:0 0 0 2px rgba(30,215,96,.18),0 8px 22px rgba(30,215,96,.28);transform:translateY(-1px)"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="display:block;flex:0 0 auto"><circle cx="12" cy="12" r="12" fill="#06162f"/><path d="M17.4 16.9a.85.85 0 0 1-1.17.28c-3.21-1.96-7.25-2.4-12.01-1.32a.85.85 0 1 1-.38-1.66c5.21-1.19 9.68-.68 13.28 1.52.4.25.53.77.28 1.18Zm1.67-3.71a1.06 1.06 0 0 1-1.46.35c-3.68-2.26-9.3-2.92-13.65-1.6a1.06 1.06 0 1 1-.62-2.03c4.98-1.51 11.17-.77 15.38 1.81.5.31.65.96.35 1.48Zm.14-3.86C14.8 6.71 7.51 6.47 3.3 7.74a1.27 1.27 0 1 1-.74-2.43c4.84-1.47 12.89-1.18 17.94 1.82a1.27 1.27 0 0 1-1.29 2.2Z" fill="#1ED760"/></svg><span>Spotify</span></a>'
-          if new in s:
-              print('Spotify already highlighted')
-          elif old in s:
-              p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          marker = '<div class="actions">'
+          hero = '<a target="_blank" rel="noopener noreferrer" href="https://open.spotify.com/show/0346uOO4gZCKFpd7dQoQdL" aria-label="Ouvir MCP Concursos Policiais no Spotify" title="Ouça no Spotify" style="display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 22px;background:#1ED760;color:#06162f;border-radius:999px;font-weight:900;text-decoration:none;box-shadow:0 10px 28px rgba(30,215,96,.32)"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="display:block;flex:0 0 auto"><circle cx="12" cy="12" r="12" fill="#06162f"/><path d="M17.4 16.9a.85.85 0 0 1-1.17.28c-3.21-1.96-7.25-2.4-12.01-1.32a.85.85 0 1 1-.38-1.66c5.21-1.19 9.68-.68 13.28 1.52.4.25.53.77.28 1.18Zm1.67-3.71a1.06 1.06 0 0 1-1.46.35c-3.68-2.26-9.3-2.92-13.65-1.6a1.06 1.06 0 1 1-.62-2.03c4.98-1.51 11.17-.77 15.38 1.81.5.31.65.96.35 1.48Zm.14-3.86C14.8 6.71 7.51 6.47 3.3 7.74a1.27 1.27 0 1 1-.74-2.43c4.84-1.47 12.89-1.18 17.94 1.82a1.27 1.27 0 0 1-1.29 2.2Z" fill="#1ED760"/></svg><span>Ouça no Spotify</span></a>'
+          if 'aria-label="Ouvir MCP Concursos Policiais no Spotify" title="Ouça no Spotify" style="display:inline-flex;align-items:center;gap:10px;min-height:52px' in s:
+              print('Hero Spotify CTA already present')
+          elif marker in s:
+              p.write_text(s.replace(marker, marker + hero, 1), encoding='utf-8')
           else:
-              raise SystemExit('Current Spotify link not found; refusing unrelated changes')
+              raise SystemExit('Hero actions marker not found; refusing unrelated changes')
           PY
       - name: Commit change
         run: |
@@ -35,5 +35,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Destaca Spotify com ícone no rodapé"
+          git commit -m "Destaca Spotify na primeira tela do site"
           git push
