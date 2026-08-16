@@ -1,0 +1,51 @@
+name: Reduce MCP AI cooldown
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/reduce-ai-cooldown.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reduce cooldown to 5 seconds
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          api = Path('api/dica.js')
+          s = api.read_text(encoding='utf-8')
+          old = 'const retryAfter = Math.max(60, Number(apiResponse.headers.get("retry-after")) || 60);'
+          new = 'const retryAfter = 5;'
+          if old in s:
+              s = s.replace(old, new, 1)
+          elif new not in s:
+              raise SystemExit('Retry-After line not found')
+          api.write_text(s, encoding='utf-8')
+
+          index = Path('index.html')
+          h = index.read_text(encoding='utf-8')
+          old2 = 'let remaining=Math.max(1,Number(seconds)||60);'
+          new2 = 'let remaining=Math.max(1,Math.min(5,Number(seconds)||5));'
+          if old2 in h:
+              h = h.replace(old2, new2, 1)
+          elif new2 not in h:
+              raise SystemExit('Cooldown line not found')
+          index.write_text(h, encoding='utf-8')
+          PY
+      - name: Validate API syntax
+        run: node --check api/dica.js
+      - name: Commit cooldown change
+        run: |
+          if git diff --quiet -- api/dica.js index.html; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add api/dica.js index.html
+          git commit -m "Reduz espera da IA MCP para 5 segundos"
+          git push
