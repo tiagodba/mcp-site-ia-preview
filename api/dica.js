@@ -14,20 +14,6 @@ const TIPOS = {
   estrategia: "dica estratégica aprofundada e aplicável em prova",
 };
 
-const buckets = new Map();
-
-function allow(ip) {
-  const now = Date.now();
-  const current = buckets.get(ip) || { start: now, count: 0 };
-  if (now - current.start > 60_000) {
-    current.start = now;
-    current.count = 0;
-  }
-  current.count++;
-  buckets.set(ip, current);
-  return current.count <= 15;
-}
-
 const OFFICIAL_HOSTS = [
   "stf.jus.br", "portal.stf.jus.br", "stj.jus.br", "cnj.jus.br",
   "planalto.gov.br", "gov.br", "senado.leg.br", "camara.leg.br",
@@ -64,15 +50,6 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido." });
   const groqKey = String(process.env.GROQ_API_KEY || "").trim();
   if (!groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
-
-  const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "anon").split(",")[0].trim();
-  if (!allow(ip)) {
-    res.setHeader("Retry-After", "60");
-    return res.status(429).json({
-      error: "Muitas solicitações seguidas.",
-      retryAfter: 60,
-    });
-  }
 
   const areaKey = Object.hasOwn(AREAS, req.body?.area) ? req.body.area : "geral";
   const tipoKey = Object.hasOwn(TIPOS, req.body?.tipo) ? req.body.tipo : "aleatoria";
