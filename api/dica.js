@@ -104,6 +104,7 @@ Regras obrigatórias:
       body: JSON.stringify({
         model: "groq/compound-mini",
         messages: [{ role: "user", content: prompt }],
+        max_completion_tokens: 700,
         compound_custom: {
           tools: {
             enabled_tools: ["web_search"]
