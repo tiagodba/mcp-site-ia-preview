@@ -76,7 +76,7 @@ function geminiResult(data, tipoKey) {
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido." });
   const geminiKey = cleanKey(process.env.GEMINI_API_KEY);
-  const tavilyKey = cleanKey(process.env.TAVILY_API_KEY);
+  const tavilyKey = cleanKey(process.env.TAVILY_API_KEY || process.env.TAVLY_API_KEY);
   const groqKey = cleanKey(process.env.GROQ_API_KEY);
   if (!tavilyKey && !geminiKey && !groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
 
