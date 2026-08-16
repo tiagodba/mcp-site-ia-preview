@@ -1,4 +1,4 @@
-name: Fix MCP AI retrieval pipeline
+name: Fix MCP AI syntax
 
 on:
   push:
@@ -14,60 +14,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Make Tavily retrieval feed the AI synthesis
+      - name: Fix invalid newline inside JS string
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
-
           p = Path('api/dica.js')
           s = p.read_text(encoding='utf-8')
-
-          anchor = '  const searchDomains = tipoKey === "jurisprudencia" ? COURT_HOSTS : OFFICIAL_HOSTS;\n\n  try {'
-          replacement = '''  const searchDomains = tipoKey === "jurisprudencia" ? COURT_HOSTS : OFFICIAL_HOSTS;\n  let tavilySources = [];\n  let tavilyContext = "";\n  let tavilyFallback = "";\n\n  try {'''
-          if anchor not in s and 'let tavilySources = [];' not in s:
-              raise SystemExit('Could not find searchDomains anchor')
-          if anchor in s:
-              s = s.replace(anchor, replacement, 1)
-
-          pattern = re.compile(r'''          let text = String\(tavilyData\.answer \|\| ""\)\.trim\(\);.*?          console\.error\("Tavily response missing answer or official sources"\);''', re.S)
-          new_block = '''          tavilySources = sources;\n          tavilyContext = snippets.slice(0, aprofundado ? 6 : 3).join("\\n\\n").slice(0, aprofundado ? 9000 : 4500);\n          tavilyFallback = String(tavilyData.answer || "").trim();\n          if (!tavilyContext && !tavilyFallback) {\n            console.error("Tavily response missing usable official content");\n          }'''
-          s2, count = pattern.subn(new_block, s, count=1)
-          if count == 0 and 'tavilyContext = snippets.slice' not in s:
-              raise SystemExit('Could not replace Tavily early-return block')
-          s = s2
-
-          s = s.replace('    if (geminiKey) {', '    if (geminiKey && !(tavilyContext && groqKey)) {', 1)
-
-          old_input = '            input: prompt + `\\nInclua nas buscas termos site:${searchDomains.join(" OR site:")} e use somente essas fontes oficiais.`,\n'
-          new_input = '            input: prompt + (tavilyContext ? `\\n\\nPESQUISA OFICIAL JÁ RECUPERADA PELO TAVILY:\\n${tavilyContext}` : "") + `\\nInclua nas buscas termos site:${searchDomains.join(" OR site:")} e use somente essas fontes oficiais.`,\n'
-          if old_input in s:
-              s = s.replace(old_input, new_input, 1)
-
-          old_msg = '        messages: [{ role: "user", content: prompt }],\n'
-          new_msg = '        messages: [{ role: "user", content: prompt + (tavilyContext ? `\\n\\nFONTES OFICIAIS RECUPERADAS PARA FUNDAMENTAR A RESPOSTA:\\n${tavilyContext}\\n\\nUse este material como base factual. Não apenas resuma: organize, explique, fundamente e cumpra integralmente o formato solicitado.` : "") }],\n'
-          if old_msg not in s and 'FONTES OFICIAIS RECUPERADAS PARA FUNDAMENTAR A RESPOSTA' not in s:
-              raise SystemExit('Could not find Groq messages block')
-          if old_msg in s:
-              s = s.replace(old_msg, new_msg, 1)
-
-          old_sources = '    const sources = sourcesFrom(data, tipoKey);\n'
-          new_sources = '    const sources = tavilySources.length ? tavilySources : sourcesFrom(data, tipoKey);\n'
-          if old_sources in s:
-              s = s.replace(old_sources, new_sources, 1)
-
-          fallback_anchor = '    if (!groqKey) return res.status(502).json({ error: "A pesquisa principal está temporariamente indisponível." });\n'
-          fallback_new = '''    if (!groqKey) {\n      if (tavilyFallback && tavilySources.length) {\n        res.setHeader("Cache-Control", "private, no-store");\n        return res.status(200).json({\n          text: tavilyFallback + "\\n\\n**Como pode cair na prova:** revise o alcance exato do entendimento e confira as fontes oficiais abaixo.",\n          sources: tavilySources,\n          consultedAt: new Date().toISOString(),\n          area: areaKey,\n          tipo: tipoKey,\n          provider: "tavily-fallback",\n        });\n      }\n      return res.status(502).json({ error: "A pesquisa principal está temporariamente indisponível." });\n    }\n'''
-          if fallback_anchor in s:
-              s = s.replace(fallback_anchor, fallback_new, 1)
-
-          p.write_text(s, encoding='utf-8')
+          broken = 'tavilyContext = snippets.slice(0, aprofundado ? 6 : 3).join("\n\n").slice(0, aprofundado ? 9000 : 4500);'
+          # The previous workflow accidentally wrote a literal line break inside the quoted JS string.
+          literal_broken = 'tavilyContext = snippets.slice(0, aprofundado ? 6 : 3).join("' + '\n\n' + '").slice(0, aprofundado ? 9000 : 4500);'
+          fixed = 'tavilyContext = snippets.slice(0, aprofundado ? 6 : 3).join("\\n\\n").slice(0, aprofundado ? 9000 : 4500);'
+          if fixed in s:
+              print('Syntax already fixed')
+          elif literal_broken in s:
+              s = s.replace(literal_broken, fixed, 1)
+              p.write_text(s, encoding='utf-8')
+          else:
+              raise SystemExit('Broken Tavily join string not found')
           PY
-      - name: Commit corrected AI pipeline
+      - name: Validate JavaScript syntax
+        run: node --check api/dica.js
+      - name: Commit syntax fix
         run: |
           if git diff --quiet -- api/dica.js; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add api/dica.js
-          git commit -m "Corrige fluxo da IA para respostas completas"
+          git commit -m "Corrige sintaxe da API da IA MCP"
           git push
