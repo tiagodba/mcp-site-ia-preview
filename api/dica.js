@@ -215,6 +215,7 @@ Regras obrigatórias:
       consultedAt: new Date().toISOString(),
       area: areaKey,
       tipo: tipoKey,
+      provider: "groq",
     });
   } catch (error) {
     console.error("MCP AI error", error?.message || "unknown");
