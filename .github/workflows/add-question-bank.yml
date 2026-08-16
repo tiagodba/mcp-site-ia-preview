@@ -1,0 +1,80 @@
+name: Add MCP AI Question Bank
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/add-question-bank.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add question API and interface
+        run: |
+          cat > api/questoes.js <<'EOF'
+          function cleanKey(v){return String(v||'').trim().replace(/^Bearer\s+/i,'').replace(/^['\"]|['\"]$/g,'').trim()}
+          const AREAS={geral:'carreiras policiais',civil:'Polícia Civil',penal:'Polícia Penal',cientifica:'Polícia Científica',gcm:'Guardas Municipais'};
+          export default async function handler(req,res){
+            if(req.method!=='POST') return res.status(405).json({error:'Método não permitido.'});
+            const key=cleanKey(process.env.GEMINI_API_KEY); if(!key) return res.status(503).json({error:'Gemini indisponível.'});
+            const area=AREAS[req.body?.area]||AREAS.geral, assunto=String(req.body?.assunto||'conteúdo jurídico relevante').slice(0,120), banca=String(req.body?.banca||'estilo concursos policiais').slice(0,80), dificuldade=['fácil','médio','difícil'].includes(req.body?.dificuldade)?req.body.dificuldade:'médio';
+            const prompt=`Crie UMA questão AUTORAL para concurso de ${area}. Assunto: ${assunto}. Estilo: ${banca}. Dificuldade: ${dificuldade}. Pesquise fontes oficiais brasileiras antes de formular. Não copie questões existentes. Retorne SOMENTE JSON válido, sem markdown, no formato {"enunciado":"...","alternativas":["A) ...","B) ...","C) ...","D) ...","E) ..."],"correta":"A","comentario":"explicação completa do gabarito e por que as demais estão erradas","pegadinha":"...","fundamento":"lei/jurisprudência oficial usada"}. Não revele o gabarito no enunciado.`;
+            try{
+              const r=await fetch('https://generativelanguage.googleapis.com/v1beta/interactions',{method:'POST',headers:{'x-goog-api-key':key,'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-3.6-flash',input:prompt,tools:[{type:'google_search'}]})});
+              const d=await r.json(); if(!r.ok) return res.status(502).json({error:'Falha ao gerar questão.'});
+              let text=''; for(const step of d?.steps||[]) if(step?.type==='model_output') for(const b of step.content||[]) if(b?.type==='text'&&b.text) text+=b.text;
+              text=text.trim().replace(/^```json\s*/i,'').replace(/```$/,'').trim();
+              let q; try{q=JSON.parse(text)}catch{return res.status(502).json({error:'A IA não retornou a questão no formato esperado.'})}
+              if(!q?.enunciado||!Array.isArray(q.alternativas)||q.alternativas.length<2||!q?.correta) return res.status(502).json({error:'Questão incompleta.'});
+              res.setHeader('Cache-Control','private, no-store'); return res.status(200).json({...q,provider:'gemini'});
+            }catch(e){console.error('Question bank error',e?.message); return res.status(500).json({error:'Erro ao gerar questão.'})}
+          }
+          EOF
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          marker='</body>'
+          block=r'''
+          <button id="quizFab" style="position:fixed;right:24px;bottom:155px;z-index:41;border:0;border-radius:30px;background:#062a5d;color:#efbd26;padding:14px 18px;font-weight:900;box-shadow:0 12px 28px #0004;cursor:pointer">🧠 Questões IA</button>
+          <div id="quizModal" style="position:fixed;inset:0;z-index:120;background:#020914e8;display:none;align-items:center;justify-content:center;padding:20px">
+            <div style="width:min(760px,100%);max-height:92vh;overflow:auto;background:white;border-radius:12px;padding:24px">
+              <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;color:#062a5d">Banco de Questões IA MCP</h2><button id="quizClose" style="border:0;background:none;font-size:26px;cursor:pointer">×</button></div>
+              <p>Questões autorais com correção comentada e pesquisa em fontes oficiais.</p>
+              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+                <select id="qArea"><option value="geral">Todas as carreiras</option><option value="civil">Polícia Civil</option><option value="penal">Polícia Penal</option><option value="cientifica">Polícia Científica</option><option value="gcm">GCM</option></select>
+                <select id="qDif"><option value="fácil">Fácil</option><option value="médio" selected>Médio</option><option value="difícil">Difícil</option></select>
+                <input id="qAssunto" placeholder="Assunto: ex. cadeia de custódia" style="padding:12px">
+                <input id="qBanca" placeholder="Banca: ex. Cebraspe, FGV" style="padding:12px">
+              </div>
+              <button id="qGerar" style="margin-top:14px;background:#efbd26;color:#062a5d;border:0;padding:13px 20px;font-weight:900;cursor:pointer">Gerar questão</button>
+              <div id="qStatus" style="margin-top:12px"></div><div id="qBox" style="margin-top:18px"></div>
+            </div>
+          </div>
+          <script>
+          (()=>{const $=id=>document.getElementById(id), modal=$('quizModal'); $('quizFab').onclick=()=>modal.style.display='flex'; $('quizClose').onclick=()=>modal.style.display='none';
+          $('qGerar').onclick=async()=>{const st=$('qStatus'),box=$('qBox'); st.textContent='Gerando questão com IA e consultando fontes oficiais...';box.innerHTML='';
+          try{const r=await fetch('/api/questoes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({area:$('qArea').value,dificuldade:$('qDif').value,assunto:$('qAssunto').value,banca:$('qBanca').value})}); const d=await r.json(); if(!r.ok)throw new Error(d.error||'Erro'); st.textContent='';
+          box.innerHTML='<h3>'+esc(d.enunciado)+'</h3>'+d.alternativas.map(a=>'<button class="qAlt" data-l="'+esc(a.charAt(0))+'" style="display:block;width:100%;text-align:left;margin:8px 0;padding:12px;border:1px solid #d5dce5;background:#fff;cursor:pointer">'+esc(a)+'</button>').join('')+'<div id="qFeedback"></div>';
+          box.querySelectorAll('.qAlt').forEach(b=>b.onclick=()=>{box.querySelectorAll('.qAlt').forEach(x=>x.disabled=true);const ok=b.dataset.l.toUpperCase()===String(d.correta).toUpperCase();$('qFeedback').innerHTML='<div style="margin-top:16px;padding:16px;background:#f4f6f9;border-left:4px solid #efbd26"><strong>'+(ok?'✅ Correto!':'❌ Incorreto. Gabarito: '+esc(d.correta))+'</strong><p>'+esc(d.comentario)+'</p><p><b>Pegadinha:</b> '+esc(d.pegadinha||'—')+'</p><p><b>Fundamento:</b> '+esc(d.fundamento||'—')+'</p><small>Gerado por Gemini • questão autoral</small></div>'})
+          }catch(e){st.textContent=e.message}}
+          function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}})();
+          </script>
+          '''
+          if 'id="quizFab"' not in s: s=s.replace(marker,block+'\n'+marker)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate
+        run: node --check api/questoes.js
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add api/questoes.js index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Adiciona Banco de Questões IA MCP"
+          git push
