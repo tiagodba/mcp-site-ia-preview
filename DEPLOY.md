@@ -5,3 +5,4 @@ Integração Groq e Vercel para validação antes da publicação no site oficia
 Última reaplicação da variável Groq: 2026-08-16.
 Reaplicação final da chave Groq: 2026-08-16.
 Nova chave MCP-FINAL aplicada em 2026-08-16.
+Chave MCP-FINAL1 aplicada em 2026-08-16.
