@@ -118,6 +118,9 @@ Regras obrigatórias:
 - Termine com “Como pode cair na prova:” e uma aplicação prática.`;
 
   const searchDomains = tipoKey === "jurisprudencia" ? COURT_HOSTS : OFFICIAL_HOSTS;
+  let tavilySources = [];
+  let tavilyContext = "";
+  let tavilyFallback = "";
 
   try {
     if (tavilyKey) {
@@ -159,27 +162,14 @@ Regras obrigatórias:
             .filter((result) => result?.url && hostAllowed(result.url, tipoKey) && result.content)
             .map((result) => String(result.content).trim())
             .filter(Boolean);
-          let text = String(tavilyData.answer || "").trim();
-          if (!text && snippets.length) {
-            const base = snippets.slice(0, aprofundado ? 3 : 1).join("\n\n").slice(0, aprofundado ? 3600 : 1200);
-            if (tipoKey === "questao") {
-              text = `**Questão autoral — Certo ou Errado**\n\nCom base nas fontes oficiais consultadas, analise a assertiva relacionada ao seguinte conteúdo: ${base}\n\n**Gabarito comentado:** confira o fundamento oficial indicado abaixo e identifique requisitos, exceções e a possível pegadinha da banca.\n\n**Como pode cair na prova:** a banca pode alterar um requisito, uma exceção, a competência ou o alcance da regra para inverter o gabarito.`;
-            } else {
-              text = `**${sources[0]?.title || "Dica atualizada"}**\n\n${base}\n\n**Como pode cair na prova:** atenção ao fundamento, aos requisitos, às exceções e ao alcance exato do entendimento indicado pelas fontes oficiais.`;
-            }
+          tavilySources = sources;
+          tavilyContext = snippets.slice(0, aprofundado ? 6 : 3).join("
+
+").slice(0, aprofundado ? 9000 : 4500);
+          tavilyFallback = String(tavilyData.answer || "").trim();
+          if (!tavilyContext && !tavilyFallback) {
+            console.error("Tavily response missing usable official content");
           }
-          if (text && sources.length) {
-            res.setHeader("Cache-Control", "private, no-store");
-            return res.status(200).json({
-              text,
-              sources,
-              consultedAt: new Date().toISOString(),
-              area: areaKey,
-              tipo: tipoKey,
-              provider: "tavily",
-            });
-          }
-          console.error("Tavily response missing answer or official sources");
         } else {
           console.error("Tavily request failed", tavilyResponse.status, String(tavilyData?.detail?.error || tavilyData?.detail || "unknown").slice(0, 180));
         }
@@ -188,7 +178,7 @@ Regras obrigatórias:
       }
     }
 
-    if (geminiKey) {
+    if (geminiKey && !(tavilyContext && groqKey)) {
       try {
         const geminiResponse = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
           method: "POST",
@@ -198,7 +188,7 @@ Regras obrigatórias:
           },
           body: JSON.stringify({
             model: "gemini-3.6-flash",
-            input: prompt + `\nInclua nas buscas termos site:${searchDomains.join(" OR site:")} e use somente essas fontes oficiais.`,
+            input: prompt + (tavilyContext ? `\n\nPESQUISA OFICIAL JÁ RECUPERADA PELO TAVILY:\n${tavilyContext}` : "") + `\nInclua nas buscas termos site:${searchDomains.join(" OR site:")} e use somente essas fontes oficiais.`,
             tools: [{ type: "google_search" }],
           }),
         });
@@ -225,7 +215,20 @@ Regras obrigatórias:
       }
     }
 
-    if (!groqKey) return res.status(502).json({ error: "A pesquisa principal está temporariamente indisponível." });
+    if (!groqKey) {
+      if (tavilyFallback && tavilySources.length) {
+        res.setHeader("Cache-Control", "private, no-store");
+        return res.status(200).json({
+          text: tavilyFallback + "\n\n**Como pode cair na prova:** revise o alcance exato do entendimento e confira as fontes oficiais abaixo.",
+          sources: tavilySources,
+          consultedAt: new Date().toISOString(),
+          area: areaKey,
+          tipo: tipoKey,
+          provider: "tavily-fallback",
+        });
+      }
+      return res.status(502).json({ error: "A pesquisa principal está temporariamente indisponível." });
+    }
     const apiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -235,7 +238,7 @@ Regras obrigatórias:
       },
       body: JSON.stringify({
         model: "groq/compound-mini",
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content: prompt + (tavilyContext ? `\n\nFONTES OFICIAIS RECUPERADAS PARA FUNDAMENTAR A RESPOSTA:\n${tavilyContext}\n\nUse este material como base factual. Não apenas resuma: organize, explique, fundamente e cumpra integralmente o formato solicitado.` : "") }],
         max_completion_tokens: aprofundado ? 1500 : 700,
         compound_custom: {
           tools: {
@@ -277,7 +280,7 @@ Regras obrigatórias:
     }
 
     const text = String(data?.choices?.[0]?.message?.content || "").trim();
-    const sources = sourcesFrom(data, tipoKey);
+    const sources = tavilySources.length ? tavilySources : sourcesFrom(data, tipoKey);
     if (!text || !sources.length) {
       return res.status(502).json({ error: "Não encontrei uma resposta com fonte oficial. Escolha outro tema e tente novamente." });
     }
