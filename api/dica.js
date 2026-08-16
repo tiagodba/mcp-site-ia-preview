@@ -25,7 +25,7 @@ function allow(ip) {
   }
   current.count++;
   buckets.set(ip, current);
-  return current.count <= 8;
+  return current.count <= 15;
 }
 
 const OFFICIAL_HOSTS = [
@@ -66,7 +66,13 @@ export default async function handler(req, res) {
   if (!groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
 
   const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "anon").split(",")[0].trim();
-  if (!allow(ip)) return res.status(429).json({ error: "Muitas solicitações. Aguarde um minuto e tente novamente." });
+  if (!allow(ip)) {
+    res.setHeader("Retry-After", "60");
+    return res.status(429).json({
+      error: "Muitas solicitações seguidas.",
+      retryAfter: 60,
+    });
+  }
 
   const areaKey = Object.hasOwn(AREAS, req.body?.area) ? req.body.area : "geral";
   const tipoKey = Object.hasOwn(TIPOS, req.body?.tipo) ? req.body.tipo : "aleatoria";
@@ -139,7 +145,12 @@ Regras obrigatórias:
         String(data?.error?.message || "no_message").slice(0, 180)
       );
       if (apiResponse.status === 429) {
-        return res.status(429).json({ error: "O limite gratuito da IA foi atingido. Aguarde alguns minutos e tente novamente." });
+        const retryAfter = Math.max(60, Number(apiResponse.headers.get("retry-after")) || 60);
+        res.setHeader("Retry-After", String(retryAfter));
+        return res.status(429).json({
+          error: "O limite gratuito da IA foi atingido.",
+          retryAfter,
+        });
       }
       if (apiResponse.status === 401) {
         return res.status(502).json({ error: "A chave da IA precisa ser atualizada pelo administrador." });
