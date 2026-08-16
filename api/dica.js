@@ -121,7 +121,14 @@ Regras obrigatórias:
   try {
     if (tavilyKey) {
       try {
-        const tavilyQuery = `Para candidato de ${area}, produza exatamente uma ${tipo}. Consulte informação jurídica brasileira atual e explique de forma didática, terminando com Como pode cair na prova. Use somente fonte oficial.`;
+        const queryByType = {
+          jurisprudencia: `jurisprudência recente STF STJ CNJ sobre ${area}`,
+          questao: `ponto de legislação ou jurisprudência mais cobrado em concursos sobre ${area}`,
+          legislacao: `legislação brasileira atualizada aplicável a ${area}`,
+          estrategia: `orientação oficial e conteúdo prioritário para estudo de ${area}`,
+          aleatoria: `tema jurídico relevante para concursos de ${area}`,
+        };
+        const tavilyQuery = queryByType[tipoKey];
         const tavilyResponse = await fetch("https://api.tavily.com/search", {
           method: "POST",
           headers: {
@@ -147,7 +154,19 @@ Regras obrigatórias:
             .map((result) => ({ title: result.title || "Fonte oficial", url: result.url }))
             .filter((source, index, list) => list.findIndex((item) => item.url === source.url) === index)
             .slice(0, 4);
-          const text = String(tavilyData.answer || "").trim();
+          const snippets = (tavilyData.results || [])
+            .filter((result) => result?.url && hostAllowed(result.url, tipoKey) && result.content)
+            .map((result) => String(result.content).trim())
+            .filter(Boolean);
+          let text = String(tavilyData.answer || "").trim();
+          if (!text && snippets.length) {
+            const base = snippets[0].slice(0, 1200);
+            if (tipoKey === "questao") {
+              text = `**Questão autoral — Certo ou Errado**\n\nConsidere correta a informação apresentada pela fonte oficial: ${base}\n\n**Gabarito: CERTO.** A assertiva reproduz o conteúdo localizado na fonte oficial indicada abaixo.\n\n**Como pode cair na prova:** a banca pode alterar um elemento da regra para tornar a afirmação incorreta.`;
+            } else {
+              text = `**${sources[0]?.title || "Dica atualizada"}**\n\n${base}\n\n**Como pode cair na prova:** atenção ao conceito central e às condições indicadas na fonte oficial; a banca costuma trocar requisitos, exceções ou competências.`;
+            }
+          }
           if (text && sources.length) {
             res.setHeader("Cache-Control", "private, no-store");
             return res.status(200).json({
