@@ -117,7 +117,13 @@ Regras obrigatórias:
 
     const data = await apiResponse.json();
     if (!apiResponse.ok) {
-      console.error("Groq request failed", apiResponse.status, data?.error?.type || "unknown");
+      console.error(
+        "Groq request failed",
+        apiResponse.status,
+        data?.error?.type || "unknown",
+        data?.error?.code || "no_code",
+        String(data?.error?.message || "no_message").slice(0, 180)
+      );
       if (apiResponse.status === 429) {
         return res.status(429).json({ error: "O limite gratuito da IA foi atingido. Aguarde alguns minutos e tente novamente." });
       }
