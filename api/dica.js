@@ -75,12 +75,14 @@ export default async function handler(req, res) {
 
   const prompt = `Produza uma dica estendida, em português do Brasil, para candidato de ${area}.
 Formato desejado: ${tipo}.
-Variação temática: ${variedade}.
+Identificador interno de diversidade: V${variedade} (isso não representa quantidade de itens).
 Data desta solicitação: ${new Date().toISOString().slice(0, 10)}.
 
 Regras obrigatórias:
 - Execute obrigatoriamente a ferramenta de pesquisa web antes de responder. Não responda apenas com conhecimento interno.
 - Priorize STF, STJ, CNJ, Planalto, Senado, Câmara e portais oficiais do governo.
+- Produza exatamente UMA dica sobre UM único ponto jurídico. Nunca reúna vários julgados, leis ou assuntos na mesma resposta.
+- Escolha uma fonte oficial principal e limite todas as afirmações jurídicas ao que essa fonte sustenta diretamente.
 - Traga um título curto e depois uma explicação objetiva, didática e útil para concursos policiais.
 - Se houver jurisprudência, informe tribunal, órgão julgador, número do processo ou tema quando disponível e explique a tese sem inventar dados.
 - Só mencione número de processo, tema, artigo, data, órgão julgador ou tese quando isso estiver expressamente sustentado por uma fonte oficial encontrada na pesquisa.
