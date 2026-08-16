@@ -62,7 +62,8 @@ function sourcesFrom(response, tipoKey) {
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido." });
-  if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: "IA temporariamente indisponível." });
+  const groqKey = String(process.env.GROQ_API_KEY || "").trim();
+  if (!groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
 
   const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "anon").split(",")[0].trim();
   if (!allow(ip)) return res.status(429).json({ error: "Muitas solicitações. Aguarde um minuto e tente novamente." });
@@ -101,7 +102,7 @@ Regras obrigatórias:
     const apiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        Authorization: `Bearer ${groqKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
