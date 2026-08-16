@@ -104,10 +104,16 @@ Regras obrigatórias:
       headers: {
         Authorization: `Bearer ${groqKey}`,
         "Content-Type": "application/json",
+        "Groq-Model-Version": "latest",
       },
       body: JSON.stringify({
         model: "groq/compound-mini",
         messages: [{ role: "user", content: prompt }],
+        compound_custom: {
+          tools: {
+            enabled_tools: ["web_search"]
+          }
+        },
         search_settings: {
           include_domains: searchDomains,
           country: "brazil"
