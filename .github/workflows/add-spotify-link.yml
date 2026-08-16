@@ -1,0 +1,39 @@
+name: Add Spotify link
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/add-spotify-link.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add Spotify to footer
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '<div class="footer-links"><a href="https://www.instagram.com/materiaiscarreiraspoliciais/">Instagram</a><a href="https://wa.me/5561995699279">WhatsApp</a></div>'
+          new = '<div class="footer-links"><a href="https://www.instagram.com/materiaiscarreiraspoliciais/">Instagram</a><a href="https://wa.me/5561995699279">WhatsApp</a><a target="_blank" rel="noopener noreferrer" href="https://open.spotify.com/show/0346uOO4gZCKFpd7dQoQdL">Spotify</a></div>'
+          if new in s:
+              print('Spotify link already present')
+          elif old in s:
+              p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          else:
+              raise SystemExit('Expected footer not found; refusing to alter unrelated content')
+          PY
+      - name: Commit change
+        run: |
+          if git diff --quiet -- index.html; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Adiciona Spotify ao rodapé do site MCP"
+          git push
