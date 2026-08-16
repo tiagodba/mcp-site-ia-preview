@@ -85,12 +85,13 @@ export default async function handler(req, res) {
   const area = AREAS[areaKey];
   const tipo = TIPOS[tipoKey];
   const variedade = Number(req.body?.variedade || 0) % 20;
+  const aprofundado = ["jurisprudencia", "questao"].includes(tipoKey);
   const limiteJurisprudencial = tipoKey === "jurisprudencia"
-    ? "Use apenas uma decisão localizada em fonte oficial de STF, STJ ou CNJ."
+    ? "Pesquise o ponto jurisprudencial em profundidade. Você pode usar mais de uma decisão oficial pertinente quando isso for necessário para explicar corretamente a tese, evolução, distinções ou exceções."
     : "Não cite jurisprudência, número de processo, tema repetitivo, súmula ou tese judicial; isso é reservado ao formato Jurisprudência.";
   const limiteEstrategia = ["estrategia", "aleatoria"].includes(tipoKey)
     ? "Trate somente de método de estudo, revisão, memorização, leitura de edital ou técnica de prova. Não apresente conteúdo jurídico substantivo nem cite números de artigos, leis, decretos ou processos."
-    : "Siga o formato escolhido e sustente toda afirmação jurídica na fonte oficial principal.";
+    : "Siga o formato escolhido e sustente cada afirmação jurídica relevante em fonte oficial adequada.";
 
   const prompt = `Produza uma dica estendida, em português do Brasil, para candidato de ${area}.
 Formato desejado: ${tipo}.
@@ -102,16 +103,16 @@ Restrição de conteúdo: ${limiteEstrategia}
 Regras obrigatórias:
 - Execute obrigatoriamente a ferramenta de pesquisa web antes de responder. Não responda apenas com conhecimento interno.
 - Priorize STF, STJ, CNJ, Planalto, Senado, Câmara e portais oficiais do governo.
-- Produza exatamente UMA dica sobre UM único ponto jurídico. Nunca reúna vários julgados, leis ou assuntos na mesma resposta.
-- Escolha uma fonte oficial principal e limite todas as afirmações jurídicas ao que essa fonte sustenta diretamente.
+- ${aprofundado ? "Faça pesquisa suficiente para entregar uma resposta completa, confrontando as fontes oficiais necessárias antes de redigir." : "Produza exatamente UMA dica sobre UM único ponto. Não reúna assuntos diferentes na mesma resposta."}
+- ${aprofundado ? "Não corte fundamento, requisito, exceção ou distinção importante apenas para encurtar a resposta." : "Escolha uma fonte oficial principal e limite as afirmações ao que ela sustenta diretamente."}
 - Traga um título curto e depois uma explicação objetiva, didática e útil para concursos policiais.
 - Se houver jurisprudência, informe tribunal, órgão julgador, número do processo ou tema quando disponível e explique a tese sem inventar dados.
 - Só mencione número de processo, tema, artigo, data, órgão julgador ou tese quando isso estiver expressamente sustentado por uma fonte oficial encontrada na pesquisa.
-- Para jurisprudência, use exclusivamente resultado oficial de STF, STJ ou CNJ. Se a busca não trouxer decisão oficial pertinente, diga que não há base suficiente; não improvise.
-- A primeira fonte encontrada deve sustentar diretamente o assunto central, e o tribunal ou órgão citado no texto deve corresponder ao domínio dessa fonte.
-- Se for questão comentada, crie uma questão autoral de Certo/Errado, forneça o gabarito e explique; não copie questão de banca.
+- Para jurisprudência, use exclusivamente resultados oficiais de STF, STJ ou CNJ. Se a busca não trouxer base oficial pertinente, diga que não há base suficiente; não improvise.
+- Em jurisprudência, explique: contexto jurídico, tese/entendimento, fundamento essencial, eventual distinção ou exceção relevante e impacto para a prova. Use decisões adicionais somente quando contribuírem diretamente para o mesmo ponto estudado.
+- Se for questão comentada, crie UMA questão autoral de Certo/Errado, forneça o gabarito e faça comentário completo: fundamento normativo ou jurisprudencial, motivo de a assertiva estar certa/errada, pegadinha provável e como a banca pode alterar a frase. Não copie questão de banca.
 - Diferencie claramente lei vigente, entendimento jurisprudencial e dica de memorização.
-- Use no máximo 320 palavras.
+- ${aprofundado ? "Use até 750 palavras quando necessário para completar o raciocínio, sem encher a resposta com conteúdo irrelevante." : "Use no máximo 320 palavras."}
 - Não faça propaganda de material e não afirme que algo é recente sem confirmação na fonte.
 - Use apenas fontes oficiais retornadas pela pesquisa e não inclua links no corpo da resposta; eles serão exibidos separadamente.
 - Termine com “Como pode cair na prova:” e uma aplicação prática.`;
@@ -122,8 +123,8 @@ Regras obrigatórias:
     if (tavilyKey) {
       try {
         const queryByType = {
-          jurisprudencia: `jurisprudência recente STF STJ CNJ sobre ${area}`,
-          questao: `ponto de legislação ou jurisprudência mais cobrado em concursos sobre ${area}`,
+          jurisprudencia: `jurisprudência STF STJ CNJ tese entendimento precedentes requisitos exceções sobre ${area}`,
+          questao: `legislação jurisprudência fundamento oficial ponto cobrado concursos sobre ${area}`,
           legislacao: `legislação brasileira atualizada aplicável a ${area}`,
           estrategia: `orientação oficial e conteúdo prioritário para estudo de ${area}`,
           aleatoria: `tema jurídico relevante para concursos de ${area}`,
@@ -137,9 +138,9 @@ Regras obrigatórias:
           },
           body: JSON.stringify({
             query: tavilyQuery,
-            search_depth: "basic",
-            chunks_per_source: 2,
-            max_results: 4,
+            search_depth: aprofundado ? "advanced" : "basic",
+            chunks_per_source: aprofundado ? 4 : 2,
+            max_results: aprofundado ? 8 : 4,
             topic: "general",
             include_answer: "advanced",
             include_raw_content: false,
@@ -160,11 +161,11 @@ Regras obrigatórias:
             .filter(Boolean);
           let text = String(tavilyData.answer || "").trim();
           if (!text && snippets.length) {
-            const base = snippets[0].slice(0, 1200);
+            const base = snippets.slice(0, aprofundado ? 3 : 1).join("\n\n").slice(0, aprofundado ? 3600 : 1200);
             if (tipoKey === "questao") {
-              text = `**Questão autoral — Certo ou Errado**\n\nConsidere correta a informação apresentada pela fonte oficial: ${base}\n\n**Gabarito: CERTO.** A assertiva reproduz o conteúdo localizado na fonte oficial indicada abaixo.\n\n**Como pode cair na prova:** a banca pode alterar um elemento da regra para tornar a afirmação incorreta.`;
+              text = `**Questão autoral — Certo ou Errado**\n\nCom base nas fontes oficiais consultadas, analise a assertiva relacionada ao seguinte conteúdo: ${base}\n\n**Gabarito comentado:** confira o fundamento oficial indicado abaixo e identifique requisitos, exceções e a possível pegadinha da banca.\n\n**Como pode cair na prova:** a banca pode alterar um requisito, uma exceção, a competência ou o alcance da regra para inverter o gabarito.`;
             } else {
-              text = `**${sources[0]?.title || "Dica atualizada"}**\n\n${base}\n\n**Como pode cair na prova:** atenção ao conceito central e às condições indicadas na fonte oficial; a banca costuma trocar requisitos, exceções ou competências.`;
+              text = `**${sources[0]?.title || "Dica atualizada"}**\n\n${base}\n\n**Como pode cair na prova:** atenção ao fundamento, aos requisitos, às exceções e ao alcance exato do entendimento indicado pelas fontes oficiais.`;
             }
           }
           if (text && sources.length) {
@@ -235,7 +236,7 @@ Regras obrigatórias:
       body: JSON.stringify({
         model: "groq/compound-mini",
         messages: [{ role: "user", content: prompt }],
-        max_completion_tokens: 700,
+        max_completion_tokens: aprofundado ? 1500 : 700,
         compound_custom: {
           tools: {
             enabled_tools: ["web_search"]
