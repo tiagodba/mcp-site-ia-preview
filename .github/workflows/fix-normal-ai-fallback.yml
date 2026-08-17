@@ -1,0 +1,66 @@
+name: Fix normal MCP AI fallback
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-normal-ai-fallback.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Tavily when Groq is rate limited
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('api/dica.js')
+          s=p.read_text(encoding='utf-8')
+          old='''      if (apiResponse.status === 429) {
+        const retryAfter = 5;
+        res.setHeader("Retry-After", String(retryAfter));
+        return res.status(429).json({
+          error: "O limite gratuito da IA foi atingido.",
+          retryAfter,
+        });
+      }
+'''
+          new='''      if (apiResponse.status === 429) {
+        if (tavilyFallback && tavilySources.length) {
+          res.setHeader("Cache-Control", "private, no-store");
+          return res.status(200).json({
+            text: tavilyFallback + "\\n\\n**Como pode cair na prova:** revise o ponto central e confira as fontes oficiais abaixo.",
+            sources: tavilySources,
+            consultedAt: new Date().toISOString(),
+            area: areaKey,
+            tipo: tipoKey,
+            provider: "tavily-fallback",
+          });
+        }
+        const retryAfter = 5;
+        res.setHeader("Retry-After", String(retryAfter));
+        return res.status(429).json({
+          error: "As IAs principais estão temporariamente no limite. Tente novamente em alguns segundos.",
+          retryAfter,
+        });
+      }
+'''
+          if old not in s:
+              raise SystemExit('429 block not found')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate API syntax
+        run: node --check api/dica.js
+      - name: Commit fallback change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add api/dica.js
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Usa Tavily quando Groq atingir limite"
+          git push
