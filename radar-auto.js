@@ -41,3 +41,4 @@
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
  setInterval(refresh,6*60*60*1000);
 })();
+// MCP Radar: trigger de instalação automática no index.html
