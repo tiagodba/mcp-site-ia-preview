@@ -1,7 +1,7 @@
 (()=>{
   if(document.getElementById('mcpCareerHub')) return;
   const q=s=>document.querySelector(s);
-  const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 
   const style=document.createElement('style');
   style.textContent=`
@@ -13,9 +13,11 @@
     .mcp-career{background:#061c3c;color:#fff;border:1px solid #17375f;border-radius:10px;padding:24px;cursor:pointer;text-align:left;min-height:165px;transition:.2s}
     .mcp-career:hover{transform:translateY(-3px);border-color:#efbd26;box-shadow:0 16px 30px #08203d1f}.mcp-career b{display:block;color:#efbd26;font-size:13px;margin-bottom:12px}.mcp-career strong{font:400 25px Georgia,serif;display:block;margin-bottom:8px}.mcp-career span{color:#aeb8c6;font-size:13px;line-height:1.5}
     .mcp-train{background:#fff;border:1px solid #dce2e9;border-radius:12px;padding:28px;margin-bottom:54px;box-shadow:0 12px 30px #08203d0d}.mcp-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.mcp-action{border:1px solid #dce2e9;background:#fff;color:#062a5d;border-radius:8px;padding:20px;cursor:pointer;text-align:left;font-weight:900}.mcp-action:hover{border-color:#efbd26;background:#fff9e5}.mcp-action small{display:block;color:#7a8491;font-weight:400;margin-top:7px;line-height:1.45}
+    .mcp-central{margin-top:18px;padding:22px;border-radius:10px;background:linear-gradient(135deg,#03162f,#082f64);color:#fff}.mcp-central-head{display:flex;justify-content:space-between;gap:16px;align-items:center}.mcp-central h3{margin:0;font:400 26px Georgia,serif}.mcp-central p{margin:7px 0 0;color:#b9c5d5;font-size:13px}.mcp-central button{border:0;background:#efbd26;color:#062a5d;padding:13px 18px;border-radius:7px;font-weight:900;cursor:pointer;white-space:nowrap}
     .mcp-final{background:linear-gradient(135deg,#03162f,#082f64);color:#fff;border-radius:12px;padding:30px}.mcp-final-head{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:20px}.mcp-final h3{font:400 32px Georgia,serif;margin:0}.mcp-final p{color:#adbacb;margin:8px 0 0}.mcp-final-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.mcp-final-card{background:#fff;color:#08203d;border-top:3px solid #efbd26;border-radius:7px;padding:18px;min-height:150px}.mcp-final-card b{font-size:10px;letter-spacing:1px;color:#8c6d0b}.mcp-final-card h4{font:400 20px Georgia,serif;margin:12px 0 7px}.mcp-final-card p{color:#6f7884;font-size:13px;line-height:1.45;margin:0}.mcp-final-card a{display:inline-block;margin-top:12px;color:#062a5d;font-weight:900;text-decoration:none;font-size:12px}
-    @media(max-width:900px){.mcp-careers,.mcp-actions{grid-template-columns:repeat(2,1fr)}.mcp-final-grid{grid-template-columns:1fr}}
-    @media(max-width:560px){#mcpCareerHub{padding:48px 0}.mcp-title{font-size:34px}.mcp-careers,.mcp-actions{grid-template-columns:1fr}}
+    #mcpQuestionHub{position:fixed;inset:0;z-index:160;background:#020914e8;display:none;align-items:center;justify-content:center;padding:20px}.mcp-q-shell{width:min(900px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 25px 80px #0008}.mcp-q-head{background:#03162f;color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:center}.mcp-q-head h2{margin:0;font:400 28px Georgia,serif}.mcp-q-close{border:1px solid #49617e;background:transparent;color:#fff;width:38px;height:38px;border-radius:50%;font-size:21px;cursor:pointer}.mcp-q-body{padding:24px}.mcp-q-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.mcp-q-grid input,.mcp-q-grid select{padding:12px;border:1px solid #d5dce5;border-radius:6px;background:#fff;color:#08203d}.mcp-platforms{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}.mcp-platform{border:1px solid #dce2e9;border-radius:9px;padding:18px;background:#fff;text-align:left;cursor:pointer;color:#062a5d}.mcp-platform:hover{border-color:#efbd26;background:#fff9e5}.mcp-platform strong{display:block;font-size:15px}.mcp-platform small{display:block;color:#6f7884;margin-top:7px;line-height:1.4}.mcp-q-note{margin-top:18px;padding:13px 15px;background:#fff8df;border-left:4px solid #efbd26;color:#6f5709;font-size:12px;line-height:1.5}
+    @media(max-width:900px){.mcp-careers,.mcp-actions{grid-template-columns:repeat(2,1fr)}.mcp-final-grid{grid-template-columns:1fr}.mcp-platforms{grid-template-columns:repeat(2,1fr)}.mcp-q-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){#mcpCareerHub{padding:48px 0}.mcp-title{font-size:34px}.mcp-careers,.mcp-actions,.mcp-platforms,.mcp-q-grid{grid-template-columns:1fr}.mcp-central-head{align-items:flex-start;flex-direction:column}}
   `;
   document.head.appendChild(style);
 
@@ -40,6 +42,7 @@
         <button class="mcp-action" data-act="sim">🎯 Simulado IA<small>Inicie uma sequência de 10, 20 ou 50 questões.</small></button>
         <button class="mcp-action" data-act="review">🔁 Revisar erros<small>Volte às questões que você errou anteriormente.</small></button>
       </div>
+      <div class="mcp-central"><div class="mcp-central-head"><div><h3>Central de Questões MCP</h3><p>Use um único painel para escolher filtros e seguir para IA MCP, TEC Concursos, Qconcursos ou Estratégia.</p></div><button id="mcpOpenQuestionHub" type="button">Abrir Central →</button></div></div>
     </div>
 
     <div class="mcp-final">
@@ -48,14 +51,45 @@
     </div>
   </div>`;
 
+  const hub=document.createElement('div');
+  hub.id='mcpQuestionHub';
+  hub.innerHTML=`<div class="mcp-q-shell"><div class="mcp-q-head"><h2>Central de Questões MCP</h2><button class="mcp-q-close" type="button" aria-label="Fechar">×</button></div><div class="mcp-q-body">
+    <p style="margin-top:0;color:#697585;line-height:1.6">Defina o foco do treino e escolha onde resolver. O MCP não armazena sua senha nem compartilha sua assinatura com terceiros.</p>
+    <div class="mcp-q-grid">
+      <select id="mcpQArea"><option value="geral">Todas as carreiras</option><option value="civil">Polícia Civil</option><option value="penal">Polícia Penal</option><option value="cientifica">Polícia Científica</option><option value="gcm">GCM</option></select>
+      <input id="mcpQDisc" placeholder="Disciplina: ex. Direito Penal">
+      <input id="mcpQAssunto" placeholder="Assunto: ex. cadeia de custódia">
+      <input id="mcpQBanca" placeholder="Banca: ex. Cebraspe, FGV">
+      <input id="mcpQAno" placeholder="Ano: ex. 2025, 2026">
+      <input id="mcpQCargo" placeholder="Cargo/órgão: ex. Investigador PC-BA">
+    </div>
+    <div class="mcp-platforms">
+      <button class="mcp-platform" data-platform="mcp"><strong>🤖 IA MCP</strong><small>Leva os filtros para o gerador autoral do próprio site.</small></button>
+      <button class="mcp-platform" data-platform="tec"><strong>🟡 TEC Concursos</strong><small>Abre a plataforma oficial para usar sua conta e seus cadernos.</small></button>
+      <button class="mcp-platform" data-platform="qconcursos"><strong>🔵 Qconcursos</strong><small>Abre o banco oficial para aplicar filtros e resolver questões.</small></button>
+      <button class="mcp-platform" data-platform="estrategia"><strong>🟢 Estratégia</strong><small>Abre o Sistema de Questões oficial para aplicar seus filtros.</small></button>
+    </div>
+    <div class="mcp-q-note" id="mcpQNote">As plataformas externas permanecem responsáveis pelo conteúdo, login e permissões da conta. A Central apenas organiza o direcionamento dos filtros.</div>
+  </div></div>`;
+
   const hero=q('.hero');
   if(hero&&hero.parentNode) hero.insertAdjacentElement('afterend',block); else (q('main')||document.body).prepend(block);
+  document.body.appendChild(hub);
 
   function openQuiz(area){
     const modal=document.getElementById('quizModal'),areaSel=document.getElementById('qArea');
     if(areaSel&&area) areaSel.value=area;
     if(modal) modal.style.display='flex'; else document.getElementById('quizFab')?.click();
   }
+  function openHub(area){
+    if(area) document.getElementById('mcpQArea').value=area;
+    hub.style.display='flex';document.body.style.overflow='hidden';
+  }
+  function closeHub(){hub.style.display='none';document.body.style.overflow=''}
+  document.getElementById('mcpOpenQuestionHub').onclick=()=>openHub();
+  hub.querySelector('.mcp-q-close').onclick=closeHub;
+  hub.addEventListener('click',e=>{if(e.target===hub)closeHub()});
+
   block.querySelectorAll('.mcp-career').forEach(btn=>btn.onclick=()=>openQuiz(btn.dataset.area));
   block.querySelectorAll('.mcp-action').forEach(btn=>btn.onclick=()=>{
     const act=btn.dataset.act; openQuiz();
@@ -66,6 +100,25 @@
         const m=document.getElementById('qModo'); if(m){m.value='simulado';m.dispatchEvent(new Event('change'));}
       }
     },120);
+  });
+
+  hub.querySelectorAll('.mcp-platform').forEach(btn=>btn.onclick=async()=>{
+    const platform=btn.dataset.platform;
+    const area=document.getElementById('mcpQArea').value;
+    const disc=document.getElementById('mcpQDisc').value.trim();
+    const assunto=document.getElementById('mcpQAssunto').value.trim();
+    const banca=document.getElementById('mcpQBanca').value.trim();
+    const ano=document.getElementById('mcpQAno').value.trim();
+    const cargo=document.getElementById('mcpQCargo').value.trim();
+    const resumo=[disc,assunto,banca,ano,cargo].filter(Boolean).join(' • ');
+    if(platform==='mcp'){
+      closeHub();openQuiz(area);
+      setTimeout(()=>{const a=document.getElementById('qAssunto'),b=document.getElementById('qBanca');if(a)a.value=[disc,assunto,cargo,ano].filter(Boolean).join(' | ');if(b)b.value=banca;},80);
+      return;
+    }
+    const urls={tec:'https://www.tecconcursos.com.br/questoes',qconcursos:'https://www.qconcursos.com/questoes-de-concursos/questoes',estrategia:'https://www.estrategiaconcursos.com.br/sistema-de-questoes/'};
+    if(resumo){try{await navigator.clipboard.writeText(resumo);document.getElementById('mcpQNote').textContent='Filtros copiados: '+resumo+'. A plataforma será aberta em nova aba para você aplicar na sua conta.'}catch{document.getElementById('mcpQNote').textContent='A plataforma será aberta em nova aba. Use os filtros informados acima dentro da sua conta.'}}
+    window.open(urls[platform],'_blank','noopener,noreferrer');
   });
 
   async function loadFinal(){
