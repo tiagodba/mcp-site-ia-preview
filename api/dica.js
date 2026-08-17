@@ -27,14 +27,36 @@ export default async function handler(req,res){
  const searchDomains=tipoKey==="jurisprudencia"?COURT_HOSTS:OFFICIAL_HOSTS;
  let tavilySources=[],tavilyContext="",tavilyFallback="";
  try{
-  if(tavilyKey){try{const q=tipoKey==="jurisprudencia"?`jurisprudência STF STJ CNJ ${area}`:`conteúdo oficial concursos ${area}`;const r=await fetch("https://api.tavily.com/search",{method:"POST",headers:{Authorization:`Bearer ${tavilyKey}`,"Content-Type":"application/json"},body:JSON.stringify({query:q,search_depth:aprofundado?"advanced":"basic",max_results:aprofundado?8:4,include_answer:"advanced",include_raw_content:false,include_domains:searchDomains,country:"brazil"})});const d=await r.json();if(r.ok){const valid=(d.results||[]).filter(x=>x?.url&&hostAllowed(x.url,tipoKey));tavilySources=valid.map(x=>({title:x.title||"Fonte oficial",url:x.url})).filter((x,i,a)=>a.findIndex(y=>y.url===x.url)===i).slice(0,4);tavilyContext=valid.map(x=>String(x.content||"").trim()).filter(Boolean).slice(0,aprofundado?6:3).join("\n\n").slice(0,aprofundado?9000:4500);tavilyFallback=String(d.answer||"").trim();if(!tavilyFallback&&tavilyContext)tavilyFallback=tavilyContext.slice(0,aprofundado?5000:2200)}else console.error("Tavily request failed",r.status)}catch(e){console.error("Tavily fallback error",e?.message)}}
-  if(geminiKey&&!tavilyContext){try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/interactions",{method:"POST",headers:{"x-goog-api-key":geminiKey,"Content-Type":"application/json"},body:JSON.stringify({model:"gemini-3.6-flash",input:prompt,tools:[{type:"google_search"}]})});const d=await r.json();if(r.ok){const g=geminiResult(d,tipoKey);if(g.text&&g.sources.length){res.setHeader("Cache-Control","private, no-store");return res.status(200).json({...g,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:"gemini"})}}else console.error("Gemini request failed",r.status,String(d?.error?.message||"").slice(0,180))}catch(e){console.error("Gemini fallback error",e?.message)}}
-  if(!groqKey){if(tavilyFallback&&tavilySources.length){res.setHeader("Cache-Control","private, no-store");return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey))}return res.status(502).json({error:"A pesquisa principal está temporariamente indisponível."})}
-  const context=tavilyContext?`\n\nFONTES OFICIAIS RECUPERADAS:\n${tavilyContext}`:"\n\nNão há contexto oficial suficiente; não invente dados jurídicos.";
-  const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${groqKey}`,"Content-Type":"application/json"},body:JSON.stringify({model:"openai/gpt-oss-20b",messages:[{role:"user",content:prompt+context}],max_completion_tokens:aprofundado?900:450})});
-  const d=await r.json();
-  if(!r.ok){console.error("Groq request failed",r.status,String(d?.error?.message||"").slice(0,180));if(tavilyFallback&&tavilySources.length){res.setHeader("Cache-Control","private, no-store");return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey))}if(r.status===429)return res.status(429).json({error:"As IAs principais estão temporariamente no limite. Tente novamente em alguns segundos.",retryAfter:5});return res.status(502).json({error:"Não foi possível gerar a dica agora."})}
-  const text=String(d?.choices?.[0]?.message?.content||"").trim();if(!text||!tavilySources.length){if(tavilyFallback&&tavilySources.length)return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey));return res.status(502).json({error:"Não encontrei resposta com fonte oficial."})}
-  res.setHeader("Cache-Control","private, no-store");return res.status(200).json({text,sources:tavilySources,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:"groq-gpt-oss-20b"});
+  if(tavilyKey){try{
+    const queryByType={
+      jurisprudencia:`site:stf.jus.br OR site:stj.jus.br OR site:cnj.jus.br jurisprudência relevante ${area}`,
+      questao:`site:planalto.gov.br OR site:gov.br OR site:stf.jus.br OR site:stj.jus.br fundamento oficial ${area}`,
+      legislacao:`site:planalto.gov.br OR site:gov.br legislação vigente ${area}`,
+      estrategia:`site:gov.br orientação estudo formação segurança pública ${area}`,
+      aleatoria:`site:planalto.gov.br OR site:gov.br OR site:stf.jus.br OR site:stj.jus.br tema relevante ${area}`
+    };
+    const r=await fetch("https://api.tavily.com/search",{method:"POST",headers:{Authorization:`Bearer ${tavilyKey}`,"Content-Type":"application/json"},body:JSON.stringify({query:queryByType[tipoKey],search_depth:aprofundado?"advanced":"basic",max_results:aprofundado?8:6,include_answer:"advanced",include_raw_content:false,include_domains:searchDomains})});
+    const d=await r.json();
+    if(r.ok){const valid=(d.results||[]).filter(x=>x?.url&&hostAllowed(x.url,tipoKey));tavilySources=valid.map(x=>({title:x.title||"Fonte oficial",url:x.url})).filter((x,i,a)=>a.findIndex(y=>y.url===x.url)===i).slice(0,4);tavilyFallback=String(d.answer||"").trim();const snippets=valid.map(x=>String(x.content||"").trim()).filter(Boolean);tavilyContext=snippets.slice(0,aprofundado?6:4).join("\n\n").slice(0,aprofundado?9000:5000);if(!tavilyContext&&tavilyFallback)tavilyContext=tavilyFallback;if(!tavilyFallback&&tavilyContext)tavilyFallback=tavilyContext.slice(0,aprofundado?5000:2400);}
+    else console.error("Tavily request failed",r.status,String(d?.detail||"").slice(0,180));
+  }catch(e){console.error("Tavily fallback error",e?.message)}}
+
+  if(groqKey&&tavilyContext&&tavilySources.length){try{
+    const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${groqKey}`,"Content-Type":"application/json"},body:JSON.stringify({model:"openai/gpt-oss-20b",messages:[{role:"user",content:prompt+`\n\nFONTES OFICIAIS RECUPERADAS:\n${tavilyContext}`}],max_completion_tokens:aprofundado?900:450})});
+    const d=await r.json();
+    if(r.ok){const text=String(d?.choices?.[0]?.message?.content||"").trim();if(text){res.setHeader("Cache-Control","private, no-store");return res.status(200).json({text,sources:tavilySources,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:"groq-gpt-oss-20b"})}}
+    else console.error("Groq request failed",r.status,String(d?.error?.message||"").slice(0,180));
+  }catch(e){console.error("Groq request error",e?.message)}}
+
+  if(tavilyFallback&&tavilySources.length){res.setHeader("Cache-Control","private, no-store");return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey))}
+
+  if(geminiKey){try{
+    const r=await fetch("https://generativelanguage.googleapis.com/v1beta/interactions",{method:"POST",headers:{"x-goog-api-key":geminiKey,"Content-Type":"application/json"},body:JSON.stringify({model:"gemini-3.6-flash",input:prompt+`\nPesquise somente em fontes oficiais brasileiras: ${searchDomains.join(", ")}.`,tools:[{type:"google_search"}]})});
+    const d=await r.json();
+    if(r.ok){const g=geminiResult(d,tipoKey);if(g.text&&g.sources.length){res.setHeader("Cache-Control","private, no-store");return res.status(200).json({...g,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:"gemini"})}}
+    else console.error("Gemini request failed",r.status,String(d?.error?.message||"").slice(0,180));
+  }catch(e){console.error("Gemini fallback error",e?.message)}}
+
+  return res.status(502).json({error:"Não foi possível obter conteúdo oficial suficiente agora. Tente outra dica em instantes."});
  }catch(e){console.error("MCP AI error",e?.message||"unknown");if(tavilyFallback&&tavilySources.length)return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey));return res.status(500).json({error:"Falha temporária na pesquisa. Tente novamente."})}
 }
