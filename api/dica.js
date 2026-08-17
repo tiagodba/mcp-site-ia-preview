@@ -5,7 +5,6 @@ const AREAS = {
   cientifica: "Polícia Científica, criminalística e medicina legal",
   gcm: "Guardas Municipais, segurança pública e legislação aplicável",
 };
-
 const TIPOS = {
   aleatoria: "dica estratégica de estudo, revisão ou resolução de questões, sem citar números de leis, artigos ou processos",
   jurisprudencia: "jurisprudência recente e relevante para provas",
@@ -13,287 +12,29 @@ const TIPOS = {
   legislacao: "alteração legislativa ou ponto de lei atualizado",
   estrategia: "dica estratégica aprofundada e aplicável em prova",
 };
-
-const OFFICIAL_HOSTS = [
-  "stf.jus.br", "portal.stf.jus.br", "stj.jus.br", "cnj.jus.br",
-  "planalto.gov.br", "gov.br", "senado.leg.br", "camara.leg.br",
-];
-
-const COURT_HOSTS = ["stf.jus.br", "portal.stf.jus.br", "stj.jus.br", "cnj.jus.br"];
-
-function hostAllowed(url, tipoKey) {
-  try {
-    const host = new URL(url).hostname.toLowerCase();
-    const allowed = tipoKey === "jurisprudencia" ? COURT_HOSTS : OFFICIAL_HOSTS;
-    return allowed.some((domain) => host === domain || host.endsWith(`.${domain}`));
-  } catch {
-    return false;
-  }
-}
-
-function sourcesFrom(response, tipoKey) {
-  const sources = [];
-  const message = response?.choices?.[0]?.message;
-  for (const tool of message?.executed_tools || []) {
-    const results = tool?.search_results?.results || tool?.search_results || [];
-    for (const result of results) {
-      if (!result?.url || !/^https:\/\//i.test(result.url) || !hostAllowed(result.url, tipoKey)) continue;
-      if (!sources.some((source) => source.url === result.url)) {
-        sources.push({ title: result.title || "Fonte oficial", url: result.url });
-      }
-    }
-  }
-  return sources.slice(0, 4);
-}
-
-function cleanKey(value) {
-  return String(value || "")
-    .trim()
-    .replace(/^Bearer\s+/i, "")
-    .replace(/^['\"]|['\"]$/g, "")
-    .trim();
-}
-
-function geminiResult(data, tipoKey) {
-  const textParts = [];
-  const sources = [];
-  for (const step of data?.steps || []) {
-    if (step?.type !== "model_output") continue;
-    for (const block of step.content || []) {
-      if (block?.type !== "text") continue;
-      if (block.text) textParts.push(block.text);
-      for (const citation of block.annotations || []) {
-        if (citation?.type !== "url_citation" || !hostAllowed(citation.url, tipoKey)) continue;
-        if (!sources.some((source) => source.url === citation.url)) {
-          sources.push({ title: citation.title || "Fonte oficial", url: citation.url });
-        }
-      }
-    }
-  }
-  return { text: textParts.join("\n\n").trim(), sources: sources.slice(0, 4) };
-}
-
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido." });
-  const geminiKey = cleanKey(process.env.GEMINI_API_KEY);
-  const tavilyKey = cleanKey(process.env.TAVILY_API_KEY || process.env.TAVLY_API_KEY);
-  const groqKey = cleanKey(process.env.GROQ_API_KEY);
-  if (!tavilyKey && !geminiKey && !groqKey) return res.status(503).json({ error: "IA temporariamente indisponível." });
-
-  const areaKey = Object.hasOwn(AREAS, req.body?.area) ? req.body.area : "geral";
-  const tipoKey = Object.hasOwn(TIPOS, req.body?.tipo) ? req.body.tipo : "aleatoria";
-  const area = AREAS[areaKey];
-  const tipo = TIPOS[tipoKey];
-  const variedade = Number(req.body?.variedade || 0) % 20;
-  const aprofundado = ["jurisprudencia", "questao"].includes(tipoKey);
-  const limiteJurisprudencial = tipoKey === "jurisprudencia"
-    ? "Pesquise o ponto jurisprudencial em profundidade. Você pode usar mais de uma decisão oficial pertinente quando isso for necessário para explicar corretamente a tese, evolução, distinções ou exceções."
-    : "Não cite jurisprudência, número de processo, tema repetitivo, súmula ou tese judicial; isso é reservado ao formato Jurisprudência.";
-  const limiteEstrategia = ["estrategia", "aleatoria"].includes(tipoKey)
-    ? "Trate somente de método de estudo, revisão, memorização, leitura de edital ou técnica de prova. Não apresente conteúdo jurídico substantivo nem cite números de artigos, leis, decretos ou processos."
-    : "Siga o formato escolhido e sustente cada afirmação jurídica relevante em fonte oficial adequada.";
-
-  const prompt = `Produza uma dica estendida, em português do Brasil, para candidato de ${area}.
-Formato desejado: ${tipo}.
-Identificador interno de diversidade: V${variedade} (isso não representa quantidade de itens).
-Data desta solicitação: ${new Date().toISOString().slice(0, 10)}.
-Restrição específica: ${limiteJurisprudencial}
-Restrição de conteúdo: ${limiteEstrategia}
-
-Regras obrigatórias:
-- Execute obrigatoriamente a ferramenta de pesquisa web antes de responder. Não responda apenas com conhecimento interno.
-- Priorize STF, STJ, CNJ, Planalto, Senado, Câmara e portais oficiais do governo.
-- ${aprofundado ? "Faça pesquisa suficiente para entregar uma resposta completa, confrontando as fontes oficiais necessárias antes de redigir." : "Produza exatamente UMA dica sobre UM único ponto. Não reúna assuntos diferentes na mesma resposta."}
-- ${aprofundado ? "Não corte fundamento, requisito, exceção ou distinção importante apenas para encurtar a resposta." : "Escolha uma fonte oficial principal e limite as afirmações ao que ela sustenta diretamente."}
-- Traga um título curto e depois uma explicação objetiva, didática e útil para concursos policiais.
-- Se houver jurisprudência, informe tribunal, órgão julgador, número do processo ou tema quando disponível e explique a tese sem inventar dados.
-- Só mencione número de processo, tema, artigo, data, órgão julgador ou tese quando isso estiver expressamente sustentado por uma fonte oficial encontrada na pesquisa.
-- Para jurisprudência, use exclusivamente resultados oficiais de STF, STJ ou CNJ. Se a busca não trouxer base oficial pertinente, diga que não há base suficiente; não improvise.
-- Em jurisprudência, explique: contexto jurídico, tese/entendimento, fundamento essencial, eventual distinção ou exceção relevante e impacto para a prova. Use decisões adicionais somente quando contribuírem diretamente para o mesmo ponto estudado.
-- Se for questão comentada, crie UMA questão autoral de Certo/Errado, forneça o gabarito e faça comentário completo: fundamento normativo ou jurisprudencial, motivo de a assertiva estar certa/errada, pegadinha provável e como a banca pode alterar a frase. Não copie questão de banca.
-- Diferencie claramente lei vigente, entendimento jurisprudencial e dica de memorização.
-- ${aprofundado ? "Use até 750 palavras quando necessário para completar o raciocínio, sem encher a resposta com conteúdo irrelevante." : "Use no máximo 320 palavras."}
-- Não faça propaganda de material e não afirme que algo é recente sem confirmação na fonte.
-- Use apenas fontes oficiais retornadas pela pesquisa e não inclua links no corpo da resposta; eles serão exibidos separadamente.
-- Termine com “Como pode cair na prova:” e uma aplicação prática.`;
-
-  const searchDomains = tipoKey === "jurisprudencia" ? COURT_HOSTS : OFFICIAL_HOSTS;
-  let tavilySources = [];
-  let tavilyContext = "";
-  let tavilyFallback = "";
-
-  try {
-    if (tavilyKey) {
-      try {
-        const queryByType = {
-          jurisprudencia: `jurisprudência STF STJ CNJ tese entendimento precedentes requisitos exceções sobre ${area}`,
-          questao: `legislação jurisprudência fundamento oficial ponto cobrado concursos sobre ${area}`,
-          legislacao: `legislação brasileira atualizada aplicável a ${area}`,
-          estrategia: `orientação oficial e conteúdo prioritário para estudo de ${area}`,
-          aleatoria: `tema jurídico relevante para concursos de ${area}`,
-        };
-        const tavilyQuery = queryByType[tipoKey];
-        const tavilyResponse = await fetch("https://api.tavily.com/search", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${tavilyKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            query: tavilyQuery,
-            search_depth: aprofundado ? "advanced" : "basic",
-            chunks_per_source: aprofundado ? 4 : 2,
-            max_results: aprofundado ? 8 : 4,
-            topic: "general",
-            include_answer: "advanced",
-            include_raw_content: false,
-            include_domains: searchDomains,
-            country: "brazil",
-          }),
-        });
-        const tavilyData = await tavilyResponse.json();
-        if (tavilyResponse.ok) {
-          const sources = (tavilyData.results || [])
-            .filter((result) => result?.url && hostAllowed(result.url, tipoKey))
-            .map((result) => ({ title: result.title || "Fonte oficial", url: result.url }))
-            .filter((source, index, list) => list.findIndex((item) => item.url === source.url) === index)
-            .slice(0, 4);
-          const snippets = (tavilyData.results || [])
-            .filter((result) => result?.url && hostAllowed(result.url, tipoKey) && result.content)
-            .map((result) => String(result.content).trim())
-            .filter(Boolean);
-          tavilySources = sources;
-          tavilyContext = snippets.slice(0, aprofundado ? 6 : 3).join("\n\n").slice(0, aprofundado ? 9000 : 4500);
-          tavilyFallback = String(tavilyData.answer || "").trim();
-          if (!tavilyContext && !tavilyFallback) {
-            console.error("Tavily response missing usable official content");
-          }
-        } else {
-          console.error("Tavily request failed", tavilyResponse.status, String(tavilyData?.detail?.error || tavilyData?.detail || "unknown").slice(0, 180));
-        }
-      } catch (tavilyError) {
-        console.error("Tavily fallback error", tavilyError?.message || "unknown");
-      }
-    }
-
-    if (geminiKey && !(tavilyContext && groqKey)) {
-      try {
-        const geminiResponse = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
-          method: "POST",
-          headers: {
-            "x-goog-api-key": geminiKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "gemini-3.6-flash",
-            input: prompt + (tavilyContext ? `\n\nPESQUISA OFICIAL JÁ RECUPERADA PELO TAVILY:\n${tavilyContext}` : "") + `\nInclua nas buscas termos site:${searchDomains.join(" OR site:")} e use somente essas fontes oficiais.`,
-            tools: [{ type: "google_search" }],
-          }),
-        });
-        const geminiData = await geminiResponse.json();
-        if (geminiResponse.ok) {
-          const generated = geminiResult(geminiData, tipoKey);
-          if (generated.text && generated.sources.length) {
-            res.setHeader("Cache-Control", "private, no-store");
-            return res.status(200).json({
-              text: generated.text,
-              sources: generated.sources,
-              consultedAt: new Date().toISOString(),
-              area: areaKey,
-              tipo: tipoKey,
-              provider: "gemini",
-            });
-          }
-          console.error("Gemini response missing official citations");
-        } else {
-          console.error("Gemini request failed", geminiResponse.status, String(geminiData?.error?.message || "unknown").slice(0, 180));
-        }
-      } catch (geminiError) {
-        console.error("Gemini fallback error", geminiError?.message || "unknown");
-      }
-    }
-
-    if (!groqKey) {
-      if (tavilyFallback && tavilySources.length) {
-        res.setHeader("Cache-Control", "private, no-store");
-        return res.status(200).json({
-          text: tavilyFallback + "\n\n**Como pode cair na prova:** revise o alcance exato do entendimento e confira as fontes oficiais abaixo.",
-          sources: tavilySources,
-          consultedAt: new Date().toISOString(),
-          area: areaKey,
-          tipo: tipoKey,
-          provider: "tavily-fallback",
-        });
-      }
-      return res.status(502).json({ error: "A pesquisa principal está temporariamente indisponível." });
-    }
-    const apiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${groqKey}`,
-        "Content-Type": "application/json",
-        "Groq-Model-Version": "latest",
-      },
-      body: JSON.stringify({
-        model: "groq/compound-mini",
-        messages: [{ role: "user", content: prompt + (tavilyContext ? `\n\nFONTES OFICIAIS RECUPERADAS PARA FUNDAMENTAR A RESPOSTA:\n${tavilyContext}\n\nUse este material como base factual. Não apenas resuma: organize, explique, fundamente e cumpra integralmente o formato solicitado.` : "") }],
-        max_completion_tokens: aprofundado ? 1500 : 700,
-        compound_custom: {
-          tools: {
-            enabled_tools: ["web_search"]
-          }
-        },
-        search_settings: {
-          include_domains: searchDomains,
-          country: "brazil"
-        }
-      }),
-    });
-
-    const data = await apiResponse.json();
-    if (!apiResponse.ok) {
-      console.error(
-        "Groq request failed",
-        apiResponse.status,
-        data?.error?.type || "unknown",
-        data?.error?.code || "no_code",
-        String(data?.error?.message || "no_message").slice(0, 180)
-      );
-      if (apiResponse.status === 429) {
-        const retryAfter = 5;
-        res.setHeader("Retry-After", String(retryAfter));
-        return res.status(429).json({
-          error: "O limite gratuito da IA foi atingido.",
-          retryAfter,
-        });
-      }
-      if (apiResponse.status === 401) {
-        return res.status(502).json({
-          error: tavilyKey
-            ? "A pesquisa principal falhou temporariamente. Tente outra dica."
-            : "A chave da IA precisa ser atualizada pelo administrador.",
-        });
-      }
-      return res.status(502).json({ error: "Não foi possível gerar a dica agora. Tente novamente em instantes." });
-    }
-
-    const text = String(data?.choices?.[0]?.message?.content || "").trim();
-    const sources = tavilySources.length ? tavilySources : sourcesFrom(data, tipoKey);
-    if (!text || !sources.length) {
-      return res.status(502).json({ error: "Não encontrei uma resposta com fonte oficial. Escolha outro tema e tente novamente." });
-    }
-
-    res.setHeader("Cache-Control", "private, no-store");
-    return res.status(200).json({
-      text,
-      sources,
-      consultedAt: new Date().toISOString(),
-      area: areaKey,
-      tipo: tipoKey,
-      provider: "groq",
-    });
-  } catch (error) {
-    console.error("MCP AI error", error?.message || "unknown");
-    return res.status(500).json({ error: "Falha temporária na pesquisa. Tente novamente." });
-  }
+const OFFICIAL_HOSTS=["stf.jus.br","portal.stf.jus.br","stj.jus.br","cnj.jus.br","planalto.gov.br","gov.br","senado.leg.br","camara.leg.br"];
+const COURT_HOSTS=["stf.jus.br","portal.stf.jus.br","stj.jus.br","cnj.jus.br"];
+function hostAllowed(url,tipoKey){try{const host=new URL(url).hostname.toLowerCase();const allowed=tipoKey==="jurisprudencia"?COURT_HOSTS:OFFICIAL_HOSTS;return allowed.some(d=>host===d||host.endsWith(`.${d}`))}catch{return false}}
+function cleanKey(v){return String(v||"").trim().replace(/^Bearer\s+/i,"").replace(/^['\"]|['\"]$/g,"").trim()}
+function sourcesFrom(response,tipoKey){const out=[];const m=response?.choices?.[0]?.message;for(const tool of m?.executed_tools||[]){const results=tool?.search_results?.results||tool?.search_results||[];for(const r of results){if(!r?.url||!/^https:\/\//i.test(r.url)||!hostAllowed(r.url,tipoKey))continue;if(!out.some(s=>s.url===r.url))out.push({title:r.title||"Fonte oficial",url:r.url})}}return out.slice(0,4)}
+function geminiResult(data,tipoKey){const parts=[],sources=[];for(const step of data?.steps||[]){if(step?.type!=="model_output")continue;for(const b of step.content||[]){if(b?.type!=="text")continue;if(b.text)parts.push(b.text);for(const c of b.annotations||[]){if(c?.type!=="url_citation"||!hostAllowed(c.url,tipoKey))continue;if(!sources.some(s=>s.url===c.url))sources.push({title:c.title||"Fonte oficial",url:c.url})}}}return{text:parts.join("\n\n").trim(),sources:sources.slice(0,4)}}
+function tavilyReply(text,sources,areaKey,tipoKey){return {text:text+"\n\n**Como pode cair na prova:** revise o ponto central e confira as fontes oficiais abaixo.",sources,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:"tavily-fallback"}}
+export default async function handler(req,res){
+ if(req.method!=="POST")return res.status(405).json({error:"Método não permitido."});
+ const geminiKey=cleanKey(process.env.GEMINI_API_KEY),tavilyKey=cleanKey(process.env.TAVILY_API_KEY||process.env.TAVLY_API_KEY),groqKey=cleanKey(process.env.GROQ_API_KEY);
+ if(!tavilyKey&&!geminiKey&&!groqKey)return res.status(503).json({error:"IA temporariamente indisponível."});
+ const areaKey=Object.hasOwn(AREAS,req.body?.area)?req.body.area:"geral",tipoKey=Object.hasOwn(TIPOS,req.body?.tipo)?req.body.tipo:"aleatoria",area=AREAS[areaKey],tipo=TIPOS[tipoKey],variedade=Number(req.body?.variedade||0)%20,aprofundado=["jurisprudencia","questao"].includes(tipoKey);
+ const prompt=`Produza uma dica estendida, em português do Brasil, para candidato de ${area}. Formato: ${tipo}. Diversidade V${variedade}. Data: ${new Date().toISOString().slice(0,10)}. Pesquise fontes oficiais brasileiras antes de responder. Priorize STF, STJ, CNJ, Planalto, Senado, Câmara e gov.br. ${aprofundado?"Explique fundamento, requisitos, exceções e impacto para prova, sem inventar dados.":"Produza uma única dica objetiva sobre um único ponto."} Não inclua links no corpo. Termine com “Como pode cair na prova:” e uma aplicação prática.`;
+ const searchDomains=tipoKey==="jurisprudencia"?COURT_HOSTS:OFFICIAL_HOSTS;
+ let tavilySources=[],tavilyContext="",tavilyFallback="";
+ try{
+  if(tavilyKey){try{const q=tipoKey==="jurisprudencia"?`jurisprudência STF STJ CNJ ${area}`:`conteúdo oficial concursos ${area}`;const r=await fetch("https://api.tavily.com/search",{method:"POST",headers:{Authorization:`Bearer ${tavilyKey}`,"Content-Type":"application/json"},body:JSON.stringify({query:q,search_depth:aprofundado?"advanced":"basic",max_results:aprofundado?8:4,include_answer:"advanced",include_raw_content:false,include_domains:searchDomains,country:"brazil"})});const d=await r.json();if(r.ok){const valid=(d.results||[]).filter(x=>x?.url&&hostAllowed(x.url,tipoKey));tavilySources=valid.map(x=>({title:x.title||"Fonte oficial",url:x.url})).filter((x,i,a)=>a.findIndex(y=>y.url===x.url)===i).slice(0,4);tavilyContext=valid.map(x=>String(x.content||"").trim()).filter(Boolean).slice(0,aprofundado?6:3).join("\n\n").slice(0,aprofundado?9000:4500);tavilyFallback=String(d.answer||"").trim();if(!tavilyFallback&&tavilyContext)tavilyFallback=tavilyContext.slice(0,aprofundado?5000:2200)}else console.error("Tavily request failed",r.status)}catch(e){console.error("Tavily fallback error",e?.message)}}
+  if(geminiKey&&!(tavilyContext&&groqKey)){try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/interactions",{method:"POST",headers:{"x-goog-api-key":geminiKey,"Content-Type":"application/json"},body:JSON.stringify({model:"gemini-3.6-flash",input:prompt+(tavilyContext?`\n\nFontes recuperadas:\n${tavilyContext}`:""),tools:[{type:"google_search"}]})});const d=await r.json();if(r.ok){const g=geminiResult(d,tipoKey);if(g.text&&g.sources.length){res.setHeader("Cache-Control","private, no-store");return res.status(200).json({...g,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:"gemini"})}}else console.error("Gemini request failed",r.status,String(d?.error?.message||"").slice(0,180))}catch(e){console.error("Gemini fallback error",e?.message)}}
+  if(!groqKey){if(tavilyFallback&&tavilySources.length){res.setHeader("Cache-Control","private, no-store");return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey))}return res.status(502).json({error:"A pesquisa principal está temporariamente indisponível."})}
+  const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${groqKey}`,"Content-Type":"application/json"},body:JSON.stringify({model:"groq/compound-mini",messages:[{role:"user",content:prompt+(tavilyContext?`\n\nFONTES OFICIAIS RECUPERADAS:\n${tavilyContext}`:"")}],max_completion_tokens:aprofundado?1000:500,compound_custom:{tools:{enabled_tools:["web_search"]}},search_settings:{include_domains:searchDomains,country:"brazil"}})});
+  const d=await r.json();
+  if(!r.ok){console.error("Groq request failed",r.status,String(d?.error?.message||"").slice(0,180));if(tavilyFallback&&tavilySources.length){res.setHeader("Cache-Control","private, no-store");return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey))}if(r.status===429)return res.status(429).json({error:"As IAs principais estão temporariamente no limite. Tente novamente em alguns segundos.",retryAfter:5});return res.status(502).json({error:"Não foi possível gerar a dica agora."})}
+  const text=String(d?.choices?.[0]?.message?.content||"").trim(),sources=tavilySources.length?tavilySources:sourcesFrom(d,tipoKey);if(!text||!sources.length){if(tavilyFallback&&tavilySources.length)return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey));return res.status(502).json({error:"Não encontrei resposta com fonte oficial."})}
+  res.setHeader("Cache-Control","private, no-store");return res.status(200).json({text,sources,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:"groq"});
+ }catch(e){console.error("MCP AI error",e?.message||"unknown");if(tavilyFallback&&tavilySources.length)return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey));return res.status(500).json({error:"Falha temporária na pesquisa. Tente novamente."})}
 }
