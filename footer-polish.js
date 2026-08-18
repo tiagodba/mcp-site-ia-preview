@@ -91,3 +91,12 @@
   const hero=document.querySelector('.hero');
   if(hero) hero.insertAdjacentElement('afterend',section); else document.body.prepend(section);
 })();
+
+(()=>{
+  if(document.querySelector('script[data-mcp-susp]')) return;
+  const s=document.createElement('script');
+  s.src='/susp-study.js?v=20260818-1';
+  s.defer=true;
+  s.dataset.mcpSusp='1';
+  document.body.appendChild(s);
+})();
