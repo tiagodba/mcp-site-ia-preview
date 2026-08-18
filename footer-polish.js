@@ -53,3 +53,27 @@
 })();
 
 (()=>{if(document.querySelector('script[data-mcp-susp]'))return;const s=document.createElement('script');s.src='/susp-study.js?v=20260818-1';s.defer=true;s.dataset.mcpSusp='1';document.body.appendChild(s)})();
+
+(()=>{
+  if(document.getElementById('mcpCrimesPessoaGamma')) return;
+  const css=document.createElement('style');
+  css.textContent=`
+    #mcpCrimesPessoaGamma{padding:62px 0;background:#061226;color:#fff}
+    .mcp-gamma-wrap{width:min(1180px,calc(100% - 40px));margin:auto}
+    .mcp-gamma-head{display:flex;justify-content:space-between;gap:24px;align-items:end;margin-bottom:22px}
+    .mcp-gamma-kicker{font-size:12px;font-weight:900;letter-spacing:1.8px;text-transform:uppercase;color:#efbd26;margin-bottom:8px}
+    .mcp-gamma-head h2{margin:0;font:700 38px/1.08 Georgia,serif;color:#fff}
+    .mcp-gamma-head p{margin:8px 0 0;color:#b9c6d8;max-width:760px;line-height:1.6}
+    .mcp-gamma-open{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;background:#efbd26;color:#071426;font-weight:900;padding:12px 18px;border-radius:10px}
+    .mcp-gamma-frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 55px rgba(0,0,0,.32);background:#0b1730}
+    .mcp-gamma-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#0b1730}
+    @media(max-width:760px){#mcpCrimesPessoaGamma{padding:42px 0}.mcp-gamma-head{display:block}.mcp-gamma-head h2{font-size:31px}.mcp-gamma-open{margin-top:16px}.mcp-gamma-wrap{width:min(100% - 24px,1180px)}}
+  `;
+  document.head.appendChild(css);
+  const section=document.createElement('section');
+  section.id='mcpCrimesPessoaGamma';
+  section.innerHTML=`<div class="mcp-gamma-wrap"><div class="mcp-gamma-head"><div><div class="mcp-gamma-kicker">Aula em slides • Direito Penal</div><h2>Crimes Contra a Pessoa</h2><p>Revisão visual em slides para concursos policiais. Navegue pelo conteúdo diretamente no site.</p></div><a class="mcp-gamma-open" href="https://gamma.app/docs/7vswa1v5u40wz2p" target="_blank" rel="noopener">Abrir em tela cheia</a></div><div class="mcp-gamma-frame"><iframe src="https://gamma.app/embed/7vswa1v5u40wz2p" title="Crimes Contra a Pessoa — Slides" allow="fullscreen" loading="lazy"></iframe></div></div>`;
+  const susp=document.getElementById('mcpSuspStudy');
+  const footer=document.querySelector('.footer, footer');
+  if(susp) susp.insertAdjacentElement('afterend',section); else if(footer) footer.insertAdjacentElement('beforebegin',section); else document.body.appendChild(section);
+})();
