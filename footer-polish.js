@@ -77,3 +77,5 @@
   const footer=document.querySelector('.footer, footer');
   if(susp) susp.insertAdjacentElement('afterend',section); else if(footer) footer.insertAdjacentElement('beforebegin',section); else document.body.appendChild(section);
 })();
+
+(()=>{if(document.querySelector('script[data-mcp-crimes-slides]'))return;const s=document.createElement('script');s.src='/crimes-pessoa-slides.js?v=20260818-2';s.defer=true;s.dataset.mcpCrimesSlides='1';document.body.appendChild(s)})();
