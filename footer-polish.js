@@ -66,3 +66,28 @@
   },{threshold:.08});
   io.observe(footer);
 })();
+
+(()=>{
+  if(document.getElementById('mcpGcmGoiasAnnouncement')) return;
+  const css=document.createElement('style');
+  css.textContent=`
+    #mcpGcmGoiasAnnouncement{padding:58px 0;background:linear-gradient(135deg,#020b18,#062650 62%,#04334a);color:#fff;position:relative;overflow:hidden}
+    #mcpGcmGoiasAnnouncement:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 78% 25%,rgba(31,211,200,.18),transparent 28%),linear-gradient(115deg,transparent 0 52%,rgba(239,189,38,.08) 52% 53%,transparent 53%);pointer-events:none}
+    .mcp-gcm-wrap{width:min(1180px,calc(100% - 40px));margin:auto;position:relative;z-index:1}
+    .mcp-gcm-card{display:grid;grid-template-columns:1.25fr .75fr;gap:34px;align-items:center;border:1px solid rgba(255,255,255,.16);border-radius:18px;background:linear-gradient(145deg,rgba(3,22,47,.94),rgba(6,45,99,.84));box-shadow:0 22px 65px rgba(0,0,0,.28);padding:42px}
+    .mcp-gcm-kicker{display:inline-flex;align-items:center;gap:9px;color:#efbd26;font-size:12px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}.mcp-gcm-kicker:before{content:'●';font-size:9px}
+    .mcp-gcm-card h2{font:700 42px/1.05 Georgia,serif;margin:0 0 18px;color:#fff}.mcp-gcm-card h2 span{display:block;color:#efbd26;margin-top:7px}.mcp-gcm-card h2 em{font-style:normal;color:#45d6d0}
+    .mcp-gcm-card p{margin:0;color:#c1ccda;font-size:16px;line-height:1.7;max-width:680px}
+    .mcp-gcm-tags{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}.mcp-gcm-tags span{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);padding:9px 12px;border-radius:999px;font-size:11px;font-weight:800;color:#e5edf6}
+    .mcp-gcm-side{display:flex;justify-content:center}.mcp-gcm-badge{width:min(320px,100%);aspect-ratio:1/1;border-radius:20px;border:1px solid rgba(239,189,38,.45);background:linear-gradient(145deg,#071b34,#0b3258);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;box-shadow:inset 0 0 50px rgba(0,0,0,.25)}
+    .mcp-gcm-icon{font-size:58px;margin-bottom:14px}.mcp-gcm-badge strong{font-size:28px;line-height:1.05;color:#efbd26}.mcp-gcm-badge small{display:block;margin-top:12px;color:#aebdce;letter-spacing:1.5px;font-weight:800}
+    @media(max-width:820px){.mcp-gcm-card{grid-template-columns:1fr;padding:30px}.mcp-gcm-side{justify-content:flex-start}.mcp-gcm-badge{aspect-ratio:auto;width:100%;min-height:170px}.mcp-gcm-card h2{font-size:35px}}
+    @media(max-width:520px){#mcpGcmGoiasAnnouncement{padding:38px 0}.mcp-gcm-wrap{width:min(100% - 24px,1180px)}.mcp-gcm-card{padding:24px 20px;border-radius:14px}.mcp-gcm-card h2{font-size:30px}.mcp-gcm-card p{font-size:14px}}
+  `;
+  document.head.appendChild(css);
+  const section=document.createElement('section');
+  section.id='mcpGcmGoiasAnnouncement';
+  section.innerHTML=`<div class="mcp-gcm-wrap"><div class="mcp-gcm-card"><div><div class="mcp-gcm-kicker">Novidades MCP • Em produção</div><h2>Materiais para os concursos da GCM de <span>Caldas Novas <em>e Rio Verde</em></span></h2><p>A MCP está produzindo materiais estratégicos voltados aos concursos das Guardas Civis Municipais de Caldas Novas e Rio Verde, com conteúdo organizado para estudo, revisão e preparação direcionada.</p><div class="mcp-gcm-tags"><span>Conteúdo completo</span><span>Revisão estratégica</span><span>Mapas mentais</span><span>Material de alta qualidade</span></div></div><div class="mcp-gcm-side"><div class="mcp-gcm-badge"><div class="mcp-gcm-icon">🛡️</div><strong>EM<br>PRODUÇÃO</strong><small>MCP • CARREIRAS POLICIAIS</small></div></div></div></div>`;
+  const hero=document.querySelector('.hero');
+  if(hero) hero.insertAdjacentElement('afterend',section); else document.body.prepend(section);
+})();
