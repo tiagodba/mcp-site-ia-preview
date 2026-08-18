@@ -9,8 +9,8 @@
     .footer-top>p{grid-column:2!important;margin:10px 0 0!important;text-align:left!important;max-width:620px!important;justify-self:start!important;font-size:17px!important;line-height:1.55!important;color:#aeb8c6!important;}
     .footer-links{display:none!important;}
     .copyright{padding-top:20px!important;border-top:1px solid rgba(255,255,255,.16)!important;text-align:left!important;color:#8fa0b5!important;}
-    .mcp-floating-ui{transition:opacity .22s ease,transform .22s ease!important;}
-    body.mcp-footer-visible .mcp-floating-ui{opacity:0!important;pointer-events:none!important;transform:translateY(18px)!important;}
+    .mcp-floating-ui{opacity:0!important;pointer-events:none!important;transform:translateY(18px)!important;transition:opacity .22s ease,transform .22s ease!important;}
+    body.mcp-footer-visible .mcp-floating-ui{opacity:1!important;pointer-events:auto!important;transform:translateY(0)!important;}
     @media(max-width:980px){.footer-top{grid-template-columns:1fr!important;text-align:center!important;gap:14px!important}.footer-top>img,.footer-title,.footer-top>p{justify-self:center!important}.footer-top>p{grid-column:1!important;text-align:center!important;margin-top:4px!important}.copyright{text-align:center!important}}
     @media(max-width:640px){.footer{padding:34px 0 18px!important}.footer .wrap{padding:0 18px!important}.footer-top>img{width:60px!important;height:60px!important}.footer-title{font-size:21px!important}.footer-top>p{font-size:15px!important}}
   `;
@@ -21,8 +21,8 @@
   const top=footer.querySelector('.footer-top');
   if(top){const img=top.querySelector('img'),title=top.querySelector('.footer-title'),p=top.querySelector('p');if(img&&title&&p){top.innerHTML='';top.appendChild(img);const group=document.createElement('div');group.style.minWidth='0';group.appendChild(title);group.appendChild(p);top.appendChild(group)}}
   const markFloating=()=>{for(const el of document.querySelectorAll('button,a,div')){const txt=(el.textContent||'').trim(),cs=getComputedStyle(el);if(cs.position==='fixed'&&(el.id==='quizFab'||/Questões IA/i.test(txt)||/Comprar com ajuda/i.test(txt)||txt==='🤖'))el.classList.add('mcp-floating-ui')}};
-  markFloating();setTimeout(markFloating,800);
-  const io=new IntersectionObserver(entries=>document.body.classList.toggle('mcp-footer-visible',entries.some(e=>e.isIntersecting)),{threshold:.08});io.observe(footer);
+  markFloating();setTimeout(markFloating,800);setTimeout(markFloating,1800);
+  const io=new IntersectionObserver(entries=>document.body.classList.toggle('mcp-footer-visible',entries.some(e=>e.isIntersecting)),{threshold:.03,rootMargin:'120px 0px 0px 0px'});io.observe(footer);
 })();
 
 (()=>{
