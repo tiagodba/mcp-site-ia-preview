@@ -5,67 +5,88 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>PC-MA Agente Generalista e Simulados | MCP Concursos Policiais</title>
   <style>
-    :root{--bg:#061225;--blue:#173b6a;--gold:#efbd26;--text:#fff;--muted:#c6d1df;--paper:#f7f9fc;--ink:#10233d}
+    :root{--navy:#071a33;--navy2:#0b2b55;--gold:#f4bd18;--red:#c62b30;--paper:#f4f6f9;--ink:#082246;--muted:#dce6f3}
     *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#061225,#0a1b38);color:var(--text);font-family:Arial,Helvetica,sans-serif}
-    .top{position:sticky;top:0;z-index:30;background:rgba(6,18,37,.97);border-bottom:1px solid rgba(255,255,255,.1)}
-    .topin{width:min(1180px,calc(100% - 28px));margin:auto;min-height:64px;display:flex;justify-content:space-between;align-items:center;gap:16px}
-    .brand{font-weight:900}.brand span{color:var(--gold)}
-    .back{background:var(--gold);color:#071426;text-decoration:none;padding:10px 14px;border-radius:9px;font-weight:900;white-space:nowrap}
-    .hero,.wrap{width:min(1180px,calc(100% - 28px));margin:auto}
-    .hero{padding:46px 0 28px;text-align:center}
-    .kicker{color:var(--gold);font-size:12px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase}
-    .hero h1{font:700 clamp(34px,5vw,56px)/1.05 Georgia,serif;margin:10px 0 14px}
-    .hero p{color:var(--muted);max-width:780px;margin:0 auto;line-height:1.65}
-    .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;padding:12px 0 54px}
-    .card{position:relative;overflow:hidden;min-height:300px;padding:30px;border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.11),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.13);box-shadow:0 20px 45px rgba(0,0,0,.22);display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s ease,border-color .2s ease}
-    .card:hover{transform:translateY(-4px);border-color:rgba(239,189,38,.7)}
-    .card:before{content:"";position:absolute;right:-70px;top:-70px;width:190px;height:190px;border-radius:50%;background:rgba(239,189,38,.10)}
-    .tag{display:inline-flex;align-self:flex-start;background:var(--gold);color:#071426;border-radius:999px;padding:8px 11px;font-size:11px;font-weight:900;letter-spacing:.8px;text-transform:uppercase}
-    .card h2{font:700 clamp(29px,4vw,42px)/1.05 Georgia,serif;margin:28px 0 12px}
-    .card p{margin:0;color:var(--muted);line-height:1.6;max-width:500px}
-    .action{margin-top:28px;display:inline-flex;align-items:center;gap:8px;color:var(--gold);font-weight:900;font-size:14px}
-    .simulados{background:linear-gradient(145deg,rgba(23,59,106,.72),rgba(255,255,255,.045))}
-    .footnote{text-align:center;color:#8391a3;font-size:12px;padding:0 14px 30px}
-    @media(max-width:760px){.cards{grid-template-columns:1fr}.card{min-height:260px}.hero{padding-top:34px}.topin{min-height:60px}.brand{font-size:14px}.back{font-size:13px;padding:9px 11px}}
+    body{margin:0;background:#06152b;color:#fff;font-family:Arial,Helvetica,sans-serif}
+    .top{background:#051329;border-bottom:1px solid rgba(255,255,255,.08)}
+    .topin{width:min(1180px,calc(100% - 32px));min-height:64px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{font-weight:900;letter-spacing:.3px}.brand b{color:var(--gold)}
+    .back{display:inline-flex;text-decoration:none;background:var(--gold);color:#06152b;font-weight:900;padding:10px 15px;border-radius:10px}
+    .wrap{width:min(1080px,calc(100% - 30px));margin:14px auto 42px}
+    .hero-card{position:relative;overflow:hidden;display:grid;grid-template-columns:1.12fr .92fr;gap:42px;padding:34px;border:1px solid rgba(244,189,24,.55);border-radius:22px;background:linear-gradient(115deg,#08284d 0%,#0b2b55 58%,#102f55 100%);box-shadow:0 18px 45px rgba(0,0,0,.22)}
+    .hero-card:after{content:"MCP";position:absolute;right:-18px;bottom:-70px;font:900 150px/1 Arial;color:rgba(255,255,255,.035);pointer-events:none}
+    .left,.right{position:relative;z-index:1}
+    .eyebrow{display:flex;align-items:center;gap:10px;margin:6px 0 10px;color:var(--gold);font-size:12px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase}
+    .eyebrow:before{content:"•";font-size:18px}
+    h1{margin:0;font:700 clamp(38px,5vw,58px)/1.04 Georgia,serif;letter-spacing:-.4px}
+    h1 span{color:var(--gold)}
+    .lead{max-width:560px;margin:12px 0 20px;color:#f0f5fb;line-height:1.6;font-size:16px}
+    .chips{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0 20px}
+    .chip{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);padding:8px 12px;border-radius:999px;font-size:12px;font-weight:900}
+    .cta{display:inline-flex;align-items:center;gap:18px;margin-top:2px;background:var(--gold);color:#07162b;border:0;border-radius:12px;padding:15px 20px;font-weight:900;font-size:16px;box-shadow:0 10px 26px rgba(244,189,24,.15)}
+    .panel{height:100%;background:var(--paper);color:var(--ink);border-radius:18px;padding:24px;box-shadow:0 12px 28px rgba(0,0,0,.17)}
+    .badge{display:inline-block;background:var(--red);color:#fff;padding:7px 12px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+    .panel h2{margin:14px 0 5px;font:700 27px/1.08 Georgia,serif;color:#082246}
+    .panel .sub{margin:0 0 15px;color:#b17a00;font-size:17px;font-weight:900}
+    .panel ul{margin:0 0 18px;padding-left:18px;color:#42536d;line-height:1.75;font-size:14px}
+    .panel hr{border:0;border-top:1px solid #d4dce7;margin:18px 0 12px}
+    .panel small{color:#65758c;line-height:1.5}
+    .sim-card{margin-top:18px;padding:22px 24px;border-radius:18px;background:linear-gradient(120deg,#ffffff,#edf3f8);color:var(--ink);border:1px solid rgba(244,189,24,.55);display:flex;align-items:center;justify-content:space-between;gap:20px;box-shadow:0 12px 28px rgba(0,0,0,.16)}
+    .sim-card h3{margin:0 0 6px;font:700 27px/1.08 Georgia,serif}
+    .sim-card p{margin:0;color:#5e6f86;line-height:1.5}
+    .sim-btn{flex:0 0 auto;background:#0b2b55;color:#fff;font-weight:900;border-radius:11px;padding:13px 18px;white-space:nowrap}
+    @media(max-width:850px){.hero-card{grid-template-columns:1fr;gap:24px;padding:25px}.wrap{margin-top:10px}.sim-card{align-items:flex-start;flex-direction:column}.sim-btn{width:100%;text-align:center}}
   </style>
 </head>
 <body>
   <header class="top">
     <div class="topin">
-      <div class="brand"><span>MCP</span> CONCURSOS POLICIAIS</div>
+      <div class="brand"><b>MCP</b> CONCURSOS POLICIAIS</div>
       <a class="back" href="/">← Voltar ao site</a>
     </div>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="kicker">MCP • Área de Estudos</div>
-      <h1>Escolha seu conteúdo</h1>
-      <p>Acesse a preparação direcionada para a PC-MA ou entre na área de simulados para treinar seus conhecimentos.</p>
+  <main class="wrap">
+    <section class="hero-card">
+      <div class="left">
+        <div class="eyebrow">PC-MA • PREPARAÇÃO DIRECIONADA</div>
+        <h1>Agente <span>Generalista</span></h1>
+        <p class="lead">Conteúdo organizado para o cargo de Agente Generalista da Polícia Científica do Maranhão, com estudo rápido, revisão direcionada e acesso aos materiais MCP.</p>
+        <div class="chips">
+          <span class="chip">PC-MA</span>
+          <span class="chip">Agente Generalista</span>
+          <span class="chip">Conteúdo por matéria</span>
+          <span class="chip">MCP Concursos Policiais</span>
+        </div>
+        <div class="cta">Estudar conteúdo <span>→</span></div>
+      </div>
+
+      <div class="right">
+        <div class="panel">
+          <span class="badge">NOVO NO MCP</span>
+          <h2>Preparação organizada por matéria</h2>
+          <p class="sub">Foco no cargo de Agente Generalista</p>
+          <ul>
+            <li>Língua Portuguesa</li>
+            <li>Direito Penal e Processo Penal</li>
+            <li>Direito Administrativo</li>
+            <li>Criminalística e cadeia de custódia</li>
+            <li>Medicina Legal</li>
+            <li>Informática e conteúdos complementares</li>
+          </ul>
+          <hr>
+          <small>Conteúdo estruturado para facilitar leitura, revisão e preparação direcionada.</small>
+        </div>
+      </div>
     </section>
 
-    <section class="wrap cards">
-      <article class="card" id="pcma">
-        <div>
-          <span class="tag">PC-MA</span>
-          <h2>Agente Generalista</h2>
-          <p>Conteúdo direcionado ao cargo de Agente Generalista da Polícia Científica do Maranhão.</p>
-        </div>
-        <div class="action">Acessar conteúdo →</div>
-      </article>
-
-      <article class="card simulados" id="simulados">
-        <div>
-          <span class="tag">Treinamento</span>
-          <h2>Simulados</h2>
-          <p>Área dedicada a simulados para revisar matérias, testar conhecimentos e acompanhar sua preparação.</p>
-        </div>
-        <div class="action">Acessar simulados →</div>
-      </article>
+    <section class="sim-card">
+      <div>
+        <h3>Simulados PC-MA</h3>
+        <p>Treine por matéria, revise os pontos mais importantes e acompanhe sua preparação para Agente Generalista.</p>
+      </div>
+      <div class="sim-btn">Acessar simulados →</div>
     </section>
-
-    <div class="footnote">Materiais Carreiras Policiais • MCP Concursos Policiais</div>
   </main>
 </body>
 </html>
