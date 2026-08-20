@@ -1,4 +1,21 @@
 (()=>{
+  const removePprn=()=>{
+    const oldLink=[...document.querySelectorAll('a[href]')].find(a=>/policia-penal-rn-2026\.html/i.test(a.getAttribute('href')||''));
+    const oldTitle=[...document.querySelectorAll('h1,h2,h3,h4,strong')].find(el=>/Polícia Penal\s*RN\s*2026|Polícia Penal do Rio Grande do Norte/i.test(el.textContent||''));
+    const target=oldLink||oldTitle;
+    if(!target)return;
+    let box=target.closest('article');
+    if(!box) box=target.closest('section');
+    if(!box){
+      box=target.closest('.card,.featured-card,.highlight-card,.study-card,.reta-final-card');
+    }
+    if(box) box.remove();
+  };
+  removePprn();
+  new MutationObserver(removePprn).observe(document.documentElement,{childList:true,subtree:true});
+})();
+
+(()=>{
   if(document.getElementById('mcpCareerHub')) return;
   const q=s=>document.querySelector(s);
   const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
