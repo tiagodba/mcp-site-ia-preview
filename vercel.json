@@ -8,10 +8,18 @@
   "rewrites": [
     {
       "source": "/apostila-reta-final-gcm-paracatu.html",
-      "destination": "/apostila-reta-final-gcm-paracatu-direto.html"
+      "destination": "/Apostila_Reta_Final_GCM_Paracatu_WEB.pdf"
     }
   ],
   "headers": [
+    {
+      "source": "/Apostila_Reta_Final_GCM_Paracatu_WEB.pdf",
+      "headers": [
+        { "key": "Content-Type", "value": "application/pdf" },
+        { "key": "Content-Disposition", "value": "inline; filename=\"Apostila_Reta_Final_GCM_Paracatu_2026.pdf\"" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" }
+      ]
+    },
     {
       "source": "/api/(.*)",
       "headers": [
