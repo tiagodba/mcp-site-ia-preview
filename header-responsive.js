@@ -11,13 +11,13 @@
   style.textContent=`
     .header,.header-inner{max-width:100%}
     .header{overflow:visible}
-    .header-inner{gap:18px}
+    .header-inner{gap:18px;height:64px!important;min-height:0!important;padding-top:0!important;padding-bottom:0!important}\n    .brand{height:64px!important;align-items:center!important}\n    .brand img{width:46px!important;height:46px!important;margin:0 9px 0 0!important;display:block}
     .nav{min-width:0;gap:18px}
     .nav a{font-size:12px}
     .mcp-more{position:relative;display:none;align-self:stretch}
     .mcp-more.show{display:flex}
     .mcp-more-btn{border:0;background:transparent;color:#efbd26;font-weight:900;font-size:12px;padding:0 5px;cursor:pointer;white-space:nowrap}
-    .mcp-more-panel{position:absolute;right:0;top:66px;width:245px;padding:9px;background:#06172f;border:1px solid #28415f;border-top:3px solid #efbd26;border-radius:0 0 8px 8px;box-shadow:0 18px 42px #0008;display:none;z-index:80}
+    .mcp-more-panel{position:absolute;right:0;top:63px;width:245px;padding:9px;background:#06172f;border:1px solid #28415f;border-top:3px solid #efbd26;border-radius:0 0 8px 8px;box-shadow:0 18px 42px #0008;display:none;z-index:80}
     .mcp-more.open .mcp-more-panel{display:grid}
     .mcp-more-panel a{display:block!important;color:#fff!important;border:0!important;padding:12px 13px!important;font-size:12px!important;text-decoration:none;white-space:normal}
     .mcp-more-panel a:hover{background:#102c50;color:#efbd26!important}
@@ -31,7 +31,7 @@
       .social{display:none!important}
     }
     @media(max-width:1180px){
-      .nav,.social{display:none!important}
+      .header-inner{height:62px!important}\n      .brand{height:62px!important}\n      .nav,.social{display:none!important}
       .menu{display:block!important;margin-left:auto}
       .brand{min-width:0!important}
       .brand span{display:block}
