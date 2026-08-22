@@ -1,3 +1,15 @@
+
+function curatedTip(areaKey,tipoKey){
+ const tips={
+  jurisprudencia:'**Jurisprudência em prova:** identifique primeiro a tese, depois os requisitos e as exceções. Evite memorizar apenas o resultado do julgamento.\n\n**Como pode cair na prova:** a banca costuma alterar um requisito ou transformar uma exceção em regra.',
+  questao:'**Estratégia de resolução:** leia primeiro o comando, marque palavras absolutas como “sempre”, “nunca” e “somente” e depois confronte cada alternativa com a literalidade legal.\n\n**Como pode cair na prova:** alternativas parcialmente corretas costumam esconder uma restrição indevida.',
+  legislacao:'**Legislação atualizada:** organize a revisão em três camadas: texto legal, alterações recentes e entendimento dos tribunais superiores.\n\n**Como pode cair na prova:** a banca mistura redação antiga com a versão atualmente vigente.',
+  estrategia:'**Dica MCP:** faça revisão ativa em 24 horas, sete dias e trinta dias. Registre os erros por assunto e refaça a questão sem consultar o comentário.\n\n**Como pode cair na prova:** o ganho vem da correção do padrão de erro, não da repetição mecânica.',
+  aleatoria:'**Ponto de atenção:** em matérias jurídicas, diferencie regra, exceção, requisito e consequência. Essa estrutura elimina alternativas aparentemente corretas.\n\n**Como pode cair na prova:** a banca geralmente troca um desses quatro elementos.'
+ };
+ return {text:tips[tipoKey]||tips.aleatoria,sources:[],consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:'mcp-continuity'};
+}
+
 const AREAS = {
   geral: "todas as carreiras policiais brasileiras",
   civil: "Polícia Civil, investigação criminal e processo penal",
@@ -66,6 +78,6 @@ export default async function handler(req,res){
     else console.error("Gemini request failed",r.status,String(d?.error?.message||"").slice(0,180));
   }catch(e){console.error("Gemini fallback error",e?.message)}}
 
-  return res.status(502).json({error:"Não foi possível obter conteúdo oficial suficiente agora. Tente outra dica em instantes."});
+  return res.status(200).json(curatedTip(areaKey,tipoKey));
  }catch(e){console.error("MCP AI error",e?.message||"unknown");if(tavilyFallback&&tavilySources.length)return res.status(200).json(tavilyReply(tavilyFallback,tavilySources,areaKey,tipoKey));return res.status(500).json({error:"Falha temporária na pesquisa. Tente novamente."})}
 }
