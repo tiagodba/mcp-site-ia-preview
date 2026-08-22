@@ -42,10 +42,10 @@ export default async function handler(req,res){
   }catch(e){console.error("Tavily fallback error",e?.message)}}
 
   if(openaiKey){try{
-    const openaiInput=prompt+(tavilyContext?\`\\n\\nFONTES OFICIAIS RECUPERADAS:\\n\${tavilyContext}\`:\`\\nPesquise e priorize exclusivamente fontes oficiais brasileiras dos domínios: \${searchDomains.join(', ')}.\`);
+    const openaiInput=prompt+(tavilyContext?`\\n\\nFONTES OFICIAIS RECUPERADAS:\\n${tavilyContext}`:`\\nPesquise e priorize exclusivamente fontes oficiais brasileiras dos domínios: ${searchDomains.join(', ')}.`);
     const body={model:'gpt-5-mini',input:openaiInput,max_output_tokens:aprofundado?1200:700};
     if(!tavilyContext)body.tools=[{type:'web_search_preview',search_context_size:aprofundado?'high':'medium'}];
-    const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:\`Bearer \${openaiKey}\`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
     const data=await r.json();
     if(r.ok){const texts=[],citations=[];for(const item of data.output||[]){for(const c of item.content||[]){if(c.text)texts.push(c.text);for(const a of c.annotations||[]){const u=a.url||a.url_citation?.url,t=a.title||a.url_citation?.title;if(u&&hostAllowed(u,tipoKey)&&!citations.some(x=>x.url===u))citations.push({title:t||'Fonte oficial',url:u})}}}const text=String(data.output_text||texts.join('\\n\\n')).trim();const finalSources=(tavilySources.length?tavilySources:citations).slice(0,4);if(text){res.setHeader('Cache-Control','private, no-store');return res.status(200).json({text,sources:finalSources,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:'openai'})}}
     else console.error('OpenAI tip failed',r.status,String(data?.error?.message||'').slice(0,180));
