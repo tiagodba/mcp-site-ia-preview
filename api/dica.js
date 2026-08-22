@@ -20,8 +20,8 @@ function geminiResult(data,tipoKey){const parts=[],sources=[];for(const step of 
 function tavilyReply(text,sources,areaKey,tipoKey){return {text:text+"\n\n**Como pode cair na prova:** revise o ponto central e confira as fontes oficiais abaixo.",sources,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:"tavily-fallback"}}
 export default async function handler(req,res){
  if(req.method!=="POST")return res.status(405).json({error:"Método não permitido."});
- const geminiKey=cleanKey(process.env.GEMINI_API_KEY),tavilyKey=cleanKey(process.env.TAVILY_API_KEY||process.env.TAVLY_API_KEY),groqKey=cleanKey(process.env.GROQ_API_KEY);
- if(!tavilyKey&&!geminiKey&&!groqKey)return res.status(503).json({error:"IA temporariamente indisponível."});
+ const openaiKey=cleanKey(process.env.OPENAI_API_KEY),geminiKey=cleanKey(process.env.GEMINI_API_KEY),tavilyKey=cleanKey(process.env.TAVILY_API_KEY||process.env.TAVLY_API_KEY),groqKey=cleanKey(process.env.GROQ_API_KEY);
+ if(!openaiKey&&!tavilyKey&&!geminiKey&&!groqKey)return res.status(503).json({error:"IA temporariamente indisponível."});
  const areaKey=Object.hasOwn(AREAS,req.body?.area)?req.body.area:"geral",tipoKey=Object.hasOwn(TIPOS,req.body?.tipo)?req.body.tipo:"aleatoria",area=AREAS[areaKey],tipo=TIPOS[tipoKey],variedade=Number(req.body?.variedade||0)%20,aprofundado=["jurisprudencia","questao"].includes(tipoKey);
  const prompt=`Produza uma dica estendida, em português do Brasil, para candidato de ${area}. Formato: ${tipo}. Diversidade V${variedade}. Data: ${new Date().toISOString().slice(0,10)}. Use somente as fontes oficiais fornecidas no contexto. ${aprofundado?"Explique fundamento, requisitos, exceções e impacto para prova, sem inventar dados.":"Produza uma única dica objetiva sobre um único ponto."} Não inclua links no corpo. Termine com “Como pode cair na prova:” e uma aplicação prática.`;
  const searchDomains=tipoKey==="jurisprudencia"?COURT_HOSTS:OFFICIAL_HOSTS;
@@ -41,6 +41,15 @@ export default async function handler(req,res){
     else console.error("Tavily request failed",r.status,String(d?.detail||"").slice(0,180));
   }catch(e){console.error("Tavily fallback error",e?.message)}}
 
+  if(openaiKey){try{
+    const openaiInput=prompt+(tavilyContext?\`\\n\\nFONTES OFICIAIS RECUPERADAS:\\n\${tavilyContext}\`:\`\\nPesquise e priorize exclusivamente fontes oficiais brasileiras dos domínios: \${searchDomains.join(', ')}.\`);
+    const body={model:'gpt-5-mini',input:openaiInput,max_output_tokens:aprofundado?1200:700};
+    if(!tavilyContext)body.tools=[{type:'web_search_preview',search_context_size:aprofundado?'high':'medium'}];
+    const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:\`Bearer \${openaiKey}\`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data=await r.json();
+    if(r.ok){const texts=[],citations=[];for(const item of data.output||[]){for(const c of item.content||[]){if(c.text)texts.push(c.text);for(const a of c.annotations||[]){const u=a.url||a.url_citation?.url,t=a.title||a.url_citation?.title;if(u&&hostAllowed(u,tipoKey)&&!citations.some(x=>x.url===u))citations.push({title:t||'Fonte oficial',url:u})}}}const text=String(data.output_text||texts.join('\\n\\n')).trim();const finalSources=(tavilySources.length?tavilySources:citations).slice(0,4);if(text){res.setHeader('Cache-Control','private, no-store');return res.status(200).json({text,sources:finalSources,consultedAt:new Date().toISOString(),area:areaKey,tipo:tipoKey,provider:'openai'})}}
+    else console.error('OpenAI tip failed',r.status,String(data?.error?.message||'').slice(0,180));
+  }catch(e){console.error('OpenAI tip error',e?.message)}}
   if(groqKey&&tavilyContext&&tavilySources.length){try{
     const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${groqKey}`,"Content-Type":"application/json"},body:JSON.stringify({model:"openai/gpt-oss-20b",messages:[{role:"user",content:prompt+`\n\nFONTES OFICIAIS RECUPERADAS:\n${tavilyContext}`}],max_completion_tokens:aprofundado?900:450})});
     const d=await r.json();
