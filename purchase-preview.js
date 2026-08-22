@@ -34,7 +34,8 @@
   modal.innerHTML=`<div class="mcp-pv-shell"><div class="mcp-pv-top"><div class="mcp-pv-brand">MCP • PRÉVIA DO MATERIAL</div><button class="mcp-pv-close" aria-label="Fechar">×</button></div><div class="mcp-pv-progress"><div class="mcp-pv-bar"></div></div><div class="mcp-pv-stage"><div class="mcp-pv-frame"></div></div><div class="mcp-pv-actions"><button class="mcp-pv-skip">Continuar vendo</button><a class="mcp-pv-buy" href="#">Comprar agora →</a></div></div>`;
   document.body.appendChild(modal);
   const frame=modal.querySelector('.mcp-pv-frame'),bar=modal.querySelector('.mcp-pv-bar'),buy=modal.querySelector('.mcp-pv-buy');
-  let timer=null,step=0,currentHref='#',currentTitle='Apostila MCP',currentFrames=[];
+  let timer=null,step=0,currentHref='#',currentTitle='Apostila MCP',currentFrames=[],currentPreviewKey='';
+  const checkoutByPreview={investigador:'https://pay.kiwify.com.br/E9EOoa7',lep:'https://pay.kiwify.com.br/0LSMLao',medicina:'https://pay.kiwify.com.br/9K3UzAY',pprn:'https://pay.kiwify.com.br/UmB7IhL',gcm:'https://pay.kiwify.com.br/q1jNiNL',tecnicoNecropsiaSP:'https://pay.kiwify.com.br/jOFZqE1',dossie:'https://pay.kiwify.com.br/X8QyVNY'};
 
   function inferCard(el){return el.closest('.material,.produced-card,article,.card')||el.parentElement}
   function inferTitle(card){return (card?.querySelector('h3,h2,.title,strong')?.textContent||'Apostila MCP').trim()}
@@ -74,24 +75,25 @@
     bar.style.width=`${((step+1)/frames.length)*100}%`;
   }
   function open(el){
-    const card=inferCard(el);currentFrames=framesFor(card);currentHref=el.href||el.dataset.href||'#';currentTitle=inferTitle(card);buy.href=currentHref;buy.setAttribute('aria-label',`Comprar ${currentTitle}`);step=0;modal.classList.add('open');drawFrame(currentFrames[0]);bar.style.width=`${(1/currentFrames.length)*100}%`;
+    const card=inferCard(el),onclick=el.getAttribute('onclick')||'',previewMatch=onclick.match(/openPreview\(['\"]([^'\"]+)['\"]\)/);currentPreviewKey=previewMatch?.[1]||'';currentFrames=framesFor(card);currentHref=(currentPreviewKey&&checkoutByPreview[currentPreviewKey])||el.href||el.dataset.href||'#';currentTitle=inferTitle(card);buy.href=currentHref;buy.style.display=currentHref==='#'?'none':'';buy.setAttribute('aria-label',`Comprar ${currentTitle}`);modal.querySelector('.mcp-pv-skip').textContent=currentPreviewKey?'Abrir prévia protegida →':'Continuar vendo';step=0;modal.classList.add('open');drawFrame(currentFrames[0]);bar.style.width=`${(1/currentFrames.length)*100}%`;
     clearInterval(timer);timer=setInterval(()=>{step++;if(step>=currentFrames.length){clearInterval(timer);return}render(currentFrames)},2200);
   }
   function close(){modal.classList.remove('open');clearInterval(timer)}
-  modal.querySelector('.mcp-pv-close').onclick=close;modal.querySelector('.mcp-pv-skip').onclick=close;modal.addEventListener('click',e=>{if(e.target===modal)close()});
+  modal.querySelector('.mcp-pv-close').onclick=close;modal.querySelector('.mcp-pv-skip').onclick=()=>{const key=currentPreviewKey;close();if(key&&typeof openPreview==='function')openPreview(key)};modal.addEventListener('click',e=>{if(e.target===modal)close()});
 
   function bind(){
     const candidates=[...document.querySelectorAll('a,button')];
     for(const el of candidates){
-      if(el.dataset.mcpPreviewBound)return;
+      if(el.dataset.mcpPreviewBound)continue;
       const txt=(el.textContent||'').trim();
       const href=el.getAttribute('href')||'';
       const card=inferCard(el);
       const cardText=(card?.textContent||'');
       const looksBuy=/\bcomprar\b|adquirir|garantir/i.test(txt);
+      const looksPreview=/prévia protegida/i.test(txt);
       const skip=/comprar com ajuda/i.test(txt)||el.classList.contains('shop-fab')||el.closest('.shop-modal')||/whatsapp/i.test(href);
       const looksMaterial=!!card&&(/apostila|material|reta final|medicina legal|lep|pol[ií]cia|gcm|guarda/i.test(cardText));
-      if(looksBuy&&!skip&&looksMaterial){el.dataset.mcpPreviewBound='1';el.addEventListener('click',e=>{if(el.tagName==='A'&&el.href){e.preventDefault();open(el)}})}
+      if((looksBuy||looksPreview)&&!skip&&looksMaterial){el.dataset.mcpPreviewBound='1';el.addEventListener('click',e=>{if(looksPreview){e.preventDefault();e.stopImmediatePropagation();open(el);return}if(el.tagName==='A'&&el.href){e.preventDefault();open(el)}},looksPreview)}
     }
   }
   bind();setTimeout(bind,1200);new MutationObserver(()=>bind()).observe(document.body,{childList:true,subtree:true});
