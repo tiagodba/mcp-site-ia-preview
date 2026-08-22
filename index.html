@@ -137,7 +137,7 @@
         message=`<strong>${product}</strong> está em produção. Posso registrar seu interesse para você receber o aviso de lançamento.`;
         actions=`<a class="bot-action" target="_blank" href="${phone+encodeURIComponent('Olá! Quero ser avisado quando estiver pronto: '+product)}">Quero receber o aviso</a>`;
       }else{
-        message=`Você escolheu <strong>${product}</strong>. ${item.direct?'A apostila completa já está disponível para abertura.':item.checkout?'O pagamento será realizado no checkout seguro da Kiwify.':item.purchaseIntent?'Veja a prévia correta da apostila e solicite a aquisição pelo atendimento oficial MCP.':'Você pode consultar a prévia e solicitar o link oficial de compra.'}`;
+        message=`Você escolheu <strong>${product}</strong>. ${item.direct?'A apostila completa já está disponível para abertura.':item.checkout?'O pagamento será realizado no checkout seguro da Kiwify.':item.purchaseIntent?'Consulte a prévia protegida do material e solicite a aquisição pelo atendimento oficial MCP.':'Você pode consultar a prévia e solicitar o link oficial de compra.'}`;
         if(item.preview)actions+=`<button class="bot-action" onclick="closeShop();openPreview('${item.preview}')">Ver prévia protegida</button>`;
         actions+=`<a class="bot-action" target="_blank" href="${item.direct||item.checkout||phone+encodeURIComponent('Olá! Quero comprar: '+product)}">${item.direct?'Abrir apostila completa':item.checkout?'Ir para o pagamento seguro':item.purchaseIntent?'Solicitar compra pelo WhatsApp':'Solicitar link de compra'}</a>`;
       }
