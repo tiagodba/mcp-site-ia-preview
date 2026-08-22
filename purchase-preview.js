@@ -2,7 +2,6 @@
   /* MCP_PMSC_MAPS_PREVIEW_2026 */
   try {
     if (typeof previews !== 'undefined' && previews.pmscMaps) {
-      previews.pmscMaps.title = '85 Tópicos em 9 Pranchas Visuais PM-SC Soldado 2026';
       previews.pmscMaps.pages = [
         '/assets/previews/pmsc-mapas-oficial-capa.jpg?v=20260822c',
         '/assets/previews/pmsc-mapas-oficial-visao-geral.jpg?v=20260822c',
