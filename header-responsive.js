@@ -12,7 +12,7 @@
     .header,.header-inner{max-width:100%}
     .header{overflow:visible}
     .header-inner{gap:18px;height:64px!important;min-height:0!important;padding-top:0!important;padding-bottom:0!important}\n    .brand{height:64px!important;align-items:center!important}\n    .brand img{width:46px!important;height:46px!important;margin:0 9px 0 0!important;display:block}
-    .nav{min-width:0;gap:18px}
+    .nav{min-width:0;gap:18px;margin-left:clamp(36px,5vw,72px)!important;margin-right:auto}
     .nav a{font-size:12px}
     .mcp-more{position:relative;display:none;align-self:stretch}
     .mcp-more.show{display:flex}
