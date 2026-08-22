@@ -1,21 +1,4 @@
 (()=>{
-  const removePprn=()=>{
-    const oldLink=[...document.querySelectorAll('a[href]')].find(a=>/policia-penal-rn-2026\.html/i.test(a.getAttribute('href')||''));
-    const oldTitle=[...document.querySelectorAll('h1,h2,h3,h4,strong')].find(el=>/Polícia Penal\s*RN\s*2026|Polícia Penal do Rio Grande do Norte/i.test(el.textContent||''));
-    const target=oldLink||oldTitle;
-    if(!target)return;
-    let box=target.closest('article');
-    if(!box) box=target.closest('section');
-    if(!box){
-      box=target.closest('.card,.featured-card,.highlight-card,.study-card,.reta-final-card');
-    }
-    if(box) box.remove();
-  };
-  removePprn();
-  new MutationObserver(removePprn).observe(document.documentElement,{childList:true,subtree:true});
-})();
-
-(()=>{
   if(document.getElementById('mcpCareerHub')) return;
   const q=s=>document.querySelector(s);
   const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
@@ -46,7 +29,7 @@
     <p class="mcp-sub">Selecione a área para abrir o Banco de Questões já direcionado e acompanhar oportunidades relacionadas.</p>
     <div class="mcp-careers">
       <button class="mcp-career" data-area="civil"><b>INVESTIGAÇÃO</b><strong>Polícia Civil</strong><span>Questões, processo penal, investigação e legislação.</span></button>
-      <button class="mcp-career" data-area="penal"><b>EXECUÇÃO PENAL</b><strong>Polícia Penal</strong><span>LEP, sistema prisional, direitos e segurança penitenciária.</span></button>
+      <button class="mcp-career" data-area="penal"><b>PÓS-EDITAL • RN 2026</b><strong>Polícia Penal</strong><span>Central exclusiva, edital verticalizado, progresso e treino Instituto Avalia.</span></button>
       <button class="mcp-career" data-area="cientifica"><b>PERÍCIA</b><strong>Polícia Científica</strong><span>Criminalística, cadeia de custódia e medicina legal.</span></button>
       <button class="mcp-career" data-area="gcm"><b>SEGURANÇA MUNICIPAL</b><strong>Guarda Municipal</strong><span>Legislação, uso da força e conteúdos para GCM.</span></button>
     </div>
@@ -91,6 +74,7 @@
 
   const hero=q('.hero');
   if(hero&&hero.parentNode) hero.insertAdjacentElement('afterend',block); else (q('main')||document.body).prepend(block);
+  const mainNav=q('.nav');if(mainNav&&!document.getElementById('navPprn')){const link=document.createElement('a');link.id='navPprn';link.href='/policia-penal-rn-2026.html';link.textContent='PP-RN 2026';mainNav.appendChild(link)}
   document.body.appendChild(hub);
 
   function openQuiz(area){
@@ -107,7 +91,7 @@
   hub.querySelector('.mcp-q-close').onclick=closeHub;
   hub.addEventListener('click',e=>{if(e.target===hub)closeHub()});
 
-  block.querySelectorAll('.mcp-career').forEach(btn=>btn.onclick=()=>openQuiz(btn.dataset.area));
+  block.querySelectorAll('.mcp-career').forEach(btn=>btn.onclick=()=>{if(btn.dataset.area==='penal'){location.href='/policia-penal-rn-2026.html';return}openQuiz(btn.dataset.area)});
   block.querySelectorAll('.mcp-action').forEach(btn=>btn.onclick=()=>{
     const act=btn.dataset.act; openQuiz();
     setTimeout(()=>{
