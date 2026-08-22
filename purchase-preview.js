@@ -1,3 +1,16 @@
+
+  /* MCP_PMSC_MAPS_PREVIEW_2026 */
+  try {
+    if (typeof previews !== 'undefined' && previews.pmscMaps) {
+      previews.pmscMaps.pages = [
+        '/assets/previews/pmsc-mapas-2026-01.jpg?v=20260822',
+        '/assets/previews/pmsc-mapas-2026-02.jpg?v=20260822',
+        '/assets/previews/pmsc-mapas-2026-03.jpg?v=20260822'
+      ];
+    }
+  } catch (error) {
+    console.warn('Não foi possível atualizar a prévia dos mapas PM-SC.', error);
+  }
 (()=>{
   if(document.getElementById('mcpPurchasePreview')) return;
   const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
