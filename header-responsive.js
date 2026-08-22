@@ -64,6 +64,8 @@
   function fit(){
     if(fitting) return; fitting=true;
     try{
+      const stored=[...panel.querySelectorAll('a:not([data-social-clone])')];
+      stored.forEach(a=>nav.insertBefore(a,more));
       const direct=[...nav.children].filter(x=>x.tagName==='A');
       direct.forEach(a=>nav.insertBefore(a,more));
       panel.innerHTML='';
@@ -74,7 +76,7 @@
       links.slice(keep).forEach(a=>panel.appendChild(a));
       if(width<=1450&&social){
         const divider=document.createElement('div');divider.className='mcp-more-divider';panel.appendChild(divider);
-        [...social.querySelectorAll('a')].forEach(a=>panel.appendChild(a.cloneNode(true)));
+        [...social.querySelectorAll('a')].forEach(a=>{const clone=a.cloneNode(true);clone.dataset.socialClone='1';panel.appendChild(clone)});
       }
       more.classList.toggle('show',panel.querySelectorAll('a').length>0);
       ensureMobileLinks();
