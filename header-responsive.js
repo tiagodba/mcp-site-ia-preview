@@ -84,3 +84,34 @@
   script.dataset.mcpAnalysisCarousel='1';
   document.body.appendChild(script);
 })();
+
+(()=>{
+  const grid=document.getElementById('materialsGrid');
+  if(!grid) return;
+  const links=[
+    ['Central Reta Final','/reta-final-gcm-paracatu.html'],
+    ['Mapas mentais','/gcm-paracatu-mapas.html'],
+    ['Questões LC 198/2025','/questoes-lc-198-2025-gcm-paracatu.html'],
+    ['Lei Orgânica','/lei-organica-paracatu-estudo-dirigido.html'],
+    ['Treino discursivo','/treino-discursiva-gcm-paracatu.html'],
+    ['Simulado Reta Final','/simulado-gcm-paracatu-reta-final-01.html'],
+    ['Estatuto Geral das Guardas','/estatuto-geral-guardas-municipais.html']
+  ];
+  const apply=()=>{
+    [...grid.querySelectorAll('.material')].forEach(card=>{
+      const title=card.querySelector('h3')?.textContent?.trim();
+      if(title!=='GCM Paracatu'||card.dataset.gcmLinks==='1') return;
+      card.dataset.gcmLinks='1';
+      const box=card.querySelector('.card-links')||card.appendChild(document.createElement('div'));
+      box.classList.add('card-links');
+      links.forEach(([label,href])=>{
+        const a=document.createElement('a');
+        a.href=href;
+        a.innerHTML=`${label} <span>→</span>`;
+        box.appendChild(a);
+      });
+    });
+  };
+  apply();
+  new MutationObserver(apply).observe(grid,{childList:true,subtree:true});
+})();
