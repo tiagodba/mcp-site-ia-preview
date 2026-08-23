@@ -27,6 +27,12 @@
     oldMore.remove();
   }
 
+  const questionsLink=[...nav.querySelectorAll(':scope > a')].find(a=>/^Questões$/i.test((a.textContent||'').trim()));
+  if(questionsLink){
+    questionsLink.href='/questoes.html';
+    questionsLink.title='Central de Questões MCP';
+  }
+
   const style=document.createElement('style');
   style.textContent=`
     .header,.header-inner{max-width:100%}
