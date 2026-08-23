@@ -124,3 +124,27 @@
   script.dataset.mcpGcmCard='1';
   document.body.appendChild(script);
 })();
+
+(()=>{
+  const grid=document.getElementById('materialsGrid');
+  if(!grid) return;
+  const href='/ambientes/direito_penal_questoes.html';
+  const apply=()=>{
+    [...grid.querySelectorAll('.material')].forEach(card=>{
+      const title=(card.querySelector('h3')?.textContent||'').trim();
+      if(!/^Questões$/i.test(title)) return;
+      const box=card.querySelector('.card-links')||card.appendChild(document.createElement('div'));
+      box.classList.add('card-links');
+      if(!box.querySelector(`a[href="${href}"]`)){
+        const a=document.createElement('a');
+        a.href=href;
+        a.innerHTML='<strong>Direito Penal — 320 questões</strong> <span>→</span>';
+        a.style.color='#062a5d';
+        a.style.borderTop='2px solid #efbd26';
+        box.prepend(a);
+      }
+    });
+  };
+  apply();
+  new MutationObserver(apply).observe(grid,{childList:true,subtree:true});
+})();
