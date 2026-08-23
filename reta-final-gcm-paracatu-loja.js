@@ -10,7 +10,8 @@
     .price,.checkout .warning{display:none!important}
     .pack{grid-template-columns:1fr!important;border-color:#26b36b77!important;background:linear-gradient(180deg,#0c2d35,#08252e)!important}
     .checkout{display:none!important}
-    @media(max-width:700px){.mcp-free-banner{flex-direction:column;align-items:flex-start}.mcp-free-banner a{width:100%;text-align:center}}
+    .mcp-ibgp{padding:8px 0 36px}.mcp-ibgp .wrap{width:min(1120px,92%);margin:auto}.mcp-ibgp-head{margin-bottom:18px}.mcp-ibgp-head span{color:#f5bf2f;font-size:.78rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.mcp-ibgp-head h2{margin:7px 0 6px;font-size:1.9rem}.mcp-ibgp-head p{margin:0;color:#aebccb;line-height:1.55}.mcp-ibgp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.mcp-ibgp-card{border:1px solid #31536d;border-top:4px solid #f5bf2f;border-radius:18px;background:linear-gradient(180deg,#102e47,#092033);padding:22px;box-shadow:0 16px 38px #0002}.mcp-ibgp-card .kicker{font-size:.72rem;color:#f5bf2f;font-weight:900;letter-spacing:.09em;text-transform:uppercase}.mcp-ibgp-card h3{font-size:1.45rem;margin:8px 0 12px}.mcp-ibgp-card p{color:#c9d5df;line-height:1.55}.mcp-ibgp-card ul{margin:16px 0 0;padding-left:18px;color:#d9e3ea;line-height:1.65}.mcp-ibgp-card li::marker{color:#f5bf2f}.mcp-ibgp-bizu{margin-top:16px;padding:12px 13px;border-radius:10px;background:#f5bf2f14;border:1px solid #f5bf2f4d;color:#f8dc86;font-size:.88rem;line-height:1.5}.mcp-ibgp-focus{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.mcp-ibgp-focus span{font-size:.72rem;padding:6px 8px;border-radius:999px;background:#ffffff0c;border:1px solid #446783;color:#dce7ef}
+    @media(max-width:700px){.mcp-free-banner{flex-direction:column;align-items:flex-start}.mcp-free-banner a{width:100%;text-align:center}.mcp-ibgp-grid{grid-template-columns:1fr}}
   `;
   document.head.appendChild(style);
 
@@ -61,10 +62,7 @@
     const notice=pack.querySelector('.notice');
     if(notice) notice.textContent='Projeto especial MCP: todo o conteúdo desta Reta Final foi liberado gratuitamente para os candidatos da GCM Paracatu.';
     const list=pack.querySelector('.list');
-    if(list){
-      const first=list.querySelector('li');
-      if(first) first.textContent='Edital verticalizado — plano de reta final';
-    }
+    if(list){const first=list.querySelector('li');if(first) first.textContent='Edital verticalizado — plano de reta final';}
   }
 
   document.querySelectorAll('a[href="#pacote"]').forEach(a=>{
@@ -77,4 +75,13 @@
   document.querySelectorAll('.simbtn').forEach(btn=>{
     if(!btn.classList.contains('wait') && !btn.classList.contains('disabled')) btn.textContent='Abrir simulado grátis';
   });
+
+  if(!document.getElementById('mcpIbpgCards')){
+    const section=document.createElement('section');
+    section.id='mcpIbpgCards';
+    section.className='mcp-ibgp';
+    section.innerHTML=`<div class="wrap"><div class="mcp-ibgp-head"><span>Perfil da banca • IBGP</span><h2>Como a IBGP costuma cobrar</h2><p>Use estes cards como guia de revisão rápida. O padrão pode variar conforme o edital e o cargo, então a prioridade final deve seguir o conteúdo programático da GCM Paracatu.</p></div><div class="mcp-ibgp-grid"><article class="mcp-ibgp-card"><div class="kicker">Língua Portuguesa</div><h3>Como a IBGP cobra Português</h3><p>A banca costuma combinar interpretação com gramática aplicada ao próprio texto, exigindo atenção ao sentido global e às relações entre as partes.</p><div class="mcp-ibgp-focus"><span>Interpretação</span><span>Inferência</span><span>Coesão</span><span>Semântica</span><span>Gramática contextualizada</span></div><ul><li>compreensão global e ideia central;</li><li>inferências e informações implícitas;</li><li>sentido de palavras e expressões no contexto;</li><li>coesão, conectivos e relações lógico-semânticas;</li><li>pontuação, concordância, regência e crase aplicadas ao texto.</li></ul><div class="mcp-ibgp-bizu"><strong>Bizu MCP:</strong> antes de marcar a alternativa, volte ao trecho citado. Na IBGP, a resposta muitas vezes depende menos de “decorar regra” e mais de aplicar a regra ao contexto.</div></article><article class="mcp-ibgp-card"><div class="kicker">Noções de Informática</div><h3>Como a IBGP cobra Informática</h3><p>O perfil tende a ser objetivo, com situações práticas de uso de computador, internet e ferramentas de escritório.</p><div class="mcp-ibgp-focus"><span>Windows</span><span>Arquivos e pastas</span><span>Internet</span><span>Segurança</span><span>Microsoft 365</span></div><ul><li>Windows: área de trabalho, janelas, menus e configurações;</li><li>criação, cópia, movimentação e exclusão de arquivos e pastas;</li><li>internet, intranet, navegadores, pesquisa e busca;</li><li>segurança da informação: phishing, antivírus, backup e boas práticas;</li><li>Word, Excel, PowerPoint, Outlook e recursos básicos de produtividade.</li></ul><div class="mcp-ibgp-bizu"><strong>Bizu MCP:</strong> faça revisão por questões e pratique os menus/comandos na ferramenta real. Informática costuma premiar quem reconhece a ação correta, não apenas quem decorou conceitos.</div></article></div></div>`;
+    const materials=document.getElementById('materiais');
+    if(materials) materials.insertAdjacentElement('afterend',section);
+  }
 })();
