@@ -115,3 +115,12 @@
   apply();
   new MutationObserver(apply).observe(grid,{childList:true,subtree:true});
 })();
+
+(()=>{
+  if(document.querySelector('script[data-mcp-gcm-card]')) return;
+  const script=document.createElement('script');
+  script.src='/gcm-card-enhancements.js?v=20260823-1';
+  script.defer=true;
+  script.dataset.mcpGcmCard='1';
+  document.body.appendChild(script);
+})();
