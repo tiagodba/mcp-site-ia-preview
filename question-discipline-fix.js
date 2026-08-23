@@ -91,3 +91,23 @@
     let tries=0;const t=setInterval(()=>{tries++;if(install()||tries>40)clearInterval(t)},250);
   }
 })();
+
+(()=>{
+  function addReadingCards(){
+    if(document.getElementById('mcpReadingTips'))return true;
+    const hub=document.getElementById('mcpCareerHub');
+    if(!hub)return false;
+    const wrap=hub.querySelector('.mcp-wrap');
+    const final=hub.querySelector('.mcp-final');
+    if(!wrap||!final)return false;
+    const style=document.createElement('style');
+    style.textContent=`#mcpReadingTips{margin:0 0 38px}.mcp-reading-head{margin-bottom:18px}.mcp-reading-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.mcp-reading-card{position:relative;overflow:hidden;background:#fff;border:1px solid #dce2e9;border-top:4px solid #efbd26;border-radius:12px;padding:26px;box-shadow:0 12px 30px #08203d0d;min-height:250px;display:flex;flex-direction:column}.mcp-reading-card:after{content:'MCP';position:absolute;right:-14px;top:14px;font:900 62px Georgia,serif;color:#062a5d08}.mcp-reading-icon{width:48px;height:48px;border-radius:9px;background:#062a5d;color:#efbd26;display:grid;place-items:center;font-size:24px;margin-bottom:18px}.mcp-reading-card small{color:#9a7407;font-weight:900;letter-spacing:1.5px;text-transform:uppercase}.mcp-reading-card h3{font:400 27px/1.15 Georgia,serif;margin:9px 0}.mcp-reading-card p{color:#697585;line-height:1.6;font-size:14px;margin:0 0 18px}.mcp-reading-card a{margin-top:auto;display:inline-flex;align-items:center;justify-content:space-between;background:#062a5d;color:#fff;text-decoration:none;font-weight:900;padding:14px 16px;border-radius:7px}.mcp-reading-card a:hover{background:#0b315f}.mcp-reading-card.cronica{background:linear-gradient(145deg,#fff,#fffaf0)}@media(max-width:700px){.mcp-reading-grid{grid-template-columns:1fr}}`;
+    document.head.appendChild(style);
+    const section=document.createElement('section');
+    section.id='mcpReadingTips';
+    section.innerHTML=`<div class="mcp-reading-head"><div class="mcp-kicker">Leitura estratégica</div><h2 class="mcp-title" style="font-size:34px">Dicas para estudar melhor além da apostila.</h2><p class="mcp-sub" style="margin-bottom:0">Curadorias rápidas para aprofundar Medicina Legal e fortalecer interpretação de texto.</p></div><div class="mcp-reading-grid"><article class="mcp-reading-card"><div class="mcp-reading-icon">⚕️</div><small>Medicina Legal</small><h3>Dicas de livros para concursos e perícia</h3><p>Genival Veloso, Fundamentos, Hércules e outras referências organizadas por nível, objetivo e melhor forma de usar cada obra.</p><a href="/dicas-livros-medicina-legal.html"><span>Ver indicações</span><span>→</span></a></article><article class="mcp-reading-card cronica"><div class="mcp-reading-icon">📖</div><small>Português • Interpretação</small><h3>Crônicas para melhorar interpretação de texto</h3><p>Rubem Braga, Verissimo, Clarice e Fernando Sabino com um método de 15 minutos para treinar inferência, ironia e ideia central.</p><a href="/cronicas-interpretacao-texto.html"><span>Começar leitura</span><span>→</span></a></article></div>`;
+    final.insertAdjacentElement('beforebegin',section);
+    return true;
+  }
+  if(!addReadingCards()){let n=0,t=setInterval(()=>{n++;if(addReadingCards()||n>40)clearInterval(t)},250)}
+})();
