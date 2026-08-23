@@ -77,7 +77,7 @@
 (()=>{
   if(document.querySelector('script[data-mcp-analysis-carousel]')) return;
   const script=document.createElement('script');
-  script.src='/analysis-carousel.js?v=20260823-2';
+  script.src='/analysis-carousel.js?v=20260823-3';
   script.defer=true;
   script.dataset.mcpAnalysisCarousel='1';
   document.body.appendChild(script);
