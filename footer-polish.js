@@ -81,3 +81,5 @@
 (()=>{if(document.querySelector('script[data-mcp-crimes-slides]'))return;const s=document.createElement('script');s.src='/crimes-pessoa-slides.js?v=20260818-2';s.defer=true;s.dataset.mcpCrimesSlides='1';document.body.appendChild(s)})();
 
 (()=>{if(document.querySelector('script[data-mcp-paracatu-free]'))return;const s=document.createElement('script');s.src='/gcm-paracatu-free.js?v=20260818-1';s.defer=true;s.dataset.mcpParacatuFree='1';document.body.appendChild(s)})();
+
+(()=>{if(document.querySelector('script[data-mcp-redacao]'))return;const s=document.createElement('script');s.src='/redacao-highlight.js?v=20260823-1';s.defer=true;s.dataset.mcpRedacao='1';document.body.appendChild(s)})();
