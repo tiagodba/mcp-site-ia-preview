@@ -1,0 +1,1 @@
+Força de redeploy do ambiente Cadeia de Custódia após migração do banco de questões para Supabase.
