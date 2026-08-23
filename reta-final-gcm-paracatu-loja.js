@@ -1,1 +1,80 @@
-(()=>{if(document.getElementById('mcpRetaFinalBot'))return;const css=document.createElement('style');css.textContent=`.mcp-shop-fab{position:fixed;right:22px;bottom:22px;z-index:80;border:0;border-radius:999px;background:#f5bf2f;color:#092039;font-weight:900;padding:14px 18px;box-shadow:0 14px 34px #0007;cursor:pointer}.mcp-shop-modal{position:fixed;inset:0;z-index:100;background:#020914e8;display:none;align-items:center;justify-content:center;padding:20px}.mcp-shop-modal.open{display:flex}.mcp-shop-shell{width:min(520px,100%);max-height:90vh;overflow:auto;background:#fff;color:#0a2443;border-radius:16px;box-shadow:0 25px 80px #0009}.mcp-shop-head{background:#031b3f;color:#fff;padding:18px 20px;display:flex;align-items:center;justify-content:space-between}.mcp-shop-head b{color:#f5bf2f;letter-spacing:.08em}.mcp-shop-close{border:1px solid #61758e;background:transparent;color:#fff;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer}.mcp-shop-body{padding:22px}.mcp-bot-line{display:flex;gap:11px;align-items:flex-start;margin-bottom:15px}.mcp-bot-avatar{width:42px;height:42px;border-radius:50%;background:#062a5d;color:#f5bf2f;display:grid;place-items:center;flex:0 0 auto}.mcp-bubble{background:#eef2f7;border-radius:4px 14px 14px;padding:13px 14px;line-height:1.5}.mcp-shop-options{display:grid;gap:9px}.mcp-shop-options a,.mcp-shop-options button{display:block;width:100%;border:1px solid #d6dee7;border-radius:9px;background:#fff;color:#062a5d;padding:13px;text-align:left;font-weight:900;text-decoration:none;cursor:pointer}.mcp-shop-options a:hover,.mcp-shop-options button:hover{border-color:#f5bf2f;background:#fff9e7}.mcp-free-option{border-color:#2fbd7366!important;background:#ecfff4!important;color:#157346!important}.mcp-paid-option{background:#f5bf2f!important;border-color:#f5bf2f!important;color:#092039!important}.mcp-shop-note{font-size:.78rem;color:#6f7d89;line-height:1.45;margin-top:13px}.mcp-shop-test{font-size:.74rem;color:#a23f3f;background:#fff0f0;border:1px solid #ef535055;padding:9px 10px;border-radius:8px;margin-top:10px}`;document.head.appendChild(css);const fab=document.createElement('button');fab.className='mcp-shop-fab';fab.id='mcpRetaFinalBot';fab.innerHTML='🛒 Robô de compras';const modal=document.createElement('div');modal.className='mcp-shop-modal';modal.innerHTML=`<div class="mcp-shop-shell"><div class="mcp-shop-head"><b>MCP • ASSISTENTE DE COMPRAS</b><button class="mcp-shop-close" aria-label="Fechar">×</button></div><div class="mcp-shop-body"><div class="mcp-bot-line"><div class="mcp-bot-avatar">🤖</div><div class="mcp-bubble">Olá! Posso te levar direto ao material da Reta Final GCM Paracatu. A <b>Apostila Reta Final é gratuita</b> e não entra no valor do pacote.</div></div><div class="mcp-shop-options"><a class="mcp-free-option" href="/apostila-reta-final-gcm-paracatu.html">📘 Apostila Reta Final — GRÁTIS</a><a href="/questoes-lc-198-2025-gcm-paracatu.html">📝 Ver questões LC 198/2025 + Estatuto</a><a href="#simgrid" data-close-shop>🧪 Ver calendário dos 4 simulados</a><a class="mcp-paid-option" href="https://buy.stripe.com/test_7sY6oH6nI5Nc7409xV4AU00" target="_blank" rel="noopener noreferrer">🛒 Pacote complementar — R$ 35,00</a></div><div class="mcp-shop-test"><b>Aviso:</b> o checkout de R$ 35,00 ainda está em modo de teste no Stripe. A apostila gratuita já pode ser acessada sem pagamento.</div><div class="mcp-shop-note">Pacote complementar: edital verticalizado, materiais dirigidos e simulados semanais. A apostila principal permanece gratuita.</div></div></div>`;document.body.append(fab,modal);const close=()=>modal.classList.remove('open');fab.onclick=()=>modal.classList.add('open');modal.querySelector('.mcp-shop-close').onclick=close;modal.addEventListener('click',e=>{if(e.target===modal)close()});modal.querySelectorAll('[data-close-shop]').forEach(a=>a.addEventListener('click',close));})();
+(()=>{
+  if(window.__mcpGcmFreeEdition) return;
+  window.__mcpGcmFreeEdition=true;
+
+  const style=document.createElement('style');
+  style.textContent=`
+    .mcp-free-banner{margin:22px auto 0;width:min(1120px,92%);background:linear-gradient(135deg,#0f5132,#16734a);border:1px solid #4fd28c;color:#fff;border-radius:16px;padding:18px 20px;display:flex;justify-content:space-between;gap:18px;align-items:center;box-shadow:0 16px 38px #0003}
+    .mcp-free-banner strong{display:block;font-size:1.15rem;margin-bottom:4px}.mcp-free-banner span{color:#d9f7e7;line-height:1.5}.mcp-free-banner a{background:#f5bf2f;color:#092039;padding:11px 14px;border-radius:9px;font-weight:900;text-decoration:none;white-space:nowrap}
+    .tag.paid,.tag.test{background:#26b36b22!important;border-color:#26b36b66!important;color:#84e0ad!important}
+    .price,.checkout .warning{display:none!important}
+    .pack{grid-template-columns:1fr!important;border-color:#26b36b77!important;background:linear-gradient(180deg,#0c2d35,#08252e)!important}
+    .checkout{display:none!important}
+    @media(max-width:700px){.mcp-free-banner{flex-direction:column;align-items:flex-start}.mcp-free-banner a{width:100%;text-align:center}}
+  `;
+  document.head.appendChild(style);
+
+  const hero=document.querySelector('.hero');
+  if(hero && !document.getElementById('mcpFreeEditionBanner')){
+    const banner=document.createElement('div');
+    banner.id='mcpFreeEditionBanner';
+    banner.className='mcp-free-banner';
+    banner.innerHTML=`<div><strong>🎁 Edição Especial MCP — GCM Paracatu 100% GRATUITA</strong><span>Apostila, mapas mentais, Lei 13.022, Lei Orgânica, edital verticalizado, questões e simulados liberados sem checkout.</span></div><a href="#materiais">Acessar materiais grátis →</a>`;
+    hero.insertAdjacentElement('afterend',banner);
+  }
+
+  document.querySelectorAll('.tag.paid').forEach(el=>{
+    el.classList.remove('paid');el.classList.add('free');el.textContent='100% GRÁTIS';
+  });
+  document.querySelectorAll('.tag.test').forEach(el=>{
+    el.classList.remove('test');el.classList.add('free');el.textContent='ACESSO LIVRE';
+  });
+
+  const materialSection=document.querySelector('#materiais .title p');
+  if(materialSection) materialSection.textContent='Todos os materiais desta Reta Final estão liberados gratuitamente pela MCP.';
+
+  document.querySelectorAll('#materiais .card').forEach(card=>{
+    const h3=card.querySelector('h3')?.textContent||'';
+    const btn=card.querySelector('.actions .btn');
+    if(!btn) return;
+    if(h3.includes('Edital Verticalizado')){
+      btn.textContent='Acessar gratuitamente →';
+      btn.href='#pacote';
+      btn.classList.remove('ghost');btn.classList.add('green');
+    }
+    if(h3.includes('Simulado LC')){
+      btn.textContent='Abrir questões grátis →';
+      btn.classList.remove('ghost');btn.classList.add('green');
+    }
+    if(h3.includes('Lei Orgânica')){
+      btn.textContent='Abrir gratuitamente →';
+      btn.classList.remove('gold');btn.classList.add('green');
+    }
+  });
+
+  const pack=document.getElementById('pacote');
+  if(pack){
+    const title=pack.querySelector('h2');
+    if(title) title.textContent='Pacote Completo GCM Paracatu — acesso gratuito';
+    const tag=pack.querySelector('.tag');
+    if(tag){tag.className='tag free';tag.textContent='100% GRÁTIS';}
+    const notice=pack.querySelector('.notice');
+    if(notice) notice.textContent='Projeto especial MCP: todo o conteúdo desta Reta Final foi liberado gratuitamente para os candidatos da GCM Paracatu.';
+    const list=pack.querySelector('.list');
+    if(list){
+      const first=list.querySelector('li');
+      if(first) first.textContent='Edital verticalizado — plano de reta final';
+    }
+  }
+
+  document.querySelectorAll('a[href="#pacote"]').forEach(a=>{
+    if(/pacote|inclu[ií]do|conte[uú]do/i.test(a.textContent)) a.textContent='Acessar gratuitamente →';
+  });
+
+  const navPack=document.querySelector('.quicknav a[href="#pacote"]');
+  if(navPack) navPack.textContent='Materiais grátis';
+
+  document.querySelectorAll('.simbtn').forEach(btn=>{
+    if(!btn.classList.contains('wait') && !btn.classList.contains('disabled')) btn.textContent='Abrir simulado grátis';
+  });
+})();
