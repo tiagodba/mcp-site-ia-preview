@@ -12,9 +12,25 @@
     .mcp-red-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.mcp-red-tags span{font-size:10px;font-weight:900;padding:7px 9px;border-radius:999px;background:${isGcm?'#ffffff0c':'#eef3f8'};border:1px solid ${isGcm?'#446783':'#d5dee7'};color:${isGcm?'#e4edf5':'#31506e'}}
     .mcp-red-btn{display:inline-flex;align-items:center;justify-content:center;min-width:190px;padding:14px 18px;border-radius:9px;background:#efbd26;color:#08203d;text-decoration:none;font-weight:900;white-space:nowrap}
     .mcp-red-btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+    .quicknav .mcp-red-nav{background:#efbd26!important;color:#08203d!important;border-color:#efbd26!important}
+    .quicknav .mcp-red-nav:hover{filter:brightness(1.05);color:#08203d!important}
     @media(max-width:760px){.mcp-red-card{grid-template-columns:1fr}.mcp-red-btn{width:100%}}
   `;
   document.head.appendChild(style);
+
+  if(isGcm){
+    const quicknav=document.querySelector('.quicknav');
+    if(quicknav&&!document.getElementById('mcpRedacaoNav')){
+      const navLink=document.createElement('a');
+      navLink.id='mcpRedacaoNav';
+      navLink.className='mcp-red-nav';
+      navLink.href='/treino-discursiva-gcm-paracatu.html';
+      navLink.textContent='✍️ Redação';
+      const back=quicknav.querySelector('a[href="/"]');
+      if(back) quicknav.insertBefore(navLink,back); else quicknav.appendChild(navLink);
+    }
+  }
+
   const section=document.createElement('section');section.id='mcpRedacaoHighlight';
   section.innerHTML=`<div class="mcp-red-wrap"><article class="mcp-red-card"><div><div class="mcp-red-kicker">✍️ Treino de redação • MCP</div><h2>${isGcm?'Treino de Discursiva — GCM Paracatu':'Treine redação direto no site'}</h2><p>${isGcm?'Pratique temas ligados à segurança urbana, cidadania e atuação municipal com cronômetro, rascunho, folha definitiva, contador de linhas e autocorreção.':'Abra o ambiente de treino de redação da MCP e pratique com cronômetro, rascunho, folha definitiva, contador de linhas, checklist e autocorreção.'}</p><div class="mcp-red-tags"><span>20–30 linhas</span><span>Cronômetro</span><span>Rascunho</span><span>Folha definitiva</span><span>Autocorreção</span><span>Salvamento local</span></div></div><a class="mcp-red-btn" href="/treino-discursiva-gcm-paracatu.html">Começar treino →</a></article></div>`;
   if(isGcm){
