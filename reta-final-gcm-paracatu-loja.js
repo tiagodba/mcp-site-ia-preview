@@ -85,3 +85,5 @@
     if(materials) materials.insertAdjacentElement('afterend',section);
   }
 })();
+
+(()=>{if(document.querySelector('script[data-mcp-redacao]'))return;const s=document.createElement('script');s.src='/redacao-highlight.js?v=20260823-1';s.defer=true;s.dataset.mcpRedacao='1';document.body.appendChild(s)})();
