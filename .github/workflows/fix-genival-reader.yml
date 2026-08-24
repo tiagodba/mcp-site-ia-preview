@@ -1,0 +1,41 @@
+name: Ajustar leitor PDF Genival
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-genival-reader.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ajustar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ajustar largura e altura do leitor
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('plano-leitura-medicina-legal-genival.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('.reader{margin-top:20px}.readerbox{display:grid;grid-template-columns:330px 1fr;gap:16px;align-items:start}', '.reader{margin-top:20px;width:min(1480px,calc(100vw - 24px));margin-left:50%;transform:translateX(-50%)}.readerbox{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;align-items:start}')
+          s = s.replace('.readerpanel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}', '.readerpanel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;position:sticky;top:14px}')
+          s = s.replace('.viewer{background:#dfe5eb;border:1px solid var(--line);border-radius:14px;min-height:720px;overflow:hidden;position:relative}.viewer iframe{width:100%;height:720px;border:0;background:#fff}.placeholder{height:720px;', '.viewer{background:#dfe5eb;border:1px solid var(--line);border-radius:14px;min-height:760px;height:85vh;overflow:hidden;position:relative}.viewer iframe{width:100%;height:100%;min-height:760px;border:0;background:#fff;display:block}.placeholder{height:100%;min-height:760px;')
+          s = s.replace('.readerbox{grid-template-columns:1fr}.viewer,.viewer iframe,.placeholder{min-height:600px;height:600px}', '.reader{width:calc(100vw - 16px)}.readerbox{grid-template-columns:1fr}.readerpanel{position:static}.viewer,.viewer iframe,.placeholder{min-height:650px;height:78vh}')
+          s = s.replace('.viewer,.viewer iframe,.placeholder{min-height:520px;height:520px}', '.reader{width:calc(100vw - 8px)}.viewer,.viewer iframe,.placeholder{min-height:560px;height:75vh;border-radius:8px}')
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit da correção
+        run: |
+          git config user.name "MCP Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add plano-leitura-medicina-legal-genival.html
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração necessária."
+          else
+            git commit -m "Ajusta leitor PDF do Genival para tela responsiva"
+            git push
+          fi
