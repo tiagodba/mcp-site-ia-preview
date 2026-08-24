@@ -40,7 +40,7 @@
     if(!btn) return;
     if(h3.includes('Edital Verticalizado')){
       btn.textContent='Acessar gratuitamente →';
-      btn.href='#pacote';
+      btn.href='/edital-verticalizado-gcm-paracatu.html';
       btn.classList.remove('ghost');btn.classList.add('green');
     }
     if(h3.includes('Simulado LC')){
