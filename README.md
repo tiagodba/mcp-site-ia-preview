@@ -1,1 +1,1 @@
-# mcp-site-ia-preview
+# MCP Site IA Preview
