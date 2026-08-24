@@ -33,6 +33,12 @@
     questionsLink.title='Central de Questões MCP';
   }
 
+  const lawLink=[...nav.querySelectorAll(':scope > a')].find(a=>/^Legislação$/i.test((a.textContent||'').trim()));
+  if(lawLink){
+    lawLink.href='/estatuto-geral-guardas-municipais.html';
+    lawLink.title='Lei nº 13.022/2014 comentada — GCM';
+  }
+
   const style=document.createElement('style');
   style.textContent=`
     .header,.header-inner{max-width:100%}
@@ -153,4 +159,17 @@
   };
   apply();
   new MutationObserver(apply).observe(grid,{childList:true,subtree:true});
+})();
+
+(()=>{
+  const addLegislacaoCard=()=>{
+    const grid=document.querySelector('#materiais-2026 .mcp-2026-grid');
+    if(!grid||grid.querySelector('[data-mcp-legislacao-13022="1"]')) return;
+    const card=document.createElement('article');
+    card.className='mcp-2026-card';
+    card.dataset.mcpLegislacao13022='1';
+    card.innerHTML=`<div class="mcp-2026-cover" style="background:linear-gradient(145deg,#061827,#0b315f);display:flex;align-items:center;justify-content:center;padding:28px"><div style="color:#fff;text-align:center"><div style="color:#efbd26;font-size:13px;font-weight:900;letter-spacing:2px">MCP • LEGISLAÇÃO</div><div style="font:700 38px/1.05 Georgia,serif;margin:18px 0 8px">LEI Nº<br>13.022/2014</div><div style="font-weight:900;color:#efbd26">COMENTADA</div><div style="margin-top:14px;font-size:12px;color:#c9d6e2">Estatuto Geral das Guardas Municipais</div></div></div><div class="mcp-2026-content"><span class="mcp-2026-badge">NOVO • 100% GRATUITO</span><small>GCM • LEGISLAÇÃO + JURISPRUDÊNCIA</small><h3>Lei nº 13.022/2014 Comentada</h3><p>Lei seca comentada, jurisprudência do STF e do STJ, Tema 656, ADPF 995, busca pessoal, quadros de reta final, questões comentadas e revisão no padrão MCP.</p><div class="mcp-2026-links"><a class="gold" href="/estatuto-geral-guardas-municipais.html">Abrir material gratuitamente <b>↗</b></a><a class="light" href="/reta-final-gcm-paracatu.html#lei13022">Ler a lei completa <b>→</b></a></div></div>`;
+    grid.appendChild(card);
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addLegislacaoCard); else addLegislacaoCard();
 })();
