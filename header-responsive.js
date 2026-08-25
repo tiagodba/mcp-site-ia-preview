@@ -35,8 +35,8 @@
 
   const lawLink=[...nav.querySelectorAll(':scope > a')].find(a=>/^Legislação$/i.test((a.textContent||'').trim()));
   if(lawLink){
-    lawLink.href='/estatuto-geral-guardas-municipais.html';
-    lawLink.title='Lei nº 13.022/2014 comentada — GCM';
+    lawLink.href='/legislacao-jurisprudencia.html';
+    lawLink.title='Legislação recente e jurisprudência do STF e STJ';
   }
 
   const style=document.createElement('style');
