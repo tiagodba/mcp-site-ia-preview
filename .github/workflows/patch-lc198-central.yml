@@ -1,0 +1,45 @@
+name: Patch LC 198 Central
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-lc198-central.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Inserir card LC 198/2025
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('reta-final-gcm-paracatu.html')
+          s=p.read_text(encoding='utf-8')
+          if 'Apostila LC nº 198/2025' in s:
+              print('Card já existe; nada a fazer.')
+              raise SystemExit(0)
+          marker='</div></article><article class="card mapsfree">'
+          card='''</div></article><article class="card freebox"><span class="tag free">100% GRÁTIS</span><h3>Apostila LC nº 198/2025</h3><p>Lei Complementar nº 198/2025 da GCM Paracatu em edição profissional MCP, artigo por artigo, com comentários, foco de prova, pegadinhas e jurisprudência.</p><div class="actions"><a class="btn green" href="/apostila-lc-198-2025-gcm-paracatu.html">Ler apostila LC 198/2025 →</a></div></article><article class="card mapsfree">'''
+          if marker not in s:
+              raise SystemExit('Marcador não encontrado no HTML da Central.')
+          s=s.replace(marker,card,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit da correção
+        run: |
+          if git diff --quiet; then
+            echo 'Sem alterações.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reta-final-gcm-paracatu.html
+          git commit -m 'Exibe apostila LC 198/2025 na Central Reta Final'
+          git push
