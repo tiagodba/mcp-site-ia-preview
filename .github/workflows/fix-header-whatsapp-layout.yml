@@ -1,0 +1,95 @@
+name: Corrigir layout do WhatsApp no cabeçalho
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-header-whatsapp-layout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  corrigir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Aplicar correção responsiva do cabeçalho
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('header-responsive.js')
+          s = p.read_text(encoding='utf-8')
+
+          anchor = "  const oldMore=document.getElementById('mcpMoreWrap');"
+          block = r'''  // Mantém o WhatsApp como CTA próprio para evitar sobreposição com os links do menu.
+  [...nav.querySelectorAll(':scope > a')].forEach(a=>{
+    if(/whatsapp/i.test((a.textContent||'').trim()) || /wa\.me/i.test(a.getAttribute('href')||'')) a.remove();
+  });
+  if(social){
+    [...social.querySelectorAll('a')].forEach(a=>{
+      if(/whatsapp/i.test((a.textContent||'').trim()) || /wa\.me/i.test(a.getAttribute('href')||'')) a.dataset.mcpWhatsappLegacy='1';
+    });
+  }
+  let headerWhatsapp=inner.querySelector('.mcp-header-whatsapp');
+  if(!headerWhatsapp){
+    headerWhatsapp=document.createElement('a');
+    headerWhatsapp.className='mcp-header-whatsapp';
+    headerWhatsapp.href='https://wa.me/5561995699279';
+    headerWhatsapp.target='_blank';
+    headerWhatsapp.rel='noopener noreferrer';
+    headerWhatsapp.setAttribute('aria-label','Conversar com a MCP pelo WhatsApp');
+    headerWhatsapp.innerHTML='<span class="mcp-wa-icon" aria-hidden="true">✆</span><span class="mcp-wa-text">WhatsApp</span>';
+    inner.insertBefore(headerWhatsapp,menuButton||null);
+  }
+
+'''
+          if 'mcp-header-whatsapp' not in s:
+              s = s.replace(anchor, block + anchor)
+
+          css_anchor = "    .mobile{background:#06172f;border-top:1px solid #203650}"
+          css = r'''    .nav>a[href*="wa.me"]{display:none!important}
+    .social a[data-mcp-whatsapp-legacy="1"],.social a[href*="wa.me"]{display:none!important}
+    .mcp-header-whatsapp{display:inline-flex!important;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 15px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:#25d366;color:#062016!important;text-decoration:none;font-size:12px;font-weight:900;line-height:1;white-space:nowrap;flex:0 0 auto;box-shadow:0 8px 20px rgba(0,0,0,.22);transition:transform .18s ease,box-shadow .18s ease}
+    .mcp-header-whatsapp:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.3)}
+    .mcp-wa-icon{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#fff;color:#168a43;font-size:15px;font-weight:900}
+    .mcp-wa-text{display:inline-block}
+'''
+          if '.mcp-header-whatsapp{' not in s:
+              s = s.replace(css_anchor, css + css_anchor)
+
+          old_1740 = "    @media(max-width:1740px){\n      .brand{min-width:64px!important}.brand span{display:none}\n      .social{display:none!important}\n      .nav{margin-left:14px!important;margin-right:14px!important;gap:8px}\n      .nav>a{font-size:10px!important}\n    }"
+          new_1740 = "    @media(max-width:1740px){\n      .brand{min-width:64px!important}.brand span{display:none}\n      .social{display:none!important}\n      .nav{margin-left:14px!important;margin-right:14px!important;gap:10px;justify-content:flex-start;overflow:hidden}\n      .nav>a{font-size:10px!important}\n      .mcp-header-whatsapp{margin-left:auto}\n    }"
+          s = s.replace(old_1740, new_1740)
+
+          old_1650 = "    @media(max-width:1650px){\n      .header-inner{height:62px!important}.brand{height:62px!important}\n      .nav,.social{display:none!important}\n      .menu{display:block!important;margin-left:auto}\n      .brand{min-width:0!important}.brand span{display:block}\n    }"
+          new_1650 = "    @media(max-width:1650px){\n      .header-inner{height:62px!important;gap:10px}.brand{height:62px!important}\n      .nav,.social{display:none!important}\n      .menu{display:block!important;margin-left:0!important;flex:0 0 auto}\n      .brand{min-width:0!important;margin-right:auto}.brand span{display:block}\n      .mcp-header-whatsapp{margin-left:auto;min-height:38px;padding:0 13px}\n    }"
+          s = s.replace(old_1650, new_1650)
+
+          media_marker = "    @media(min-width:1651px){.mobile{display:none!important}}"
+          mobile_css = "    @media(max-width:700px){.header-inner{gap:8px!important}.mcp-header-whatsapp{min-height:38px;padding:0 11px;font-size:11px}.mcp-wa-icon{width:20px;height:20px;font-size:14px}}\n    @media(max-width:520px){.brand span{display:none!important}.brand img{margin-right:0!important}.mcp-header-whatsapp{padding:0 10px}.mcp-wa-text{display:inline-block}.menu{padding:7px 10px!important}}\n"
+          if '@media(max-width:520px){.brand span{display:none!important}' not in s:
+              s = s.replace(media_marker, mobile_css + media_marker)
+
+          p.write_text(s, encoding='utf-8')
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          html = html.replace('/header-responsive.js?v=20260822-3', '/header-responsive.js?v=20260825-1')
+          index.write_text(html, encoding='utf-8')
+          PY
+
+      - name: Commit da correção
+        run: |
+          git config user.name "MCP Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add header-responsive.js index.html
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração necessária."
+          else
+            git commit -m "Corrige botão WhatsApp e responsividade do cabeçalho"
+            git push
+          fi
