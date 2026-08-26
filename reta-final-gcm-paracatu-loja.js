@@ -87,3 +87,22 @@
 })();
 
 (()=>{if(document.querySelector('script[data-mcp-redacao]'))return;const s=document.createElement('script');s.src='/redacao-highlight.js?v=20260823-1';s.defer=true;s.dataset.mcpRedacao='1';document.body.appendChild(s)})();
+
+(()=>{
+  function addLc198Card(){
+    const grid=document.querySelector('#materiais .grid');
+    if(!grid||document.getElementById('mcpLc198ApostilaCard')) return false;
+    const card=document.createElement('article');
+    card.id='mcpLc198ApostilaCard';
+    card.className='card freebox';
+    card.innerHTML=`<span class="tag free">100% GRÁTIS</span><h3>Apostila LC nº 198/2025 — Artigo por Artigo</h3><p><strong>90 artigos comentados.</strong> Texto oficial, comentários MCP, foco de prova, pegadinhas e jurisprudência em edição de reta final.</p><div class="actions"><a class="btn green" href="/apostila-lc-198-2025-gcm-paracatu.html">Ler apostila LC 198/2025 →</a></div>`;
+    const maps=[...grid.children].find(el=>/Mapas Mentais.*LC/i.test(el.querySelector('h3')?.textContent||''));
+    if(maps) grid.insertBefore(card,maps); else grid.appendChild(card);
+    return true;
+  }
+  if(!addLc198Card()){
+    const obs=new MutationObserver(()=>{if(addLc198Card())obs.disconnect()});
+    obs.observe(document.documentElement,{childList:true,subtree:true});
+    setTimeout(()=>obs.disconnect(),10000);
+  }
+})();
