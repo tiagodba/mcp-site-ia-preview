@@ -21,31 +21,6 @@
     nav.appendChild(genival);
   }
 
-  // Evita o WhatsApp misturado entre os links do menu e cria um CTA próprio.
-  [...nav.querySelectorAll(':scope > a')].forEach(a=>{
-    const href=a.getAttribute('href')||'';
-    const label=(a.textContent||'').trim();
-    if(/whatsapp/i.test(label)||/wa\.me/i.test(href)) a.remove();
-  });
-  if(social){
-    [...social.querySelectorAll('a')].forEach(a=>{
-      const href=a.getAttribute('href')||'';
-      const label=(a.textContent||'').trim();
-      if(/whatsapp/i.test(label)||/wa\.me/i.test(href)) a.dataset.mcpWhatsappLegacy='1';
-    });
-  }
-  let headerWhatsapp=inner.querySelector('.mcp-header-whatsapp');
-  if(!headerWhatsapp){
-    headerWhatsapp=document.createElement('a');
-    headerWhatsapp.className='mcp-header-whatsapp';
-    headerWhatsapp.href='https://wa.me/5561995699279';
-    headerWhatsapp.target='_blank';
-    headerWhatsapp.rel='noopener noreferrer';
-    headerWhatsapp.setAttribute('aria-label','Conversar com a MCP pelo WhatsApp');
-    headerWhatsapp.innerHTML='<span class="mcp-wa-icon" aria-hidden="true">✆</span><span class="mcp-wa-text">WhatsApp</span>';
-    inner.insertBefore(headerWhatsapp,menuButton||null);
-  }
-
   const oldMore=document.getElementById('mcpMoreWrap');
   if(oldMore){
     [...oldMore.querySelectorAll('.mcp-more-panel > a:not([data-social-clone])')].forEach(a=>nav.insertBefore(a,oldMore));
@@ -71,17 +46,11 @@
     .header-inner{gap:14px;height:64px!important;min-height:0!important;padding-top:0!important;padding-bottom:0!important}
     .brand{height:64px!important;align-items:center!important;flex:0 0 auto}
     .brand img{width:46px!important;height:46px!important;margin:0 9px 0 0!important;display:block}
-    .nav{display:flex!important;align-items:center;justify-content:flex-start;min-width:0;gap:clamp(12px,1.2vw,26px);margin-left:clamp(16px,2vw,32px)!important;margin-right:clamp(12px,1.5vw,24px)!important;flex:1 1 auto;flex-wrap:nowrap;overflow:hidden}
+    .nav{display:flex!important;align-items:center;justify-content:space-between;min-width:0;gap:clamp(12px,1.2vw,26px);margin-left:clamp(16px,2vw,32px)!important;margin-right:clamp(16px,2vw,32px)!important;flex:1 1 auto;flex-wrap:nowrap}
     .nav>a{font-size:clamp(10px,.78vw,12px)!important;white-space:nowrap;flex:0 0 auto}
     .nav a[data-mcp-genival="1"]{color:#efbd26!important;font-weight:900}
-    .nav>a[href*="wa.me"]{display:none!important}
-    .social{display:flex;align-items:center;gap:10px;margin-left:0!important;flex:0 0 auto}
+    .social{display:flex;align-items:center;gap:10px;margin-left:10px!important;flex:0 0 auto}
     .social a{display:inline-flex!important;align-items:center;justify-content:center;min-height:40px;padding:0 12px!important;white-space:nowrap;line-height:1!important}
-    .social a[data-mcp-whatsapp-legacy="1"],.social a[href*="wa.me"]{display:none!important}
-    .mcp-header-whatsapp{display:inline-flex!important;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 15px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:#25d366;color:#062016!important;text-decoration:none;font-size:12px;font-weight:900;line-height:1;white-space:nowrap;flex:0 0 auto;box-shadow:0 8px 20px rgba(0,0,0,.22);transition:transform .18s ease,box-shadow .18s ease}
-    .mcp-header-whatsapp:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.3)}
-    .mcp-wa-icon{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#fff;color:#168a43;font-size:15px;font-weight:900}
-    .mcp-wa-text{display:inline-block}
     .mobile{background:#06172f;border-top:1px solid #203650}
     .mobile.show{display:flex!important;flex-wrap:wrap;gap:10px;padding:14px 20px 18px!important}
     .mobile.show a{display:block;color:#fff!important;margin:0!important;padding:10px 12px;text-decoration:none;border:1px solid #29415e;border-radius:5px}
@@ -89,26 +58,14 @@
     @media(max-width:1740px){
       .brand{min-width:64px!important}.brand span{display:none}
       .social{display:none!important}
-      .nav{margin-left:14px!important;margin-right:10px!important;gap:10px}
+      .nav{margin-left:14px!important;margin-right:14px!important;gap:8px}
       .nav>a{font-size:10px!important}
-      .mcp-header-whatsapp{margin-left:auto}
     }
     @media(max-width:1650px){
-      .header-inner{height:62px!important;gap:10px}.brand{height:62px!important}
+      .header-inner{height:62px!important}.brand{height:62px!important}
       .nav,.social{display:none!important}
-      .menu{display:block!important;margin-left:0!important;flex:0 0 auto}
-      .brand{min-width:0!important;margin-right:auto}.brand span{display:block}
-      .mcp-header-whatsapp{margin-left:auto;min-height:38px;padding:0 13px}
-    }
-    @media(max-width:700px){
-      .header-inner{gap:8px!important}
-      .mcp-header-whatsapp{min-height:38px;padding:0 11px;font-size:11px}
-      .mcp-wa-icon{width:20px;height:20px;font-size:14px}
-    }
-    @media(max-width:520px){
-      .brand span{display:none!important}.brand img{margin-right:0!important}
-      .mcp-header-whatsapp{padding:0 10px}
-      .menu{padding:7px 10px!important}
+      .menu{display:block!important;margin-left:auto}
+      .brand{min-width:0!important}.brand span{display:block}
     }
     @media(min-width:1651px){.mobile{display:none!important}}
   `;
