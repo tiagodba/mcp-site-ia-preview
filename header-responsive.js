@@ -68,27 +68,30 @@
   style.textContent=`
     .header,.header-inner{max-width:100%}
     .header{overflow:visible}
-    .header-inner{gap:14px;height:64px!important;min-height:0!important;padding-top:0!important;padding-bottom:0!important}
-    .brand{height:64px!important;align-items:center!important;flex:0 0 auto}
-    .brand img{width:46px!important;height:46px!important;margin:0 9px 0 0!important;display:block}
-    .nav{display:flex!important;align-items:center;justify-content:flex-start;min-width:0;gap:clamp(10px,.9vw,18px);margin-left:clamp(16px,2vw,32px)!important;margin-right:clamp(12px,1.5vw,22px)!important;flex:1 1 auto;flex-wrap:nowrap;overflow:hidden}
-    .nav>a{font-size:clamp(10px,.78vw,12px)!important;white-space:nowrap;flex:0 0 auto}
-    .nav a[data-mcp-genival="1"],.nav a[data-mcp-reta-final="1"]{color:#efbd26!important;font-weight:900}
+    .header-inner{gap:18px;height:68px!important;min-height:0!important;padding-top:0!important;padding-bottom:0!important}
+    .brand{height:68px!important;align-items:center!important;flex:0 0 auto}
+    .brand img{width:48px!important;height:48px!important;margin:0 10px 0 0!important;display:block}
+    .brand strong{font-size:15px!important;line-height:1.1!important;font-weight:800!important;color:#fff!important}
+    .brand small{font-size:8px!important;letter-spacing:3px!important;color:#d8b34a!important}
+    .nav{display:flex!important;align-items:center;justify-content:flex-start;min-width:0;gap:clamp(12px,1vw,20px);margin-left:clamp(16px,2vw,32px)!important;margin-right:clamp(12px,1.5vw,22px)!important;flex:1 1 auto;flex-wrap:nowrap;overflow:hidden}
+    .nav>a{font-size:clamp(12px,.86vw,13px)!important;font-weight:800!important;line-height:1!important;letter-spacing:.15px!important;color:#f6f8fb!important;text-shadow:0 1px 1px rgba(0,0,0,.3);white-space:nowrap;flex:0 0 auto;text-decoration:none!important}
+    .nav>a:hover{color:#efbd26!important}
+    .nav a[data-mcp-genival="1"],.nav a[data-mcp-reta-final="1"]{color:#efbd26!important;font-weight:900!important}
     .nav>a[href*="wa.me"],.social>a[href*="wa.me"],.mcp-header-whatsapp{display:none!important}
-    .social{display:flex;align-items:center;gap:8px;margin-left:8px!important;flex:0 0 auto}
-    .social a{display:inline-flex!important;align-items:center;justify-content:center;min-height:40px;padding:0 10px!important;white-space:nowrap;line-height:1!important}
+    .social{display:flex;align-items:center;gap:10px;margin-left:8px!important;flex:0 0 auto}
+    .social a{display:inline-flex!important;align-items:center;justify-content:center;min-height:40px;padding:0 10px!important;white-space:nowrap;line-height:1!important;font-size:13px!important;font-weight:800!important;color:#f6f8fb!important}
     .mobile{background:#06172f;border-top:1px solid #203650}
     .mobile.show{display:flex!important;flex-wrap:wrap;gap:10px;padding:14px 20px 18px!important}
-    .mobile.show a{display:block;color:#fff!important;margin:0!important;padding:10px 12px;text-decoration:none;border:1px solid #29415e;border-radius:5px}
+    .mobile.show a{display:block;color:#fff!important;margin:0!important;padding:11px 13px;text-decoration:none;border:1px solid #29415e;border-radius:5px;font-size:14px!important;font-weight:800!important}
     .mobile.show a[data-mcp-genival="1"],.mobile.show a[data-mcp-reta-final="1"]{color:#efbd26!important;border-color:#7b6318}
     @media(max-width:1740px){
       .brand{min-width:64px!important}.brand span{display:none}
       .social{display:none!important}
-      .nav{margin-left:14px!important;margin-right:14px!important;gap:8px}
-      .nav>a{font-size:10px!important}
+      .nav{margin-left:14px!important;margin-right:14px!important;gap:12px}
+      .nav>a{font-size:12px!important}
     }
     @media(max-width:1650px){
-      .header-inner{height:62px!important}.brand{height:62px!important}
+      .header-inner{height:64px!important}.brand{height:64px!important}
       .nav,.social{display:none!important}
       .menu{display:block!important;margin-left:auto}
       .brand{min-width:0!important}.brand span{display:block}
