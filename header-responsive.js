@@ -21,28 +21,29 @@
   removeWhatsapp(nav); removeWhatsapp(social); removeWhatsapp(mobile);
   inner.querySelector('.mcp-header-whatsapp')?.remove();
 
-  // Remove o atalho duplicado "Plano Genival": agora Medicina Legal abre diretamente o cronograma.
   [...nav.querySelectorAll(':scope > a')].forEach(a=>{
     if(/plano genival/i.test((a.textContent||'').trim())||a.dataset.mcpGenival==='1') a.remove();
   });
 
   const links=[...nav.querySelectorAll(':scope > a')];
   let medicina=links.find(a=>/^Medicina Legal$/i.test((a.textContent||'').trim()));
-  if(!medicina){
-    medicina=document.createElement('a');
-    medicina.textContent='Medicina Legal';
-  }
+  if(!medicina){medicina=document.createElement('a');medicina.textContent='Medicina Legal';}
   medicina.href='/plano-leitura-medicina-legal-genival.html';
   medicina.title='Medicina Legal — cronograma de leitura Genival Veloso de França';
   medicina.dataset.mcpMedicina='1';
 
-  let reta=[...nav.querySelectorAll(':scope > a')].find(a=>/reta final.*gcm.*paracatu/i.test((a.textContent||'').trim()));
-  if(!reta){
-    reta=document.createElement('a');
-    reta.href='/reta-final-gcm-paracatu.html';
-    reta.textContent='Reta Final GCM Paracatu';
-    reta.title='Reta Final GCM Paracatu';
-  }
+  // Normaliza a Reta Final GCM: mantém apenas um único atalho canônico.
+  const retaCandidates=[...nav.querySelectorAll(':scope > a')].filter(a=>{
+    const t=(a.textContent||'').trim();
+    const h=a.getAttribute('href')||'';
+    return /^Reta Final GCM$/i.test(t)||/reta final.*gcm.*paracatu/i.test(t)||/reta-final-gcm-paracatu/i.test(h);
+  });
+  let reta=retaCandidates.find(a=>/paracatu/i.test((a.textContent||'').trim()))||retaCandidates[0];
+  retaCandidates.forEach(a=>{if(a!==reta)a.remove();});
+  if(!reta) reta=document.createElement('a');
+  reta.href='/reta-final-gcm-paracatu.html';
+  reta.textContent='Reta Final GCM Paracatu';
+  reta.title='Reta Final GCM Paracatu';
   reta.dataset.mcpRetaFinal='1';
 
   const oldMore=document.getElementById('mcpMoreWrap');
@@ -56,7 +57,6 @@
   const law=[...nav.querySelectorAll(':scope > a')].find(a=>/^Legislação$/i.test((a.textContent||'').trim()));
   if(law){law.href='/legislacao-jurisprudencia.html';law.title='Legislação recente e jurisprudência do STF e STJ'}
 
-  // Prioridade visual: Legislação → Medicina Legal → Reta Final GCM.
   if(law){
     law.insertAdjacentElement('afterend',medicina);
     medicina.insertAdjacentElement('afterend',reta);
@@ -69,7 +69,6 @@
     if(/^PP-RN 2026$/i.test(t)||/^Editais$/i.test(t)) a.dataset.mcpLowPriority='1';
   });
 
-  // Mantém Instagram e PP-RN 2026 no final do cabeçalho.
   const instagram=[...nav.querySelectorAll(':scope > a')].find(a=>/instagram/i.test((a.textContent||'').trim()));
   const pprn=[...nav.querySelectorAll(':scope > a')].find(a=>/^PP-RN 2026$/i.test((a.textContent||'').trim()));
   if(instagram) nav.appendChild(instagram);
@@ -98,7 +97,11 @@
 
   function ensureMobile(){
     if(!mobile) return;
-    [...mobile.querySelectorAll('a')].forEach(a=>{if(/plano genival/i.test((a.textContent||'').trim())||/whatsapp/i.test((a.textContent||'').trim())||/wa\.me/i.test(a.getAttribute('href')||''))a.remove()});
+    [...mobile.querySelectorAll('a')].forEach(a=>{
+      const t=(a.textContent||'').trim();
+      const h=a.getAttribute('href')||'';
+      if(/plano genival/i.test(t)||/whatsapp/i.test(t)||/wa\.me/i.test(h)||/^Reta Final GCM$/i.test(t)) a.remove();
+    });
     const items=[...nav.querySelectorAll(':scope > a'),...(social?[...social.querySelectorAll('a')]:[])];
     items.forEach(a=>{
       const href=a.getAttribute('href')||'#'; if(/wa\.me/i.test(href)) return;
