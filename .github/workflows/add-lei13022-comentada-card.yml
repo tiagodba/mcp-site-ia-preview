@@ -1,0 +1,44 @@
+name: Adiciona card Lei 13.022 comentada
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-lei13022-comentada-card.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-central:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Inserir card da Lei 13.022 comentada
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('reta-final-gcm-paracatu.html')
+          s = p.read_text(encoding='utf-8')
+          href = '/lei-13022-comentada-gcm-paracatu.html'
+          if href in s:
+              print('Card já existe; nada a fazer.')
+              raise SystemExit(0)
+          anchor = '<article class="card"><span class="tag free">LEITURA INTEGRAL</span><h3>Lei nº 13.022/2014</h3><p>Estatuto Geral das Guardas Municipais completo, artigo por artigo, nesta própria página.</p><div class="actions"><a class="btn gold" href="#lei13022">Ler Lei 13.022 completa →</a></div></article>'
+          card = '<article class="card freebox"><span class="tag free">100% GRÁTIS</span><h3>Lei nº 13.022/2014 Comentada</h3><p>Edição profissional MCP com lei seca, jurisprudência do STF e STJ, questões, flashcards e caderno de erros.</p><div class="actions"><a class="btn green" href="/lei-13022-comentada-gcm-paracatu.html">Ler Lei 13.022 comentada →</a></div></article>'
+          if anchor not in s:
+              raise SystemExit('Bloco da Lei 13.022 não encontrado; nenhuma alteração feita.')
+          s = s.replace(anchor, anchor + card, 1)
+          p.write_text(s, encoding='utf-8')
+      - name: Commit da alteração
+        run: |
+          if git diff --quiet; then
+            echo "Sem alterações."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reta-final-gcm-paracatu.html
+          git commit -m "Exibe Lei 13.022 comentada na Central Reta Final"
+          git push
