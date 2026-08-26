@@ -12,7 +12,6 @@
   marker.hidden=true;
   header.appendChild(marker);
 
-  // Remove WhatsApp do cabeçalho para não disputar espaço com os atalhos de estudo.
   const removeWhatsappLinks=root=>{
     if(!root) return;
     [...root.querySelectorAll('a')].forEach(a=>{
@@ -42,7 +41,6 @@
     retaFinal.href='/reta-final-gcm-paracatu.html';
     retaFinal.textContent='Reta Final GCM Paracatu';
     retaFinal.title='Reta Final GCM Paracatu';
-    nav.insertBefore(retaFinal,genival);
   }
   retaFinal.dataset.mcpRetaFinal='1';
 
@@ -64,6 +62,14 @@
     lawLink.title='Legislação recente e jurisprudência do STF e STJ';
   }
 
+  // Mantém a Reta Final visível logo após Medicina Legal.
+  const medicina=[...nav.querySelectorAll(':scope > a')].find(a=>/^Medicina Legal$/i.test((a.textContent||'').trim()));
+  if(medicina){
+    medicina.insertAdjacentElement('afterend',retaFinal);
+  }else{
+    nav.insertBefore(retaFinal,genival);
+  }
+
   const style=document.createElement('style');
   style.textContent=`
     .header,.header-inner{max-width:100%}
@@ -73,33 +79,37 @@
     .brand img{width:48px!important;height:48px!important;margin:0 10px 0 0!important;display:block}
     .brand strong{font-size:15px!important;line-height:1.1!important;font-weight:800!important;color:#fff!important}
     .brand small{font-size:8px!important;letter-spacing:3px!important;color:#d8b34a!important}
-    .nav{display:flex!important;align-items:center;justify-content:flex-start;min-width:0;gap:clamp(12px,1vw,20px);margin-left:clamp(16px,2vw,32px)!important;margin-right:clamp(12px,1.5vw,22px)!important;flex:1 1 auto;flex-wrap:nowrap;overflow:hidden}
-    .nav>a{font-size:clamp(12px,.86vw,13px)!important;font-weight:800!important;line-height:1!important;letter-spacing:.15px!important;color:#f6f8fb!important;text-shadow:0 1px 1px rgba(0,0,0,.3);white-space:nowrap;flex:0 0 auto;text-decoration:none!important}
+    .nav{display:flex!important;align-items:center;justify-content:flex-start;min-width:0;gap:clamp(11px,.85vw,18px);margin-left:clamp(16px,2vw,32px)!important;margin-right:clamp(10px,1.2vw,18px)!important;flex:1 1 auto;flex-wrap:nowrap;overflow:hidden}
+    .nav>a{font-size:clamp(12px,.84vw,13px)!important;font-weight:800!important;line-height:1!important;letter-spacing:.1px!important;color:#f6f8fb!important;text-shadow:0 1px 1px rgba(0,0,0,.3);white-space:nowrap;flex:0 0 auto;text-decoration:none!important}
+    .nav>a:first-child{color:#efbd26!important;border-bottom:2px solid #efbd26!important}
     .nav>a:hover{color:#efbd26!important}
+    .nav a[data-mcp-reta-final="1"]{color:#efbd26!important;font-weight:900!important}
     .nav a[data-mcp-genival="1"]{color:#efbd26!important;font-weight:900!important}
-    .nav a[data-mcp-reta-final="1"]{color:#f6f8fb!important;font-weight:900!important}
-    .nav a[href*="medicina"],.nav a[href*="medicina-legal"],.nav a[href*="genival"]:not([data-mcp-genival="1"]){color:#f6f8fb!important}
+    .nav a[href*="medicina"],.nav a[href*="medicina-legal"]{color:#f6f8fb!important}
     .nav>a[href*="wa.me"],.social>a[href*="wa.me"],.mcp-header-whatsapp{display:none!important}
     .social{display:flex;align-items:center;gap:10px;margin-left:8px!important;flex:0 0 auto}
     .social a{display:inline-flex!important;align-items:center;justify-content:center;min-height:40px;padding:0 10px!important;white-space:nowrap;line-height:1!important;font-size:13px!important;font-weight:800!important;color:#f6f8fb!important}
     .mobile{background:#06172f;border-top:1px solid #203650}
     .mobile.show{display:flex!important;flex-wrap:wrap;gap:10px;padding:14px 20px 18px!important}
     .mobile.show a{display:block;color:#fff!important;margin:0!important;padding:11px 13px;text-decoration:none;border:1px solid #29415e;border-radius:5px;font-size:14px!important;font-weight:800!important}
-    .mobile.show a[data-mcp-genival="1"]{color:#efbd26!important;border-color:#7b6318}
-    .mobile.show a[data-mcp-reta-final="1"]{color:#fff!important;border-color:#29415e}
+    .mobile.show a[data-mcp-genival="1"],.mobile.show a[data-mcp-reta-final="1"]{color:#efbd26!important;border-color:#7b6318}
     @media(max-width:1740px){
       .brand{min-width:64px!important}.brand span{display:none}
       .social{display:none!important}
-      .nav{margin-left:14px!important;margin-right:14px!important;gap:12px}
+      .nav{margin-left:12px!important;margin-right:10px!important;gap:10px}
       .nav>a{font-size:12px!important}
     }
-    @media(max-width:1650px){
+    @media(max-width:1500px){
+      .nav{gap:8px!important}
+      .nav>a{font-size:11px!important}
+    }
+    @media(max-width:1320px){
       .header-inner{height:64px!important}.brand{height:64px!important}
       .nav,.social{display:none!important}
       .menu{display:block!important;margin-left:auto}
       .brand{min-width:0!important}.brand span{display:block}
     }
-    @media(min-width:1651px){.mobile{display:none!important}}
+    @media(min-width:1321px){.mobile{display:none!important}}
   `;
   document.head.appendChild(style);
 
