@@ -76,14 +76,17 @@
     .nav{display:flex!important;align-items:center;justify-content:flex-start;min-width:0;gap:clamp(12px,1vw,20px);margin-left:clamp(16px,2vw,32px)!important;margin-right:clamp(12px,1.5vw,22px)!important;flex:1 1 auto;flex-wrap:nowrap;overflow:hidden}
     .nav>a{font-size:clamp(12px,.86vw,13px)!important;font-weight:800!important;line-height:1!important;letter-spacing:.15px!important;color:#f6f8fb!important;text-shadow:0 1px 1px rgba(0,0,0,.3);white-space:nowrap;flex:0 0 auto;text-decoration:none!important}
     .nav>a:hover{color:#efbd26!important}
-    .nav a[data-mcp-genival="1"],.nav a[data-mcp-reta-final="1"]{color:#efbd26!important;font-weight:900!important}
+    .nav a[data-mcp-genival="1"]{color:#efbd26!important;font-weight:900!important}
+    .nav a[data-mcp-reta-final="1"]{color:#f6f8fb!important;font-weight:900!important}
+    .nav a[href*="medicina"],.nav a[href*="medicina-legal"],.nav a[href*="genival"]:not([data-mcp-genival="1"]){color:#f6f8fb!important}
     .nav>a[href*="wa.me"],.social>a[href*="wa.me"],.mcp-header-whatsapp{display:none!important}
     .social{display:flex;align-items:center;gap:10px;margin-left:8px!important;flex:0 0 auto}
     .social a{display:inline-flex!important;align-items:center;justify-content:center;min-height:40px;padding:0 10px!important;white-space:nowrap;line-height:1!important;font-size:13px!important;font-weight:800!important;color:#f6f8fb!important}
     .mobile{background:#06172f;border-top:1px solid #203650}
     .mobile.show{display:flex!important;flex-wrap:wrap;gap:10px;padding:14px 20px 18px!important}
     .mobile.show a{display:block;color:#fff!important;margin:0!important;padding:11px 13px;text-decoration:none;border:1px solid #29415e;border-radius:5px;font-size:14px!important;font-weight:800!important}
-    .mobile.show a[data-mcp-genival="1"],.mobile.show a[data-mcp-reta-final="1"]{color:#efbd26!important;border-color:#7b6318}
+    .mobile.show a[data-mcp-genival="1"]{color:#efbd26!important;border-color:#7b6318}
+    .mobile.show a[data-mcp-reta-final="1"]{color:#fff!important;border-color:#29415e}
     @media(max-width:1740px){
       .brand{min-width:64px!important}.brand span{display:none}
       .social{display:none!important}
