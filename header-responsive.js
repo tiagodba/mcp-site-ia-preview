@@ -69,6 +69,12 @@
     if(/^PP-RN 2026$/i.test(t)||/^Editais$/i.test(t)) a.dataset.mcpLowPriority='1';
   });
 
+  // Mantém Instagram e PP-RN 2026 no final do cabeçalho.
+  const instagram=[...nav.querySelectorAll(':scope > a')].find(a=>/instagram/i.test((a.textContent||'').trim()));
+  const pprn=[...nav.querySelectorAll(':scope > a')].find(a=>/^PP-RN 2026$/i.test((a.textContent||'').trim()));
+  if(instagram) nav.appendChild(instagram);
+  if(pprn) nav.appendChild(pprn);
+
   const style=document.createElement('style');
   style.textContent=`
     .header,.header-inner{max-width:100%}.header{overflow:visible}
