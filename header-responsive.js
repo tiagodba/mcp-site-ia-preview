@@ -12,14 +12,39 @@
   marker.hidden=true;
   header.appendChild(marker);
 
-  if(!nav.querySelector('[data-mcp-genival="1"]')){
-    const genival=document.createElement('a');
+  // Remove WhatsApp do cabeçalho para não disputar espaço com os atalhos de estudo.
+  const removeWhatsappLinks=root=>{
+    if(!root) return;
+    [...root.querySelectorAll('a')].forEach(a=>{
+      const href=a.getAttribute('href')||'';
+      const label=(a.textContent||'').trim();
+      if(/whatsapp/i.test(label)||/wa\.me/i.test(href)) a.remove();
+    });
+  };
+  removeWhatsappLinks(nav);
+  removeWhatsappLinks(social);
+  removeWhatsappLinks(mobile);
+  inner.querySelector('.mcp-header-whatsapp')?.remove();
+
+  let genival=nav.querySelector('[data-mcp-genival="1"]');
+  if(!genival){
+    genival=document.createElement('a');
     genival.href='/plano-leitura-medicina-legal-genival.html';
     genival.textContent='Plano Genival';
     genival.title='Plano de leitura Medicina Legal — PC-BA e PC-MA';
     genival.dataset.mcpGenival='1';
     nav.appendChild(genival);
   }
+
+  let retaFinal=[...nav.querySelectorAll(':scope > a')].find(a=>/reta final.*gcm.*paracatu/i.test((a.textContent||'').trim()));
+  if(!retaFinal){
+    retaFinal=document.createElement('a');
+    retaFinal.href='/reta-final-gcm-paracatu.html';
+    retaFinal.textContent='Reta Final GCM Paracatu';
+    retaFinal.title='Reta Final GCM Paracatu';
+    nav.insertBefore(retaFinal,genival);
+  }
+  retaFinal.dataset.mcpRetaFinal='1';
 
   const oldMore=document.getElementById('mcpMoreWrap');
   if(oldMore){
@@ -46,15 +71,16 @@
     .header-inner{gap:14px;height:64px!important;min-height:0!important;padding-top:0!important;padding-bottom:0!important}
     .brand{height:64px!important;align-items:center!important;flex:0 0 auto}
     .brand img{width:46px!important;height:46px!important;margin:0 9px 0 0!important;display:block}
-    .nav{display:flex!important;align-items:center;justify-content:space-between;min-width:0;gap:clamp(12px,1.2vw,26px);margin-left:clamp(16px,2vw,32px)!important;margin-right:clamp(16px,2vw,32px)!important;flex:1 1 auto;flex-wrap:nowrap}
+    .nav{display:flex!important;align-items:center;justify-content:flex-start;min-width:0;gap:clamp(10px,.9vw,18px);margin-left:clamp(16px,2vw,32px)!important;margin-right:clamp(12px,1.5vw,22px)!important;flex:1 1 auto;flex-wrap:nowrap;overflow:hidden}
     .nav>a{font-size:clamp(10px,.78vw,12px)!important;white-space:nowrap;flex:0 0 auto}
-    .nav a[data-mcp-genival="1"]{color:#efbd26!important;font-weight:900}
-    .social{display:flex;align-items:center;gap:10px;margin-left:10px!important;flex:0 0 auto}
-    .social a{display:inline-flex!important;align-items:center;justify-content:center;min-height:40px;padding:0 12px!important;white-space:nowrap;line-height:1!important}
+    .nav a[data-mcp-genival="1"],.nav a[data-mcp-reta-final="1"]{color:#efbd26!important;font-weight:900}
+    .nav>a[href*="wa.me"],.social>a[href*="wa.me"],.mcp-header-whatsapp{display:none!important}
+    .social{display:flex;align-items:center;gap:8px;margin-left:8px!important;flex:0 0 auto}
+    .social a{display:inline-flex!important;align-items:center;justify-content:center;min-height:40px;padding:0 10px!important;white-space:nowrap;line-height:1!important}
     .mobile{background:#06172f;border-top:1px solid #203650}
     .mobile.show{display:flex!important;flex-wrap:wrap;gap:10px;padding:14px 20px 18px!important}
     .mobile.show a{display:block;color:#fff!important;margin:0!important;padding:10px 12px;text-decoration:none;border:1px solid #29415e;border-radius:5px}
-    .mobile.show a[data-mcp-genival="1"]{color:#efbd26!important;border-color:#7b6318}
+    .mobile.show a[data-mcp-genival="1"],.mobile.show a[data-mcp-reta-final="1"]{color:#efbd26!important;border-color:#7b6318}
     @media(max-width:1740px){
       .brand{min-width:64px!important}.brand span{display:none}
       .social{display:none!important}
@@ -76,6 +102,7 @@
     const items=[...nav.querySelectorAll(':scope > a'),...(social?[...social.querySelectorAll('a')]:[])];
     items.forEach(a=>{
       const href=a.getAttribute('href')||'#';
+      if(/wa\.me/i.test(href)||/whatsapp/i.test((a.textContent||'').trim())) return;
       if(![...mobile.querySelectorAll('a')].some(x=>x.getAttribute('href')===href)){
         const clone=a.cloneNode(true);
         clone.removeAttribute('style');
