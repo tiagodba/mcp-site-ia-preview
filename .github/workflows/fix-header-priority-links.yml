@@ -1,0 +1,94 @@
+name: Corrigir prioridades do cabeçalho
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-header-priority-links.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  corrigir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ajustar links prioritários do cabeçalho
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('header-responsive.js')
+          s = p.read_text(encoding='utf-8')
+
+          marker = "  const oldMore=document.getElementById('mcpMoreWrap');"
+          block = r'''  // Mantém no destaque somente Reta Final GCM Paracatu e Plano Genival.
+  [...nav.querySelectorAll(':scope > a')].forEach(a=>{
+    const href=a.getAttribute('href')||'';
+    const label=(a.textContent||'').trim();
+    if(/whatsapp/i.test(label)||/wa\.me/i.test(href)) a.remove();
+  });
+  if(social){
+    [...social.querySelectorAll('a')].forEach(a=>{
+      const href=a.getAttribute('href')||'';
+      const label=(a.textContent||'').trim();
+      if(/whatsapp/i.test(label)||/wa\.me/i.test(href)) a.remove();
+    });
+  }
+  if(mobile){
+    [...mobile.querySelectorAll('a')].forEach(a=>{
+      const href=a.getAttribute('href')||'';
+      const label=(a.textContent||'').trim();
+      if(/whatsapp/i.test(label)||/wa\.me/i.test(href)) a.remove();
+    });
+  }
+
+  let retaFinal=nav.querySelector('[data-mcp-reta-final="1"]') || [...nav.querySelectorAll(':scope > a')].find(a=>/reta final.*gcm.*paracatu/i.test((a.textContent||'').trim()));
+  if(!retaFinal){
+    retaFinal=document.createElement('a');
+    retaFinal.href='/reta-final-gcm-paracatu.html';
+    retaFinal.textContent='Reta Final GCM Paracatu';
+    retaFinal.title='Reta Final GCM Paracatu';
+    retaFinal.dataset.mcpRetaFinal='1';
+    const genivalLink=nav.querySelector('[data-mcp-genival="1"]');
+    nav.insertBefore(retaFinal,genivalLink||null);
+  }else{
+    retaFinal.dataset.mcpRetaFinal='1';
+  }
+
+'''
+          if 'Mantém no destaque somente Reta Final GCM Paracatu e Plano Genival.' not in s:
+              s = s.replace(marker, block + marker)
+
+          s = s.replace('.nav{display:flex!important;align-items:center;justify-content:space-between;min-width:0;gap:clamp(12px,1.2vw,26px);', '.nav{display:flex!important;align-items:center;justify-content:flex-start;min-width:0;gap:clamp(10px,.9vw,18px);')
+          s = s.replace('.nav a[data-mcp-genival="1"]{color:#efbd26!important;font-weight:900}', '.nav a[data-mcp-genival="1"],.nav a[data-mcp-reta-final="1"]{color:#efbd26!important;font-weight:900}')
+          s = s.replace('.social{display:flex;align-items:center;gap:10px;margin-left:10px!important;flex:0 0 auto}', '.social{display:flex;align-items:center;gap:8px;margin-left:8px!important;flex:0 0 auto}')
+
+          # Evita que versões antigas do botão grande reapareçam por cache/CSS legado.
+          css_anchor = '    .mobile{background:#06172f;border-top:1px solid #203650}'
+          if '.mcp-header-whatsapp{display:none!important}' not in s:
+              s = s.replace(css_anchor, '    .mcp-header-whatsapp{display:none!important}\n    .nav>a[href*="wa.me"],.social>a[href*="wa.me"]{display:none!important}\n' + css_anchor)
+
+          p.write_text(s, encoding='utf-8')
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          html = re.sub(r'/header-responsive\.js\?v=[^"\']+', '/header-responsive.js?v=20260826-1', html)
+          index.write_text(html, encoding='utf-8')
+          PY
+
+      - name: Commit da correção
+        run: |
+          git config user.name "MCP Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add header-responsive.js index.html
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração necessária."
+          else
+            git commit -m "Corrige cabeçalho: Reta Final GCM e Plano Genival"
+            git push
+          fi
