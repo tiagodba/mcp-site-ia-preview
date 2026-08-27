@@ -9,31 +9,48 @@
  const jobs=radar.querySelector('.jobs');
  if(!jobs)return;
  const original=jobs.innerHTML;
+ const destaqueQueimados={
+   orgao:'Guarda Municipal de Queimados',
+   uf:'RJ',
+   categoria:'gcm',
+   status:'Banca contratada',
+   resumo:'Prefeitura de Queimados contratou o Instituto de Avaliação Nacional (IAN). A Guarda Municipal está prevista no novo concurso, com etapas como prova objetiva, TAF, psicotécnico, investigação social e curso de formação. Cargos e número de vagas ainda estão em definição.',
+   titulo:'Novo concurso Queimados RJ é confirmado e já possui banca',
+   url:'https://folha.qconcursos.com/n/concurso-queimados-rj-2026-banca-contratada',
+   sourceLabel:'FOLHA DIRIGIDA / QCONCURSOS',
+   actionLabel:'Ler notícia',
+   featured:true
+ };
  function formatDate(iso){try{return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(iso))}catch{return new Date().toLocaleString('pt-BR')}}
  function card(x){
    const statusClass=/abertas|publicado/i.test(x.status)?'':' gold';
-   return `<article class="job" data-cat="${esc(x.categoria)}">
+   const featuredClass=x.featured?' featured-news':'';
+   return `<article class="job${featuredClass}" data-cat="${esc(x.categoria)}">
      <div class="job-top"><span class="status${statusClass}">${esc(x.status)}</span><span class="state">${esc(x.uf)}</span></div>
-     <div class="type">FONTE OFICIAL</div>
+     <div class="type">${esc(x.sourceLabel||'FONTE OFICIAL')}</div>
      <h3>${esc(x.orgao)}</h3>
      <p>${esc(x.resumo||x.titulo)}</p>
      <div class="facts"><div><span>Situação</span><strong>${esc(x.status)}</strong></div><div><span>UF</span><strong>${esc(x.uf)}</strong></div></div>
-     <a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">Ver fonte oficial <span>→</span></a>
+     <a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.actionLabel||'Ver fonte oficial')} <span>→</span></a>
    </article>`;
+ }
+ function renderWithHighlight(items=[]){
+   const safeItems=Array.isArray(items)?items:[];
+   const filtered=safeItems.filter(x=>!/queimados/i.test(`${x?.orgao||''} ${x?.titulo||''} ${x?.resumo||''}`));
+   return [destaqueQueimados,...filtered].map(card).join('');
  }
  async function refresh(){
    if(updated)updated.textContent='Atualizando Radar...';
    try{
      const r=await fetch('/api/radar',{headers:{Accept:'application/json'}}),d=await r.json();
      if(!r.ok)throw new Error(d.error||'Falha');
-     if(Array.isArray(d.items)&&d.items.length){
-       jobs.innerHTML=d.items.map(card).join('');
-       radar.dataset.dynamicRadar='1';
-       const result=radar.querySelector('.result');if(result)result.textContent=`${d.items.length} oportunidades/movimentações encontradas em fontes oficiais`;
-     }else jobs.innerHTML=original;
+     jobs.innerHTML=renderWithHighlight(d.items);
+     radar.dataset.dynamicRadar='1';
+     const total=1+(Array.isArray(d.items)?d.items.filter(x=>!/queimados/i.test(`${x?.orgao||''} ${x?.titulo||''} ${x?.resumo||''}`)).length:0);
+     const result=radar.querySelector('.result');if(result)result.textContent=`${total} oportunidades/movimentações em acompanhamento`;
      if(updated)updated.textContent=`Última consulta: ${formatDate(d.updatedAt||new Date().toISOString())}`;
    }catch(e){
-     jobs.innerHTML=original;
+     jobs.innerHTML=card(destaqueQueimados)+original;
      if(updated)updated.textContent=`Radar ativo • última tentativa: ${formatDate(new Date().toISOString())}`;
    }
  }
