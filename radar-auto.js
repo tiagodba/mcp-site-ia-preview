@@ -14,11 +14,11 @@
    uf:'RJ',
    categoria:'gcm',
    status:'Banca contratada',
-   resumo:'Prefeitura de Queimados contratou o Instituto de Avaliação Nacional (IAN). A Guarda Municipal está prevista no novo concurso, com etapas como prova objetiva, TAF, psicotécnico, investigação social e curso de formação. Cargos e número de vagas ainda estão em definição.',
-   titulo:'Novo concurso Queimados RJ é confirmado e já possui banca',
-   url:'https://folha.qconcursos.com/n/concurso-queimados-rj-2026-banca-contratada',
-   sourceLabel:'FOLHA DIRIGIDA / QCONCURSOS',
-   actionLabel:'Ler notícia',
+   resumo:'Novo concurso com banca IAN e Guarda Municipal prevista. A MCP já levantou o concurso anterior de 2015 e preparou um comparativo com prova, disciplinas, etapas e prioridades pré-edital para 2026.',
+   titulo:'GCM Queimados RJ — concurso anterior x 2026',
+   url:'/gcm-queimados-rj-2015-2026.html',
+   sourceLabel:'RAIO-X MCP • 2015 x 2026',
+   actionLabel:'Ver análise completa',
    featured:true
  };
  function formatDate(iso){try{return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(iso))}catch{return new Date().toLocaleString('pt-BR')}}
@@ -31,7 +31,7 @@
      <h3>${esc(x.orgao)}</h3>
      <p>${esc(x.resumo||x.titulo)}</p>
      <div class="facts"><div><span>Situação</span><strong>${esc(x.status)}</strong></div><div><span>UF</span><strong>${esc(x.uf)}</strong></div></div>
-     <a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.actionLabel||'Ver fonte oficial')} <span>→</span></a>
+     <a href="${esc(x.url)}"${/^https?:/i.test(x.url)?' target="_blank" rel="noopener noreferrer"':''}>${esc(x.actionLabel||'Ver fonte oficial')} <span>→</span></a>
    </article>`;
  }
  function renderWithHighlight(items=[]){
