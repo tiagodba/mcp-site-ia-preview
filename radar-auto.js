@@ -14,11 +14,11 @@
    uf:'RJ',
    categoria:'gcm',
    status:'Banca contratada',
-   resumo:'Novo concurso com banca IAN e Guarda Municipal prevista. A MCP já levantou o concurso anterior de 2015 e preparou um comparativo com prova, disciplinas, etapas e prioridades pré-edital para 2026.',
-   titulo:'GCM Queimados RJ — concurso anterior x 2026',
-   url:'/gcm-queimados-rj-2015-2026.html',
-   sourceLabel:'RAIO-X MCP • 2015 x 2026',
-   actionLabel:'Ver análise completa',
+   resumo:'Novo concurso com banca IAN e Guarda Municipal prevista. A MCP já reuniu o Raio-X 2015 x 2026, preparatório pré-edital e edital verticalizado estratégico em uma central de materiais.',
+   titulo:'GCM Queimados RJ — central de materiais 2026',
+   url:'/gcm-queimados-rj-2026-materiais.html',
+   sourceLabel:'MCP • GCM QUEIMADOS 2026',
+   actionLabel:'Abrir central de materiais',
    featured:true
  };
  function formatDate(iso){try{return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(iso))}catch{return new Date().toLocaleString('pt-BR')}}
