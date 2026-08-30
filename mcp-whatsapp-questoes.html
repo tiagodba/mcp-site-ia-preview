@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MCP Questões para WhatsApp</title>
+<meta name="theme-color" content="#071527" />
+<style>
+:root{--bg:#06111f;--card:#0d1d31;--line:#203956;--txt:#f5f7fb;--muted:#9eb0c5;--gold:#f2c230;--green:#25d366;--red:#ff5b5b;--blue:#2e9cff}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(145deg,#04101d,#0a1b30 65%,#06111f);color:var(--txt);min-height:100vh}
+.wrap{max-width:1100px;margin:auto;padding:24px}.head{display:flex;align-items:center;gap:16px;margin-bottom:18px}.logo{width:66px;height:66px;border:3px solid var(--gold);border-radius:18px;display:grid;place-items:center;font-weight:900;color:var(--gold);background:#030911;box-shadow:0 10px 30px #0008}.head h1{margin:0;font-size:clamp(24px,4vw,40px)}.head p{margin:4px 0 0;color:var(--muted)}
+.panel{background:#0a1829dd;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 60px #0007;backdrop-filter:blur(10px)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.field label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px}.field select,.field input{width:100%;background:#07121f;color:white;border:1px solid #294766;border-radius:12px;padding:12px;outline:none}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer}.primary{background:var(--gold);color:#0b1320}.green{background:var(--green);color:#062912}.blue{background:var(--blue);color:white}.ghost{background:#132942;color:white;border:1px solid #31577e}.danger{background:#3a1a24;color:#ffb6bf;border:1px solid #6a2738}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.pill{background:#10253d;border:1px solid #244a72;padding:8px 11px;border-radius:999px;color:#bfd0e2;font-size:13px}.pill b{color:white}
+.question{margin-top:16px;background:#fff;color:#111827;border-radius:20px;overflow:hidden}.qtop{background:#075e54;color:white;padding:14px 18px;display:flex;justify-content:space-between;gap:12px}.qtop strong{font-size:18px}.qbody{padding:20px}.meta{color:#46607a;font-size:13px;margin-bottom:12px}.prompt{white-space:pre-wrap;font-size:18px;line-height:1.55;font-weight:650}.opts{display:grid;gap:9px;margin-top:18px}.opt{border:1px solid #d7dee8;border-radius:12px;padding:12px 14px;background:#fafcff;display:flex;gap:10px;align-items:flex-start}.letter{font-weight:900;color:#087d6f}.hidden{display:none}.answer{margin-top:14px;background:#f1f8ff;border-left:5px solid #2e9cff;padding:14px;border-radius:10px}.answer.ok{background:#eefbf2;border-color:#19a35b}.answer h3{margin:0 0 8px}.answer p{white-space:pre-wrap;line-height:1.5}
+.preview{margin-top:18px;background:#071522;border:1px dashed #365878;border-radius:14px;padding:14px}.preview textarea{width:100%;min-height:250px;background:#030b14;color:#dce9f6;border:0;resize:vertical;padding:12px;border-radius:10px;line-height:1.5}.foot{margin-top:16px;color:#8298b0;font-size:12px;text-align:center}.toast{position:fixed;right:18px;bottom:18px;background:#0e8d59;color:white;padding:12px 16px;border-radius:12px;box-shadow:0 10px 35px #0008;display:none}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.wrap{padding:14px}.grid{grid-template-columns:1fr}.head{align-items:flex-start}.logo{width:54px;height:54px}.actions .btn{flex:1 1 45%}.prompt{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head"><div class="logo">MCP</div><div><h1>Questões para WhatsApp</h1><p>Gerador MCP • Grupo “Bizu carreiras policiais” • gabarito oculto até você liberar</p></div></div>
+  <section class="panel">
+    <div class="grid">
+      <div class="field"><label>Matéria</label><select id="category"><option value="">Todas</option></select></div>
+      <div class="field"><label>Banca</label><select id="banca"><option value="">Todas</option></select></div>
+      <div class="field"><label>Dificuldade</label><select id="difficulty"><option value="">Todas</option></select></div>
+      <div class="field"><label>Busca no enunciado</label><input id="search" placeholder="Ex.: legítima defesa" /></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="draw">🎲 Sortear questão</button>
+      <button class="btn green" id="copy">📋 Copiar para WhatsApp</button>
+      <button class="btn green" id="share">🟢 Abrir WhatsApp</button>
+      <button class="btn blue" id="reveal">✅ Liberar gabarito</button>
+      <button class="btn ghost" id="next">➡️ Próxima</button>
+      <button class="btn danger" id="resetHistory">↻ Limpar histórico local</button>
+    </div>
+    <div class="stats"><span class="pill">Banco MCP: <b id="total">carregando…</b></span><span class="pill">Já sorteadas neste navegador: <b id="used">0</b></span><span class="pill">Status: <b id="status">conectando</b></span></div>
+
+    <div class="question hidden" id="questionCard">
+      <div class="qtop"><strong>🚨 ENQUETE MCP</strong><span id="qtag">QUESTÃO</span></div>
+      <div class="qbody">
+        <div class="meta" id="meta"></div>
+        <div class="prompt" id="prompt"></div>
+        <div class="opts" id="options"></div>
+        <div class="answer hidden" id="answerBox"><h3 id="answerTitle"></h3><p id="answerText"></p></div>
+      </div>
+    </div>
+
+    <div class="preview"><strong>Texto pronto para postagem</strong><textarea id="waText" readonly placeholder="Sorteie uma questão para gerar o texto."></textarea></div>
+  </section>
+  <div class="foot">MCP Carreiras Policiais • ferramenta administrativa para preparação de enquetes e questões</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const SUPABASE_URL='https://hutwrsieqqckvdrdqjyx.supabase.co';
+const SUPABASE_KEY='sb_publishable_FGUbg9FddhbwtVmZiXYCYA_qR1lqU7Q';
+const TABLE='mcp_whatsapp_questions';
+let rows=[], current=null;
+const $=id=>document.getElementById(id);
+const usedSet=()=>new Set(JSON.parse(localStorage.getItem('mcp_wa_used')||'[]'));
+const saveUsed=id=>{const s=usedSet();s.add(id);localStorage.setItem('mcp_wa_used',JSON.stringify([...s].slice(-400)));$('used').textContent=s.size};
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',1800)}
+function unique(key){return [...new Set(rows.map(r=>r[key]).filter(Boolean).map(v=>String(v).trim()))].sort((a,b)=>a.localeCompare(b,'pt-BR'))}
+function fillSelect(id,key){const s=$(id);unique(key).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})}
+function normalizeOptions(o){if(Array.isArray(o)) return o.map((x,i)=>typeof x==='string'?{letter:String.fromCharCode(65+i),text:x}:{letter:(x.letter||x.key||String.fromCharCode(65+i)).toString().toUpperCase(),text:x.text||x.label||x.value||JSON.stringify(x)}); if(o&&typeof o==='object') return Object.entries(o).map(([k,v])=>({letter:k.toUpperCase(),text:typeof v==='string'?v:(v.text||v.label||JSON.stringify(v))})); return []}
+function buildText(q,withAnswer=false){const opts=normalizeOptions(q.options);let t=`🚨 *ENQUETE MCP* | ${q.category||'QUESTÃO'}\n\n${q.prompt}\n\n`;for(const o of opts)t+=`*${o.letter})* ${o.text}\n`;t+=`\n🧠 *Vote na alternativa correta.*\n⏳ Gabarito será divulgado posteriormente.`;if(withAnswer){t+=`\n\n━━━━━━━━━━━━━━\n✅ *GABARITO MCP: ${q.correct_answer||'-'}*`;if(q.explanation)t+=`\n\n📚 *COMENTÁRIO*\n${q.explanation}`;if(q.reference_text)t+=`\n\n📖 *REFERÊNCIA*\n${q.reference_text}`}return t}
+function filtered(){const c=$('category').value,b=$('banca').value,d=$('difficulty').value,s=$('search').value.trim().toLowerCase();return rows.filter(r=>(!c||r.category===c)&&(!b||r.banca===b)&&(!d||r.difficulty===d)&&(!s||String(r.prompt||'').toLowerCase().includes(s)))}
+function render(q){current=q;saveUsed(q.id);$('questionCard').classList.remove('hidden');$('answerBox').classList.add('hidden');$('meta').textContent=[q.banca,q.category,q.difficulty].filter(Boolean).join(' • ');$('qtag').textContent=q.banca||'QUESTÃO';$('prompt').textContent=q.prompt;const box=$('options');box.innerHTML='';normalizeOptions(q.options).forEach(o=>{const el=document.createElement('div');el.className='opt';el.innerHTML=`<span class="letter">${o.letter})</span><span></span>`;el.children[1].textContent=o.text;box.appendChild(el)});$('waText').value=buildText(q,false)}
+function draw(){const list=filtered();if(!list.length){toast('Nenhuma questão encontrada com esses filtros.');return}const used=usedSet();let pool=list.filter(x=>!used.has(x.id));if(!pool.length)pool=list;render(pool[Math.floor(Math.random()*pool.length)])}
+function reveal(){if(!current)return toast('Sorteie uma questão primeiro.');$('answerBox').classList.remove('hidden');$('answerTitle').textContent=`✅ Gabarito: ${current.correct_answer||'-'}`;$('answerText').textContent=[current.explanation,current.reference_text?`Referência: ${current.reference_text}`:''].filter(Boolean).join('\n\n')||'Sem comentário cadastrado.';$('waText').value=buildText(current,true)}
+async function copy(){if(!$('waText').value)return toast('Sorteie uma questão primeiro.');await navigator.clipboard.writeText($('waText').value);toast('Texto copiado!')}
+function share(){if(!$('waText').value)return toast('Sorteie uma questão primeiro.');window.open('https://wa.me/?text='+encodeURIComponent($('waText').value),'_blank','noopener')}
+async function load(){try{$('status').textContent='carregando';const url=`${SUPABASE_URL}/rest/v1/${TABLE}?select=id,banca,category,difficulty,prompt,options,correct_answer,explanation,reference_text&active=eq.true&limit=1000`;const r=await fetch(url,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});if(!r.ok)throw new Error(await r.text());rows=await r.json();$('total').textContent=rows.length;$('used').textContent=usedSet().size;$('status').textContent='online';fillSelect('category','category');fillSelect('banca','banca');fillSelect('difficulty','difficulty');draw()}catch(e){console.error(e);$('status').textContent='erro';toast('Falha ao carregar o banco MCP.')}}
+$('draw').onclick=draw;$('next').onclick=draw;$('reveal').onclick=reveal;$('copy').onclick=copy;$('share').onclick=share;$('resetHistory').onclick=()=>{localStorage.removeItem('mcp_wa_used');$('used').textContent='0';toast('Histórico local limpo.')} ;
+load();
+</script>
+</body>
+</html>
