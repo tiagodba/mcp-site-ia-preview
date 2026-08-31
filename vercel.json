@@ -3,6 +3,9 @@
   "functions": {
     "api/dica.js": {
       "maxDuration": 30
+    },
+    "api/corrigir-discursiva.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [
