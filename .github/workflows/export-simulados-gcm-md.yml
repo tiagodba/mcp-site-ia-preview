@@ -1,0 +1,55 @@
+name: Exportar simulados GCM
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/export-simulados-gcm-md.yml'
+permissions:
+  contents: write
+jobs:
+  exportar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gerar Markdown consolidado
+        run: |
+          python - <<'PY'
+          import re, json, pathlib
+          out=[]
+          out.append('# MCP - GCM Paracatu - 4 Simulados')
+          out.append('')
+          out.append('Caderno consolidado com 160 questões. Gabarito ao final de cada simulado.')
+          out.append('')
+          for n in range(1,5):
+              p=pathlib.Path(f'simulado-gcm-paracatu-reta-final-{n:02d}.html')
+              txt=p.read_text(encoding='utf-8')
+              m=re.search(r'const Q=(\[.*?\]);let idx=', txt)
+              if not m:
+                  raise SystemExit(f'Q não encontrado em {p}')
+              Q=json.loads(m.group(1))
+              out.append(f'\n# SIMULADO {n:02d}\n')
+              for i,q in enumerate(Q,1):
+                  enun, opts, gab, coment = q
+                  out.append(f'## Questão {i}')
+                  out.append(enun)
+                  out.append('')
+                  for j,opt in enumerate(opts):
+                      out.append(f'{chr(65+j)}) {opt}')
+                  out.append('')
+              out.append(f'\n## GABARITO - SIMULADO {n:02d}\n')
+              linha=[]
+              for i,q in enumerate(Q,1):
+                  linha.append(f'{i}-{chr(65+q[2])}')
+                  if len(linha)==10:
+                      out.append(' | '.join(linha)); linha=[]
+              if linha: out.append(' | '.join(linha))
+              out.append('')
+          pathlib.Path('simulados-gcm-paracatu-compilado.md').write_text('\n'.join(out),encoding='utf-8')
+          PY
+      - name: Commit do consolidado
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add simulados-gcm-paracatu-compilado.md
+          git diff --cached --quiet || git commit -m 'docs: consolidar 4 simulados GCM Paracatu'
+          git push
