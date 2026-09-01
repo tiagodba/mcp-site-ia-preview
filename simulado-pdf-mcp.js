@@ -40,6 +40,83 @@
     actions.prepend(b);
   }
 
+  function progressKey(){
+    return `mcp:simulado-progress:${location.pathname}`;
+  }
+
+  function setSaveIndicator(text){
+    let el=document.getElementById('mcpSaveIndicator');
+    if(!el){
+      const side=document.querySelector('.side');
+      if(!side) return;
+      el=document.createElement('div');
+      el.id='mcpSaveIndicator';
+      el.style.marginTop='14px';
+      el.style.padding='10px 11px';
+      el.style.border='1px solid #2f6f5b';
+      el.style.borderRadius='10px';
+      el.style.background='#0a2b2a';
+      el.style.color='#9ee6c2';
+      el.style.fontSize='.82rem';
+      el.style.lineHeight='1.35';
+      side.appendChild(el);
+    }
+    el.textContent=text;
+  }
+
+  function saveProgress(){
+    try{
+      if(typeof Q==='undefined'||typeof state==='undefined'||typeof idx==='undefined') return;
+      const payload={
+        version:1,
+        state:Array.from(state),
+        idx:Number(idx)||0,
+        updatedAt:Date.now()
+      };
+      localStorage.setItem(progressKey(),JSON.stringify(payload));
+      const answered=payload.state.filter(v=>v!=null).length;
+      setSaveIndicator(answered?`✓ Progresso salvo automaticamente • ${answered}/${Q.length} respondidas`:'✓ Salvamento automático ativado neste dispositivo');
+    }catch(e){
+      console.warn('MCP: não foi possível salvar o progresso do simulado.',e);
+    }
+  }
+
+  function restoreProgress(){
+    try{
+      if(typeof Q==='undefined'||typeof state==='undefined'||typeof idx==='undefined') return false;
+      const raw=localStorage.getItem(progressKey());
+      if(!raw) return false;
+      const saved=JSON.parse(raw);
+      if(!saved||!Array.isArray(saved.state)||saved.state.length!==Q.length) return false;
+      state=saved.state.map(v=>Number.isInteger(v)&&v>=0&&v<5?v:null);
+      idx=Number.isInteger(saved.idx)?Math.min(Math.max(saved.idx,0),Q.length-1):0;
+      return state.some(v=>v!=null);
+    }catch(e){
+      console.warn('MCP: não foi possível restaurar o progresso do simulado.',e);
+      return false;
+    }
+  }
+
+  function installProgressPersistence(){
+    try{
+      if(typeof Q==='undefined'||typeof state==='undefined'||typeof idx==='undefined'||typeof render!=='function') return;
+      const restored=restoreProgress();
+      const originalRender=render;
+      render=function(){
+        originalRender();
+        saveProgress();
+      };
+      render();
+      if(restored){
+        setSaveIndicator(`↻ Progresso restaurado automaticamente • ${state.filter(v=>v!=null).length}/${Q.length} respondidas`);
+      }
+      window.addEventListener('pagehide',saveProgress);
+      document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden') saveProgress();});
+    }catch(e){
+      console.warn('MCP: persistência do simulado indisponível.',e);
+    }
+  }
+
   async function generatePDF(){
     const btn=document.getElementById('mcpPdfBtn');
     try{
@@ -127,6 +204,12 @@
     }
   }
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addButton); else addButton();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>{addButton();installProgressPersistence();});
+  }else{
+    addButton();
+    installProgressPersistence();
+  }
   window.mcpGenerateSimulationPDF=generatePDF;
+  window.mcpSaveSimulationProgress=saveProgress;
 })();
