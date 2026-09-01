@@ -1,0 +1,30 @@
+name: Atualizar apostila Paracatu corrigida
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-apostila-paracatu-historia.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update-pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reconstruir e validar PDF
+        run: |
+          cat .pdf-update/new_* | base64 -d > Apostila_Reta_Final_GCM_Paracatu_WEB.pdf
+          test "$(head -c 4 Apostila_Reta_Final_GCM_Paracatu_WEB.pdf)" = "%PDF"
+          test "$(wc -c < Apostila_Reta_Final_GCM_Paracatu_WEB.pdf)" -gt 3000000
+      - name: Publicar arquivo e limpar temporários
+        run: |
+          git config user.name "MCP Atualizações"
+          git config user.email "actions@users.noreply.github.com"
+          git add Apostila_Reta_Final_GCM_Paracatu_WEB.pdf
+          git rm .pdf-update/new_*
+          git rm .github/workflows/update-apostila-paracatu-historia.yml
+          git commit -m "feat: corrige história da apostila GCM Paracatu"
+          git push
