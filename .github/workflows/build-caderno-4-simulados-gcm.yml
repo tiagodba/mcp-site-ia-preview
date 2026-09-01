@@ -1,0 +1,94 @@
+name: Gerar caderno 4 simulados GCM
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-caderno-4-simulados-gcm.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install reportlab python-docx
+      - name: Gerar PDF e DOCX
+        run: |
+          python - <<'PY'
+          import re, json, pathlib
+          from reportlab.lib.pagesizes import A4
+          from reportlab.lib import colors
+          from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+          from reportlab.lib.enums import TA_CENTER
+          from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, KeepTogether, Table, TableStyle
+          from reportlab.lib.units import cm
+          from docx import Document
+          from docx.shared import Pt, Cm
+          from docx.enum.text import WD_ALIGN_PARAGRAPH
+          from docx.enum.section import WD_SECTION
+
+          sims=[]
+          for n in range(1,5):
+              txt=pathlib.Path(f'simulado-gcm-paracatu-reta-final-{n:02d}.html').read_text(encoding='utf-8')
+              m=re.search(r'const Q=(\[.*?\]);let idx=',txt)
+              if not m: raise SystemExit(f'Q não encontrado no simulado {n}')
+              sims.append(json.loads(m.group(1)))
+
+          # PDF
+          pdf='MCP_GCM_Paracatu_4_Simulados_Caderno_Unico.pdf'
+          doc=SimpleDocTemplate(pdf,pagesize=A4,rightMargin=1.6*cm,leftMargin=1.6*cm,topMargin=1.6*cm,bottomMargin=1.6*cm)
+          styles=getSampleStyleSheet()
+          title=ParagraphStyle('title',parent=styles['Title'],fontName='Helvetica-Bold',fontSize=24,leading=29,textColor=colors.HexColor('#0B2942'),alignment=TA_CENTER,spaceAfter=12)
+          sub=ParagraphStyle('sub',parent=styles['Normal'],fontName='Helvetica-Bold',fontSize=11,leading=15,textColor=colors.HexColor('#B8860B'),alignment=TA_CENTER)
+          simh=ParagraphStyle('simh',parent=styles['Heading1'],fontName='Helvetica-Bold',fontSize=18,leading=22,textColor=colors.HexColor('#0B2942'),spaceAfter=12)
+          qst=ParagraphStyle('qst',parent=styles['Normal'],fontName='Helvetica-Bold',fontSize=10.5,leading=14,spaceAfter=5)
+          opt=ParagraphStyle('opt',parent=styles['Normal'],fontSize=10,leading=13,leftIndent=8,spaceAfter=2)
+          small=ParagraphStyle('small',parent=styles['Normal'],fontSize=8.5,leading=11,textColor=colors.HexColor('#555555'))
+          story=[]
+          story += [Spacer(1,3.2*cm),Paragraph('MCP - MATERIAIS CARREIRAS POLICIAIS',sub),Spacer(1,8),Paragraph('GCM PARACATU',title),Paragraph('CADERNO ÚNICO - 4 SIMULADOS',title),Spacer(1,10),Paragraph('160 questões • nível alto • padrão IBGP',sub),Spacer(1,20),Paragraph('Gabarito ao final de cada simulado',styles['Heading2']),Spacer(1,3.4*cm),Paragraph('Material de estudo - Reta Final MCP',small),PageBreak()]
+          for sn,Q in enumerate(sims,1):
+              story.append(Paragraph(f'SIMULADO {sn:02d}',simh))
+              story.append(Paragraph('40 questões - assinale apenas uma alternativa em cada item.',small)); story.append(Spacer(1,10))
+              for i,q in enumerate(Q,1):
+                  enun,opts,gab,coment=q
+                  blocks=[Paragraph(f'<b>Questão {i}</b> - {enun}',qst)]
+                  for j,o in enumerate(opts): blocks.append(Paragraph(f'{chr(65+j)}) {o}',opt))
+                  blocks.append(Spacer(1,7))
+                  story.append(KeepTogether(blocks))
+              story.append(PageBreak())
+              story.append(Paragraph(f'GABARITO - SIMULADO {sn:02d}',simh))
+              data=[]
+              for r in range(0,40,10):
+                  data.append([f'{i+1}-{chr(65+Q[i][2])}' for i in range(r,r+10)])
+              t=Table(data,colWidths=[1.7*cm]*10)
+              t.setStyle(TableStyle([('GRID',(0,0),(-1,-1),0.5,colors.HexColor('#9AA8B2')),('BACKGROUND',(0,0),(-1,-1),colors.HexColor('#F4F6F8')),('ALIGN',(0,0),(-1,-1),'CENTER'),('FONTNAME',(0,0),(-1,-1),'Helvetica-Bold'),('FONTSIZE',(0,0),(-1,-1),9),('TOPPADDING',(0,0),(-1,-1),7),('BOTTOMPADDING',(0,0),(-1,-1),7)]))
+              story += [t,Spacer(1,14),Paragraph('MCP - revise os erros antes de avançar para o próximo simulado.',small)]
+              if sn<4: story.append(PageBreak())
+          doc.build(story)
+
+          # DOCX
+          out='MCP_GCM_Paracatu_4_Simulados_Caderno_Unico.docx'
+          d=Document(); sec=d.sections[0]; sec.top_margin=Cm(1.7); sec.bottom_margin=Cm(1.7); sec.left_margin=Cm(1.7); sec.right_margin=Cm(1.7)
+          p=d.add_paragraph(); p.alignment=WD_ALIGN_PARAGRAPH.CENTER; r=p.add_run('MCP - MATERIAIS CARREIRAS POLICIAIS'); r.bold=True; r.font.size=Pt(15)
+          p=d.add_paragraph(); p.alignment=WD_ALIGN_PARAGRAPH.CENTER; r=p.add_run('GCM PARACATU\nCADERNO ÚNICO - 4 SIMULADOS'); r.bold=True; r.font.size=Pt(22)
+          p=d.add_paragraph(); p.alignment=WD_ALIGN_PARAGRAPH.CENTER; p.add_run('160 questões • nível alto • padrão IBGP\nGabarito ao final de cada simulado').bold=True
+          d.add_page_break()
+          for sn,Q in enumerate(sims,1):
+              d.add_heading(f'SIMULADO {sn:02d}',level=1)
+              d.add_paragraph('40 questões - assinale apenas uma alternativa em cada item.')
+              for i,q in enumerate(Q,1):
+                  enun,opts,gab,coment=q
+                  p=d.add_paragraph(); rr=p.add_run(f'Questão {i} - {enun}'); rr.bold=True; rr.font.size=Pt(10.5)
+                  for j,o in enumerate(opts):
+                      p=d.add_paragraph(f'{chr(65+j)}) {o}'); p.paragraph_format.left_indent=Cm(.35); p.paragraph_format.space_after=Pt(1)
+              d.add_page_break(); d.add_heading(f'GABARITO - SIMULADO {sn:02d}',level=1)
+              for r0 in range(0,40,10): d.add_paragraph('   |   '.join(f'{i+1}-{chr(65+Q[i][2])}' for i in range(r0,r0+10)))
+              if sn<4: d.add_page_break()
+          d.save(out)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: caderno-4-simulados-gcm-paracatu
+          path: |
+            MCP_GCM_Paracatu_4_Simulados_Caderno_Unico.pdf
+            MCP_GCM_Paracatu_4_Simulados_Caderno_Unico.docx
