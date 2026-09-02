@@ -1,0 +1,123 @@
+name: SEO paginas prioritarias MCP
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/seo-content-pages.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-seo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Aplicar SEO preservando layout
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, json
+
+          BASE = 'https://materiais-carreiras-policiais.vercel.app'
+
+          def patch_head(path, title, description, canonical, og_type='article', schema_type='Article'):
+              p = Path(path)
+              s = p.read_text(encoding='utf-8')
+              s = re.sub(r'<title>.*?</title>', f'<title>{title}</title>', s, count=1, flags=re.I|re.S)
+              if re.search(r'<meta\s+name=["\']description["\']', s, flags=re.I):
+                  s = re.sub(r'<meta\s+name=["\']description["\'][^>]*>', f'<meta name="description" content="{description}">', s, count=1, flags=re.I)
+              else:
+                  s = re.sub(r'(<meta\s+name=["\']viewport["\'][^>]*>)', r'\1\n<meta name="description" content="'+description+r'">', s, count=1, flags=re.I)
+
+              # Remove duplicatas que este patch gerencia, mantendo apenas a versão nova.
+              patterns = [
+                  r'\s*<meta\s+name=["\']robots["\'][^>]*>',
+                  r'\s*<link\s+rel=["\']canonical["\'][^>]*>',
+                  r'\s*<meta\s+property=["\']og:(?:locale|type|site_name|title|description|url)["\'][^>]*>',
+                  r'\s*<meta\s+name=["\']twitter:(?:card|title|description)["\'][^>]*>',
+                  r'\s*<!-- SEO MCP START -->.*?<!-- SEO MCP END -->'
+              ]
+              for pat in patterns:
+                  s = re.sub(pat, '', s, flags=re.I|re.S)
+
+              schema = {
+                  '@context':'https://schema.org',
+                  '@type':schema_type,
+                  'headline':title.split(' | ')[0],
+                  'name':title.split(' | ')[0],
+                  'description':description,
+                  'url':canonical,
+                  'inLanguage':'pt-BR',
+                  'publisher':{'@type':'Organization','name':'Materiais Carreiras Policiais','url':BASE+'/'},
+                  'isPartOf':{'@type':'WebSite','name':'Materiais Carreiras Policiais','url':BASE+'/'}
+              }
+              breadcrumb = {
+                  '@context':'https://schema.org','@type':'BreadcrumbList','itemListElement':[
+                      {'@type':'ListItem','position':1,'name':'Materiais Carreiras Policiais','item':BASE+'/'},
+                      {'@type':'ListItem','position':2,'name':title.split(' | ')[0],'item':canonical}
+                  ]
+              }
+              block = f'''\n<!-- SEO MCP START -->
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="{canonical}">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:type" content="{og_type}">
+<meta property="og:site_name" content="Materiais Carreiras Policiais">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{description}">
+<meta property="og:url" content="{canonical}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{title}">
+<meta name="twitter:description" content="{description}">
+<script type="application/ld+json">{json.dumps(schema, ensure_ascii=False, separators=(',',':'))}</script>
+<script type="application/ld+json">{json.dumps(breadcrumb, ensure_ascii=False, separators=(',',':'))}</script>
+<!-- SEO MCP END -->\n'''
+              s = re.sub(r'</head>', block + '</head>', s, count=1, flags=re.I)
+              p.write_text(s, encoding='utf-8')
+
+          patch_head(
+              'index.html',
+              'Materiais para Concursos Policiais 2026 | Apostilas, Resumos e Simulados | MCP',
+              'Materiais para concursos policiais 2026: apostilas, resumos de Direito Penal, legislação comentada, mapas mentais, questões e simulados para Polícia Civil, Militar, Penal, GCM e Perícia.',
+              BASE+'/', 'website', 'WebSite'
+          )
+          patch_head(
+              'resumo-culpabilidade-fgv-2026.html',
+              'Culpabilidade no Direito Penal para Concursos | FGV 2026 | MCP',
+              'Resumo completo de culpabilidade para concursos: imputabilidade penal, doença mental, embriaguez, erro de proibição, coação moral irresistível, obediência hierárquica e pegadinhas FGV.',
+              BASE+'/resumo-culpabilidade-fgv-2026.html'
+          )
+          patch_head(
+              'resumo-dosimetria-concurso-crimes-2026.html',
+              'Dosimetria da Pena e Concurso de Crimes para Concursos | MCP 2026',
+              'Resumo de dosimetria da pena e concurso de crimes para concursos: sistema trifásico, agravantes, atenuantes, reincidência, concurso material, formal, crime continuado e questões FGV e IDECAN.',
+              BASE+'/resumo-dosimetria-concurso-crimes-2026.html'
+          )
+
+          related = {
+            'resumo-culpabilidade-fgv-2026.html': '''<section class="box" id="seo-related"><h2>Leia também — Direito Penal para concursos</h2><p>Aprofunde sua revisão com outros materiais MCP relacionados.</p><ul><li><a href="/resumos-direito-penal.html">Resumos de Direito Penal para concursos policiais</a></li><li><a href="/resumo-dosimetria-concurso-crimes-2026.html">Dosimetria da pena e concurso de crimes</a></li><li><a href="/questoes.html">Questões e simulados para concursos policiais</a></li></ul></section>''',
+            'resumo-dosimetria-concurso-crimes-2026.html': '''<section class="box" id="seo-related"><h2>Leia também — Direito Penal para concursos</h2><p>Continue sua revisão com outros materiais MCP relacionados.</p><ul><li><a href="/resumos-direito-penal.html">Resumos de Direito Penal para concursos policiais</a></li><li><a href="/resumo-culpabilidade-fgv-2026.html">Culpabilidade no Direito Penal para concursos</a></li><li><a href="/questoes.html">Questões e simulados para concursos policiais</a></li></ul></section>'''
+          }
+          for path, html in related.items():
+              p=Path(path); s=p.read_text(encoding='utf-8')
+              if 'id="seo-related"' not in s:
+                  s = s.replace('</main>', html+'\n</main>', 1)
+                  p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commitar alteracoes
+        run: |
+          if git diff --quiet; then
+            echo "Nada a alterar"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html resumo-culpabilidade-fgv-2026.html resumo-dosimetria-concurso-crimes-2026.html
+          git commit -m "SEO: otimizar home, culpabilidade e dosimetria"
+          git push
