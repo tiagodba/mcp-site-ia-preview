@@ -1,0 +1,132 @@
+name: SEO MCP
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/seo-mcp.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  optimize-seo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Otimizar metadados e indexação
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          from datetime import date
+
+          base = 'https://materiais-carreiras-policiais.vercel.app'
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+
+          # Homepage: title, description, canonical e metadados sociais.
+          html = re.sub(r'<title>.*?</title>', '<title>Materiais para Concursos Policiais 2026 | Apostilas, Questões e Simulados | MCP</title>', html, count=1, flags=re.S)
+          html = re.sub(r'<meta\s+name=["\']description["\']\s+content=["\'].*?["\']\s*/?>', '<meta name="description" content="Materiais para concursos policiais 2026: apostilas, resumos de Direito Penal, legislação comentada, mapas mentais, questões e simulados para Polícia Civil, Militar, Penal, GCM e Perícia." />', html, count=1, flags=re.S|re.I)
+
+          additions = '''
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
+  <link rel="canonical" href="https://materiais-carreiras-policiais.vercel.app/" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Materiais Carreiras Policiais" />
+  <meta property="og:title" content="Materiais para Concursos Policiais 2026 | MCP" />
+  <meta property="og:description" content="Apostilas, resumos, legislação comentada, mapas mentais, questões e simulados para concursos policiais." />
+  <meta property="og:url" content="https://materiais-carreiras-policiais.vercel.app/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Materiais para Concursos Policiais 2026 | MCP" />
+  <meta name="twitter:description" content="Apostilas, resumos, legislação comentada, mapas mentais, questões e simulados para concursos policiais." />
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"Materiais Carreiras Policiais",
+    "alternateName":"MCP",
+    "url":"https://materiais-carreiras-policiais.vercel.app/",
+    "inLanguage":"pt-BR",
+    "description":"Materiais de estudo para concursos policiais, com apostilas, resumos, legislação comentada, mapas mentais, questões e simulados."
+  }
+  </script>
+'''
+          if 'rel="canonical"' not in html:
+              html = html.replace('</head>', additions + '\n</head>', 1)
+          else:
+              # Ainda garante robots e schema caso o canonical já exista.
+              if 'name="robots"' not in html:
+                  html = html.replace('</head>', additions.replace('  <link rel="canonical" href="https://materiais-carreiras-policiais.vercel.app/" />\n','') + '\n</head>', 1)
+
+          index.write_text(html, encoding='utf-8')
+
+          # Acrescenta canonical/robots às páginas públicas HTML quando ausentes.
+          excluded = {
+              'painel-admin-questoes.html',
+              'painel-importar-pdf-questoes.html',
+              'mcp-whatsapp-questoes.html',
+          }
+          public_pages = []
+          for p in sorted(Path('.').glob('*.html')):
+              if p.name in excluded:
+                  continue
+              text = p.read_text(encoding='utf-8', errors='ignore')
+              if '<head' not in text.lower():
+                  continue
+              url = base + ('/' if p.name == 'index.html' else '/' + p.name)
+              public_pages.append((p, url))
+              if p.name == 'index.html':
+                  continue
+              inserts = []
+              if 'rel="canonical"' not in text:
+                  inserts.append(f'  <link rel="canonical" href="{url}" />')
+              if 'name="robots"' not in text:
+                  inserts.append('  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />')
+              if inserts:
+                  text = re.sub(r'</head>', '\n'.join(inserts) + '\n</head>', text, count=1, flags=re.I)
+                  p.write_text(text, encoding='utf-8')
+
+          # Sitemap amplo com páginas públicas relevantes.
+          today = date.today().isoformat()
+          priority_high = {
+              'index.html','resumos-direito-penal.html','reta-final-gcm-paracatu.html',
+              'legislacao-jurisprudencia.html','questoes.html'
+          }
+          lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+          for p, url in public_pages:
+              pri = '1.0' if p.name == 'index.html' else ('0.9' if p.name in priority_high else '0.7')
+              lines.append('  <url>')
+              lines.append(f'    <loc>{url}</loc>')
+              lines.append(f'    <lastmod>{today}</lastmod>')
+              lines.append(f'    <changefreq>{"daily" if p.name == "index.html" else "weekly"}</changefreq>')
+              lines.append(f'    <priority>{pri}</priority>')
+              lines.append('  </url>')
+          lines.append('</urlset>')
+          Path('sitemap.xml').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
+          Path('robots.txt').write_text(
+              'User-agent: *\nAllow: /\n\n'
+              'Disallow: /api/\n'
+              'Disallow: /painel-admin-questoes.html\n'
+              'Disallow: /painel-importar-pdf-questoes.html\n\n'
+              f'Sitemap: {base}/sitemap.xml\n',
+              encoding='utf-8'
+          )
+
+      - name: Publicar alterações
+        run: |
+          if git diff --quiet; then
+            echo "Nenhuma alteração necessária"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html *.html sitemap.xml robots.txt
+          git commit -m "SEO: melhorar rastreamento e descoberta orgânica"
+          git push
