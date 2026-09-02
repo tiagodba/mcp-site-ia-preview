@@ -38,6 +38,21 @@
   medicina.dataset.mcpMedicina='1';
   if(medicina.parentElement!==nav) nav.appendChild(medicina);
 
+  // Resumos Direito Penal: cria/normaliza um único acesso canônico.
+  const penalLinks=[];
+  [nav,social,mobile].filter(Boolean).forEach(root=>{
+    [...root.querySelectorAll('a')].forEach(a=>{
+      if(/^Resumos Direito Penal$/i.test(norm(a.textContent))||/resumos-direito-penal\.html/i.test(a.getAttribute('href')||'')) penalLinks.push(a);
+    });
+  });
+  let penal=penalLinks.find(a=>a.parentElement===nav)||penalLinks[0]||document.createElement('a');
+  penalLinks.forEach(a=>{if(a!==penal)a.remove();});
+  penal.textContent='Resumos Direito Penal';
+  penal.href='/resumos-direito-penal.html';
+  penal.title='Resumos táticos de Direito Penal — MCP';
+  penal.dataset.mcpPenal='1';
+  if(penal.parentElement!==nav) nav.appendChild(penal);
+
   // Reta Final GCM: apaga TODAS as variantes e cria somente uma canônica.
   [nav,social,mobile].filter(Boolean).forEach(root=>{
     [...root.querySelectorAll('a')].forEach(a=>{if(isReta(a)) a.remove();});
@@ -53,11 +68,13 @@
   const law=[...nav.querySelectorAll(':scope > a')].find(a=>/^Legislação$/i.test(norm(a.textContent)));
   if(law){law.href='/legislacao-jurisprudencia.html';law.title='Legislação recente e jurisprudência do STF e STJ';}
 
-  // Ordem principal: Legislação > Medicina Legal > Reta Final GCM Paracatu.
+  // Ordem principal: Legislação > Resumos Direito Penal > Medicina Legal > Reta Final GCM Paracatu.
   if(law){
-    law.insertAdjacentElement('afterend',medicina);
+    law.insertAdjacentElement('afterend',penal);
+    penal.insertAdjacentElement('afterend',medicina);
     medicina.insertAdjacentElement('afterend',reta);
   }else{
+    nav.appendChild(penal);
     nav.appendChild(medicina);
     nav.appendChild(reta);
   }
@@ -84,6 +101,7 @@
     .nav{display:flex!important;align-items:center;justify-content:flex-start;min-width:0;gap:clamp(8px,.68vw,14px);margin-left:clamp(10px,1.4vw,24px)!important;margin-right:6px!important;flex:1 1 auto;flex-wrap:nowrap;overflow:visible!important}
     .nav>a{font-size:clamp(11px,.80vw,13px)!important;font-weight:800!important;line-height:1!important;letter-spacing:.05px!important;color:#f6f8fb!important;text-shadow:0 1px 1px rgba(0,0,0,.3);white-space:nowrap;flex:0 0 auto;text-decoration:none!important;padding-left:0!important;padding-right:0!important}
     .nav>a:first-child{color:#efbd26!important;border-bottom:2px solid #efbd26!important}.nav>a:hover{color:#efbd26!important}
+    .nav a[data-mcp-penal="1"]{color:#efbd26!important;font-weight:900!important}
     .nav a[data-mcp-medicina="1"]{color:#f6f8fb!important;font-weight:900!important}
     .nav a[data-mcp-reta-final="1"]{color:#efbd26!important;font-weight:900!important}
     .nav>a[href*="wa.me"],.social>a[href*="wa.me"],.mcp-header-whatsapp{display:none!important}
@@ -111,6 +129,9 @@
     all.forEach(a=>{if(a!==reta)a.remove();});
     if(reta.parentElement!==nav){
       if(medicina.parentElement===nav) medicina.insertAdjacentElement('afterend',reta); else nav.appendChild(reta);
+    }
+    if(penal.parentElement!==nav){
+      if(law?.parentElement===nav) law.insertAdjacentElement('afterend',penal); else nav.insertBefore(penal,nav.firstChild);
     }
   });
   observer.observe(nav,{childList:true,subtree:false});
