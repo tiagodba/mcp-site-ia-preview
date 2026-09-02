@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+Disallow: /api/
+Disallow: /painel-admin-questoes.html
+Disallow: /painel-importar-pdf-questoes.html
+
 Sitemap: https://materiais-carreiras-policiais.vercel.app/sitemap.xml
