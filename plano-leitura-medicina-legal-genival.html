@@ -47,7 +47,61 @@ function updateToday(){state.current=Math.max(1,Math.min(state.days,state.curren
 function updateProgress(){const n=doneSet().size,p=Math.round(n/state.days*100);$('#barfill').style.width=p+'%';$('#progressText').textContent=p+'% concluído';$('#doneCount').textContent=`${n}/${state.days} dias`;updateToday()}
 $$('[data-track]').forEach(b=>{if(b.dataset.track===state.track)b.classList.add('active');b.onclick=()=>{state.track=b.dataset.track;localStorage.setItem('mcp_genival_track',state.track);$$('[data-track]').forEach(x=>x.classList.toggle('active',x===b));state.current=1;buildPriorities();buildPlan()}});$$('[data-days]').forEach(b=>{if(+b.dataset.days===state.days)b.classList.add('active');b.onclick=()=>{state.days=+b.dataset.days;localStorage.setItem('mcp_genival_days',state.days);$$('[data-days]').forEach(x=>x.classList.toggle('active',x===b));state.current=Math.min(state.current,state.days);buildPlan()}});$('#prevDay').onclick=()=>{state.current=Math.max(1,state.current-1);updateToday()};$('#nextDay').onclick=()=>{state.current=Math.min(state.days,state.current+1);updateToday()};$('#todayDone').onchange=e=>{const s=doneSet();e.target.checked?s.add(state.current):s.delete(state.current);saveDone(s);buildPlan()};$('#notes').value=localStorage.getItem('mcp_genival_notes')||'';$('#saveNotes').onclick=()=>{localStorage.setItem('mcp_genival_notes',$('#notes').value);alert('Anotações salvas neste navegador.')};$('#clearNotes').onclick=()=>{if(confirm('Limpar anotações?')){$('#notes').value='';localStorage.removeItem('mcp_genival_notes')}};buildPriorities();buildPlan();
 let activeUrl='',blobUrl='';const viewer=$('#pdfViewer'),placeholder=$('#pdfPlaceholder'),status=$('#readerStatus'),name=$('#pdfName');function showPdf(url,label){if(blobUrl&&blobUrl!==url){URL.revokeObjectURL(blobUrl);blobUrl=''}activeUrl=url;viewer.src=url;viewer.hidden=false;placeholder.hidden=true;name.textContent=label||'PDF carregado';status.textContent='PDF pronto para leitura.'}function setPage(n){n=Math.max(1,+n||1);localStorage.setItem('mcp_genival_page',n);if(!activeUrl){status.textContent='Abra um PDF primeiro.';return}const base=activeUrl.split('#')[0];viewer.src=base+'#page='+n;status.textContent='Página '+n+' selecionada.'}
-function openDb(){return new Promise((res,rej)=>{const r=indexedDB.open('mcp_genival_pdf_db',1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('files'))r.result.createObjectStore('files')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}async function savePdf(file){try{const db=await openDb();await new Promise((res,rej)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').put(file,'genival');tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});localStorage.setItem('mcp_genival_pdf_name',file.name);status.textContent='PDF salvo localmente neste navegador.'}catch(e){status.textContent='PDF aberto, mas o navegador não permitiu salvá-lo para a próxima visita.'}}async function loadSavedPdf(){try{const db=await openDb();const file=await new Promise((res,rej)=>{const tx=db.transaction('files','readonly');const r=tx.objectStore('files').get('genival');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});if(file){blobUrl=URL.createObjectURL(file);showPdf(blobUrl,localStorage.getItem('mcp_genival_pdf_name')||'PDF salvo no navegador');const p=+(localStorage.getItem('mcp_genival_page')||1);setPage(p)}}catch(e){}}
+function openDb(){return new Promise((res,rej)=>{const r=indexedDB.open('mcp_genival_pdf_db',2);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('files'))r.result.createObjectStore('files')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function savePdf(file){
+  try{
+    status.textContent='Salvando PDF neste navegador...';
+    const data=await file.arrayBuffer();
+    const record={name:file.name,type:file.type||'application/pdf',data};
+    const db=await openDb();
+    await new Promise((res,rej)=>{
+      const tx=db.transaction('files','readwrite');
+      tx.objectStore('files').put(record,'genival');
+      tx.oncomplete=()=>res();
+      tx.onerror=()=>rej(tx.error);
+      tx.onabort=()=>rej(tx.error||new Error('Transação cancelada'));
+    });
+    localStorage.setItem('mcp_genival_pdf_name',file.name);
+    localStorage.setItem('mcp_genival_pdf_saved','1');
+    status.textContent='PDF salvo neste navegador. Ele será reaberto automaticamente.';
+  }catch(e){
+    console.error('Falha ao salvar PDF:',e);
+    localStorage.removeItem('mcp_genival_pdf_saved');
+    status.textContent='PDF aberto, mas não foi possível salvá-lo. Verifique espaço/permissões do navegador.';
+  }
+}
+async function loadSavedPdf(){
+  try{
+    if(!('indexedDB' in window))throw new Error('IndexedDB indisponível');
+    const db=await openDb();
+    const saved=await new Promise((res,rej)=>{
+      const tx=db.transaction('files','readonly');
+      const r=tx.objectStore('files').get('genival');
+      r.onsuccess=()=>res(r.result);
+      r.onerror=()=>rej(r.error);
+    });
+    if(!saved)return;
+    let blob;
+    if(saved instanceof Blob){
+      blob=saved;
+    }else if(saved && saved.data){
+      blob=new Blob([saved.data],{type:saved.type||'application/pdf'});
+    }else{
+      throw new Error('Formato salvo inválido');
+    }
+    if(blobUrl)URL.revokeObjectURL(blobUrl);
+    blobUrl=URL.createObjectURL(blob);
+    const label=(saved&&saved.name)||localStorage.getItem('mcp_genival_pdf_name')||'PDF salvo no navegador';
+    showPdf(blobUrl,label);
+    const p=Math.max(1,+(localStorage.getItem('mcp_genival_page')||1));
+    $('#pageNumber').value=p;
+    setTimeout(()=>setPage(p),150);
+    status.textContent='PDF recuperado do navegador.';
+  }catch(e){
+    console.error('Falha ao recuperar PDF:',e);
+    status.textContent='Não foi possível recuperar o PDF salvo. Selecione o arquivo novamente.';
+  }
+}
 $('#pdfFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(file.type&&file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){status.textContent='Selecione um arquivo PDF.';return}blobUrl=URL.createObjectURL(file);showPdf(blobUrl,file.name);await savePdf(file)};$('#openUrl').onclick=()=>{const u=$('#pdfUrl').value.trim();if(!/^https?:\/\//i.test(u)){status.textContent='Informe um link https:// válido.';return}localStorage.setItem('mcp_genival_pdf_url',u);showPdf(u,'PDF por link')};$('#goPage').onclick=()=>setPage($('#pageNumber').value);$('#savePage').onclick=()=>{const n=Math.max(1,+$('#pageNumber').value||+(localStorage.getItem('mcp_genival_page')||1));localStorage.setItem('mcp_genival_page',n);status.textContent='Página '+n+' salva.'};$('#resumePage').onclick=()=>{const n=+(localStorage.getItem('mcp_genival_page')||1);$('#pageNumber').value=n;setPage(n)};$('#openTab').onclick=()=>{if(activeUrl)window.open(activeUrl,'_blank','noopener');else status.textContent='Abra um PDF primeiro.'};$('#forgetPdf').onclick=async()=>{try{const db=await openDb();await new Promise((res,rej)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').delete('genival');tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}catch{}localStorage.removeItem('mcp_genival_pdf_name');localStorage.removeItem('mcp_genival_pdf_url');if(blobUrl)URL.revokeObjectURL(blobUrl);blobUrl='';activeUrl='';viewer.src='';viewer.hidden=true;placeholder.hidden=false;name.textContent='Nenhum PDF carregado.';status.textContent='PDF removido do armazenamento local.'};const savedUrl=localStorage.getItem('mcp_genival_pdf_url');if(savedUrl){$('#pdfUrl').value=savedUrl}loadSavedPdf();
 })();
 </script>
