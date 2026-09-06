@@ -146,3 +146,110 @@
   }
   loadFinal();
 })();
+
+
+;(()=>{
+  if(document.getElementById('mcpLeadCapture')) return;
+
+  const style=document.createElement('style');
+  style.textContent=`
+    #mcpLeadCapture{position:fixed;inset:0;z-index:170;background:#020914d9;display:none;align-items:center;justify-content:center;padding:18px}
+    #mcpLeadCapture.open{display:flex}
+    .mcp-lead-card{width:min(520px,100%);background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 28px 90px #0008}
+    .mcp-lead-head{background:linear-gradient(115deg,#020a18,#072650);color:#fff;padding:22px 24px;display:flex;gap:16px;align-items:flex-start}
+    .mcp-lead-badge{width:48px;height:48px;border:1px solid #efbd26;border-radius:50%;display:grid;place-items:center;color:#efbd26;font-size:22px;flex:0 0 auto}
+    .mcp-lead-head h2{margin:0;font:400 28px Georgia,serif}.mcp-lead-head p{margin:7px 0 0;color:#b8c5d4;font-size:13px;line-height:1.5}
+    .mcp-lead-close{margin-left:auto;border:0;background:transparent;color:#fff;font-size:26px;cursor:pointer}
+    .mcp-lead-body{padding:24px}
+    .mcp-lead-grid{display:grid;gap:12px}.mcp-lead-grid input,.mcp-lead-grid select{width:100%;padding:13px 14px;border:1px solid #d7dee8;border-radius:8px;color:#08203d;background:#fff;font:inherit}
+    .mcp-lead-consent{display:flex;gap:9px;align-items:flex-start;color:#697585;font-size:11px;line-height:1.45;margin:2px 0 4px}.mcp-lead-consent input{margin-top:2px}
+    .mcp-lead-submit{width:100%;border:0;border-radius:8px;background:#efbd26;color:#062a5d;padding:14px 18px;font-weight:900;cursor:pointer}
+    .mcp-lead-submit:disabled{opacity:.65;cursor:not-allowed}.mcp-lead-status{min-height:20px;margin-top:11px;font-size:12px;line-height:1.45}.mcp-lead-status.ok{color:#126a43}.mcp-lead-status.err{color:#9a2b2b}
+    .mcp-lead-trigger{position:fixed;left:24px;bottom:24px;z-index:42;border:0;border-radius:28px;background:#fff;color:#062a5d;padding:13px 17px;font-weight:900;box-shadow:0 12px 28px #0003;cursor:pointer;border:1px solid #dfe5ec}
+    @media(max-width:560px){.mcp-lead-trigger{left:14px;bottom:14px}.mcp-lead-head h2{font-size:24px}}
+  `;
+  document.head.appendChild(style);
+
+  const modal=document.createElement('div');
+  modal.id='mcpLeadCapture';
+  modal.setAttribute('aria-hidden','true');
+  modal.innerHTML=`
+    <div class="mcp-lead-card" role="dialog" aria-modal="true" aria-labelledby="mcpLeadTitle">
+      <div class="mcp-lead-head">
+        <div class="mcp-lead-badge">✉</div>
+        <div><h2 id="mcpLeadTitle">Receba material gratuito do MCP</h2><p>Informe seu concurso de interesse e receba conteúdos, mapas ou avisos de materiais disponíveis.</p></div>
+        <button class="mcp-lead-close" type="button" aria-label="Fechar">×</button>
+      </div>
+      <form class="mcp-lead-body" id="mcpLeadForm">
+        <div class="mcp-lead-grid">
+          <input name="nome" autocomplete="name" placeholder="Seu nome" required>
+          <input name="email" type="email" autocomplete="email" placeholder="Seu melhor e-mail" required>
+          <select name="concurso" required>
+            <option value="">Concurso de interesse</option>
+            <option>GCM Caldas Novas</option>
+            <option>GCM Paracatu</option>
+            <option>Polícia Civil</option>
+            <option>Polícia Penal</option>
+            <option>Polícia Científica</option>
+            <option>PM / Bombeiros</option>
+            <option>Outro concurso policial</option>
+          </select>
+          <label class="mcp-lead-consent"><input name="consentimento" type="checkbox" required><span>Autorizo o MCP a usar meu e-mail para enviar o material solicitado e comunicações relacionadas ao concurso informado.</span></label>
+          <button class="mcp-lead-submit" type="submit">Quero receber material</button>
+        </div>
+        <div class="mcp-lead-status" id="mcpLeadStatus" aria-live="polite"></div>
+      </form>
+    </div>`;
+  document.body.appendChild(modal);
+
+  const trigger=document.createElement('button');
+  trigger.className='mcp-lead-trigger';
+  trigger.type='button';
+  trigger.textContent='📩 Receber material';
+  document.body.appendChild(trigger);
+
+  const open=()=>{modal.classList.add('open');modal.setAttribute('aria-hidden','false')};
+  const close=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true')};
+  trigger.onclick=open;
+  modal.querySelector('.mcp-lead-close').onclick=close;
+  modal.addEventListener('click',e=>{if(e.target===modal)close()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+
+  const key='mcpLeadPromptSeenV1';
+  try{
+    if(!localStorage.getItem(key)){
+      setTimeout(()=>{open();localStorage.setItem(key,String(Date.now()))},9000);
+    }
+  }catch{}
+
+  const form=modal.querySelector('#mcpLeadForm');
+  const status=modal.querySelector('#mcpLeadStatus');
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();
+    status.className='mcp-lead-status';
+    status.textContent='Enviando sua solicitação...';
+    const button=form.querySelector('.mcp-lead-submit');
+    button.disabled=true;
+    const fd=new FormData(form);
+    const payload={
+      nome:fd.get('nome'),
+      email:fd.get('email'),
+      concurso:fd.get('concurso'),
+      consentimento:fd.get('consentimento')==='on',
+      pagina:location.href
+    };
+    try{
+      const r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(d.error||'Não foi possível enviar agora.');
+      status.className='mcp-lead-status ok';
+      status.textContent='Cadastro enviado. Confira seu e-mail em alguns instantes.';
+      form.reset();
+      try{localStorage.setItem('mcpLeadConvertedV1','1')}catch{}
+      setTimeout(close,2200);
+    }catch(err){
+      status.className='mcp-lead-status err';
+      status.textContent=err.message||'Não foi possível enviar agora.';
+    }finally{button.disabled=false}
+  });
+})();
