@@ -80,7 +80,8 @@ export default async function handler(req, res) {
     const assuntoEmail = `Seu material MCP - ${concurso}`;
     const emailHtml = `
       <div style="font-family:Arial,Helvetica,sans-serif;max-width:620px;margin:auto;color:#0a2443">
-        <div style="background:#03162f;padding:24px;border-radius:12px 12px 0 0;color:#fff">
+        <div style="background:#03162f;padding:24px;border-radius:12px 12px 0 0;color:#fff;text-align:center">
+          <img src="https://materiais-carreiras-policiais.basegpt2.chatgpt.site/logo-mcp.png" alt="MCP Materiais Carreiras Policiais" width="110" style="display:block;width:110px;max-width:110px;height:auto;margin:0 auto 14px">
           <div style="font-size:12px;letter-spacing:2px;color:#efbd26;font-weight:700">MCP • MATERIAIS CARREIRAS POLICIAIS</div>
           <h2 style="margin:10px 0 0;font-size:28px">Olá, ${nomeSeguro}!</h2>
         </div>
