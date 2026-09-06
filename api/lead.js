@@ -1,4 +1,4 @@
-const N8N_WEBHOOK = 'https://tiagoteixeira.app.n8n.cloud/webhook/mcp-lead';
+const N8N_WEBHOOK = 'https://tiagoteixeira.app.n8n.cloud/webhook/mcp-lead-site';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
