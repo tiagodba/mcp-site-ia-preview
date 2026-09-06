@@ -15,7 +15,7 @@ function materialFor(concurso) {
     },
     'GCM Caldas Novas': {
       titulo: 'Materiais GCM Caldas Novas',
-      url: SITE + '/#materiais',
+      url: SITE + '/#gcm-caldas-novas',
       texto: 'Confira os materiais e atualizações disponíveis para Guarda Municipal.'
     },
     'Polícia Civil': {
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
     const emailHtml = `
       <div style="font-family:Arial,Helvetica,sans-serif;max-width:620px;margin:auto;color:#0a2443">
         <div style="background:#03162f;padding:24px;border-radius:12px 12px 0 0;color:#fff;text-align:center">
-          <img src="https://materiais-carreiras-policiais.basegpt2.chatgpt.site/logo-mcp.png" alt="MCP Materiais Carreiras Policiais" width="110" style="display:block;width:110px;max-width:110px;height:auto;margin:0 auto 14px">
+          <img src="https://materiais-carreiras-policiais.basegpt2.chatgpt.site/logo-mcp.png" alt="MCP Materiais Carreiras Policiais" width="160" style="display:block;width:160px;max-width:160px;height:auto;margin:0 auto 18px">
           <div style="font-size:12px;letter-spacing:2px;color:#efbd26;font-weight:700">MCP • MATERIAIS CARREIRAS POLICIAIS</div>
           <h2 style="margin:10px 0 0;font-size:28px">Olá, ${nomeSeguro}!</h2>
         </div>
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
             <p style="margin:8px 0 0;line-height:1.5">${textoSeguro}</p>
           </div>
           <p style="text-align:center;margin:28px 0">
-            <a href="${material.url}" style="display:inline-block;background:#efbd26;color:#062a5d;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:7px">IR DIRETO AOS MATERIAIS</a>
+            <a href="${material.url}" style="display:inline-block;background:#efbd26;color:#062a5d;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:7px">${concursoSeguro === 'GCM Caldas Novas' ? 'ACESSAR MATERIAIS GCM CALDAS NOVAS' : 'IR DIRETO AOS MATERIAIS'}</a>
           </p>
           <p style="font-size:13px;color:#6c7581;line-height:1.5">Você recebeu esta mensagem porque solicitou material no site do MCP.</p>
         </div>
