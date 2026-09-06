@@ -177,7 +177,7 @@
     <div class="mcp-lead-card" role="dialog" aria-modal="true" aria-labelledby="mcpLeadTitle">
       <div class="mcp-lead-head">
         <div class="mcp-lead-badge">✉</div>
-        <div><h2 id="mcpLeadTitle">Receba material gratuito do MCP</h2><p>Informe seu concurso de interesse e receba conteúdos, mapas ou avisos de materiais disponíveis.</p></div>
+        <div><h2 id="mcpLeadTitle">Receba materiais e novidades do MCP</h2><p>Informe seu concurso de interesse e receba conteúdos, mapas, avisos e acesso aos materiais disponíveis para a sua preparação.</p></div>
         <button class="mcp-lead-close" type="button" aria-label="Fechar">×</button>
       </div>
       <form class="mcp-lead-body" id="mcpLeadForm">
