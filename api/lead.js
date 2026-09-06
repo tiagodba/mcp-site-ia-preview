@@ -92,7 +92,7 @@ export default async function handler(req, res) {
             <p style="margin:8px 0 0;line-height:1.5">${textoSeguro}</p>
           </div>
           <p style="text-align:center;margin:28px 0">
-            <a href="${material.url}" style="display:inline-block;background:#efbd26;color:#062a5d;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:7px">ACESSAR MATERIAL MCP</a>
+            <a href="${material.url}" style="display:inline-block;background:#efbd26;color:#062a5d;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:7px">IR DIRETO AOS MATERIAIS</a>
           </p>
           <p style="font-size:13px;color:#6c7581;line-height:1.5">Você recebeu esta mensagem porque solicitou material no site do MCP.</p>
         </div>
