@@ -20,17 +20,17 @@ function materialFor(concurso) {
     },
     'Polícia Civil': {
       titulo: 'Materiais para Polícia Civil',
-      url: SITE + '/#materiais',
+      url: SITE + '/#policia-civil',
       texto: 'Confira apostilas, questões, mapas e materiais disponíveis para Polícia Civil.'
     },
     'Polícia Científica': {
       titulo: 'Materiais para Polícia Científica',
-      url: SITE + '/#materiais',
+      url: SITE + '/#policia-cientifica',
       texto: 'Confira conteúdos de perícia, cadeia de custódia, medicina legal e criminalística.'
     },
     'PM / Bombeiros': {
       titulo: 'Materiais para PM e Bombeiros',
-      url: SITE + '/#materiais',
+      url: SITE + '/#pm-bombeiros',
       texto: 'Confira os materiais disponíveis para carreiras militares.'
     },
     'Outro concurso policial': {
