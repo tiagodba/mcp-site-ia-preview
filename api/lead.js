@@ -18,6 +18,11 @@ function materialFor(concurso) {
       url: SITE + '/#gcm-caldas-novas',
       texto: 'Confira os materiais e atualizações disponíveis para Guarda Municipal.'
     },
+    'PC-BA': {
+      titulo: 'Materiais PC-BA',
+      url: SITE + '/#pc-ba',
+      texto: 'Confira os materiais direcionados para a Polícia Civil da Bahia, incluindo conteúdos para Escrivão e Investigador.'
+    },
     'Polícia Civil': {
       titulo: 'Materiais para Polícia Civil',
       url: SITE + '/#policia-civil',
