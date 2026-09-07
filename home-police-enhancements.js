@@ -188,6 +188,7 @@
             <option value="">Concurso de interesse</option>
             <option>GCM Caldas Novas</option>
             <option>GCM Paracatu</option>
+            <option>PC-BA</option>
             <option>Polícia Civil</option>
             <option>Polícia Penal</option>
             <option>Polícia Científica</option>
