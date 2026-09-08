@@ -109,7 +109,25 @@
     .mobile{background:#06172f;border-top:1px solid #203650}.mobile.show{display:flex!important;flex-wrap:wrap;gap:10px;padding:14px 20px 18px!important}.mobile.show a{display:block;color:#fff!important;margin:0!important;padding:11px 13px;text-decoration:none;border:1px solid #29415e;border-radius:5px;font-size:14px!important;font-weight:800!important}
     @media(max-width:1740px){.brand{min-width:58px!important}.brand span{display:none}.social{display:none!important}.nav{margin-left:7px!important;margin-right:4px!important;gap:7px!important}.nav>a{font-size:11.5px!important}}
     @media(max-width:1510px){.nav>a[data-mcp-low-priority="1"]{display:none!important}.nav{gap:8px!important}.nav>a{font-size:11.5px!important}}
-    @media(max-width:1950px){.header-inner{height:64px!important}.brand{height:64px!important}.nav,.social{display:none!important}.menu{display:block!important;margin-left:auto}.brand{min-width:0!important}.brand span{display:block}}
+    @media(max-width:1950px){
+      .header-inner{height:64px!important}.brand{height:64px!important}.brand{min-width:0!important}.brand span{display:block}
+      .social{display:none!important}
+      .nav{display:flex!important;align-items:center;gap:12px!important;margin-left:24px!important;overflow:hidden!important}
+      .nav>a{display:none!important}
+      .nav>a[href="#inicio"],
+      .nav>a[href="#materiais"]:first-of-type,
+      .nav>a[href="/questoes-gcm-2026.html"],
+      .nav>a[href="/questoes.html"],
+      .nav>a[data-mcp-reta-final="1"]{display:inline-flex!important}
+      .menu{display:block!important;margin-left:auto;flex:0 0 auto}
+    }
+    @media(max-width:1220px){
+      .nav>a[href="/questoes.html"],
+      .nav>a[data-mcp-reta-final="1"]{display:none!important}
+    }
+    @media(max-width:980px){
+      .nav{display:none!important}
+    }
     @media(min-width:1951px){.mobile{display:none!important}}
   `;
   document.getElementById('mcp-header-fix-final')?.remove();
