@@ -30,7 +30,7 @@
   .menu{display:block;margin-left:auto}
   .brand{min-width:0}
 }
-@media(min-width:1281px){.mobile{display:none!important}}
+@media(min-width:1551px){.mobile{display:none!important}}
 @media(max-width:700px){
   .header-inner{height:66px;gap:10px}
   .brand img{width:42px;height:42px;margin-right:9px}
@@ -38,6 +38,28 @@
   .brand small{letter-spacing:3px}
   .mobile.show{grid-template-columns:1fr}
   .mobile{padding:8px 14px 14px}
+}/* Header alignment hardening */
+html,body{max-width:100%;overflow-x:hidden}
+.header{width:100%;overflow:visible}
+.header .wrap{width:min(1180px,calc(100% - 32px))}
+.header-inner{width:100%;min-width:0}
+.brand{min-width:0;max-width:245px}
+.brand span{min-width:0}
+.nav{min-width:0;overflow:hidden}
+.nav a{flex:0 0 auto}
+@media(max-width:1550px){
+  .nav,.social{display:none!important}
+  .menu{display:block!important;margin-left:auto}
+  .header-inner{justify-content:space-between}
+}
+@media(min-width:1551px){
+  .menu{display:none!important}
+  .mobile{display:none!important}
+}
+@media(max-width:700px){
+  .header .wrap{width:calc(100% - 20px)}
+  .brand{max-width:210px}
+  .brand strong{white-space:nowrap}
 }</style>
   <style>
     .mcp-ai{position:fixed;right:22px;bottom:22px;width:min(380px,calc(100vw - 28px));z-index:45;font-family:Arial,sans-serif;filter:drop-shadow(0 18px 35px #00102755)}.mcp-ai-launcher{margin-left:auto;width:66px;height:66px;border:2px solid #efbd26;border-radius:50%;background:#03162f;color:#efbd26;font-size:27px;cursor:pointer;display:grid;place-items:center;box-shadow:0 0 0 0 #efbd2666;animation:mcpPulse 2s infinite}.mcp-ai-panel{display:none;overflow:hidden;border:1px solid #29476b;border-radius:16px;background:#fff}.mcp-ai.open .mcp-ai-panel{display:block;animation:mcpRise .28s ease}.mcp-ai.open .mcp-ai-launcher{display:none}.mcp-ai-head{display:flex;align-items:center;gap:12px;padding:16px 18px;background:linear-gradient(115deg,#020a18,#072650);color:#fff}.mcp-ai-avatar{width:42px;height:42px;display:grid;place-items:center;border:1px solid #efbd26;border-radius:50%;background:#0a315f;font-size:21px}.mcp-ai-head strong{display:block}.mcp-ai-head small{display:flex;align-items:center;gap:6px;color:#b9c7d8;margin-top:4px}.mcp-ai-head small:before{content:'';width:7px;height:7px;border-radius:50%;background:#35d07f;box-shadow:0 0 8px #35d07f}.mcp-ai-close{margin-left:auto;border:0;background:transparent;color:#fff;font-size:24px;cursor:pointer}.mcp-ai-body{padding:18px}.mcp-ai-label{font-size:10px;font-weight:900;letter-spacing:1.8px;color:#9a7300}.mcp-ai-tip{min-height:100px;margin:11px 0 16px;font-size:15px;line-height:1.55;color:#183653}.mcp-ai-tip.typing:after{content:'|';color:#d9a900;animation:mcpBlink .7s infinite}.mcp-ai-select{width:100%;padding:11px;border:1px solid #d8dee7;border-radius:8px;color:#173552;background:#fff}.mcp-ai-actions{display:flex;gap:9px;margin-top:12px}.mcp-ai-actions button{flex:1;border:0;border-radius:8px;padding:11px 9px;font-weight:800;cursor:pointer}.mcp-ai-next{background:#efbd26;color:#08203d}.mcp-ai-material{background:#062650;color:#fff}.mcp-ai-note{margin:12px 0 0;color:#7a8490;font-size:10px;line-height:1.35}@keyframes mcpPulse{70%{box-shadow:0 0 0 16px #efbd2600}}@keyframes mcpRise{from{opacity:0;transform:translateY(12px)}}@keyframes mcpBlink{50%{opacity:0}}@media(max-width:520px){.mcp-ai{right:14px;bottom:14px}.mcp-ai-panel{max-height:76vh;overflow:auto}}
@@ -170,7 +192,7 @@
       document.querySelector('#botResult').innerHTML=actions;
     }
     [previewModal,shopModal].forEach(modal=>modal.addEventListener('click',e=>{if(e.target===modal){modal.classList.remove('open');document.body.style.overflow=''}}));document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePreview();closeShop()}});
-    const style=document.createElement('style');style.textContent='.mobile.show{display:block!important}@media(min-width:1281px){.mobile{display:none!important}}';document.head.appendChild(style);
+    const style=document.createElement('style');style.textContent='.mobile.show{display:block!important}@media(min-width:1551px){.mobile{display:none!important}}';document.head.appendChild(style);
     let mcpTipIndex=0,mcpCurrentTip='',mcpLoading=false,mcpCooldownTimer=null;
     const mcpTipCache=new Map();
     function toggleMcpAi(open){document.querySelector('#mcpAi').classList.toggle('open',open);if(open&&!document.querySelector('#mcpAiTip').textContent)nextMcpTip()}
