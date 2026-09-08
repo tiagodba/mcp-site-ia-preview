@@ -1,4 +1,4 @@
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.setHeader('Allow', 'GET, HEAD');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -51,4 +51,4 @@ module.exports = async function handler(req, res) {
       message: error && error.message ? error.message : 'Unknown error'
     });
   }
-};
+}
