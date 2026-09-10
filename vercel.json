@@ -10,6 +10,10 @@
   },
   "rewrites": [
     {
+      "source": "/analise-edital",
+      "destination": "/analise-edital.html"
+    },
+    {
       "source": "/apostila-reta-final-gcm-paracatu.html",
       "destination": "/Apostila_Reta_Final_GCM_Paracatu_WEB.pdf"
     }
