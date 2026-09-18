@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Simulado GCM Paracatu | IBGP — MCP</title><style>body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#10233f}.top{background:#061a35;color:#fff;padding:22px}.wrap{max-width:900px;margin:auto;padding:24px}.card{background:#fff;border:1px solid #dbe3ee;border-radius:12px;padding:22px;margin:18px 0}.q{font-weight:800;font-size:18px;line-height:1.45}.opt{display:block;padding:12px;margin:9px 0;border:1px solid #cfd8e3;border-radius:8px;cursor:pointer}.opt input{margin-right:8px}.btn{background:#092c5d;color:#fff;border:0;border-radius:8px;padding:14px 20px;font-weight:800;cursor:pointer}.result{font-size:20px;font-weight:800;background:#fff7d6;border:1px solid #e7c85b;padding:20px;border-radius:10px}.small{color:#617089}.gold{color:#f0bd28}</style></head><body><header class="top"><div class="wrap"><strong><span class="gold">MCP</span> CARREIRAS POLICIAIS</strong><div>Simulado GCM Paracatu/MG — estilo IBGP</div></div></header><main class="wrap"><h1>Simulado de 30 questões</h1><p class="small">Base de estudo: Lei Complementar nº 198/2025, conforme material editorial MCP. Marque uma alternativa por questão e confira o resultado ao final.</p><form id="quiz"></form><button class="btn" id="finish">Corrigir simulado</button><div id="result" style="margin-top:20px"></div></main><script>
+const qs=[
+['A LC 198/2025 estrutura, entre outros temas:',['Somente o salário','Carreira, organização, cargos, jornada e vencimentos','Apenas o concurso','Somente a hierarquia'],1],
+['Quais são os quatro núcleos da estrutura administrativa da GCM?',['Comando, Corregedoria, Ouvidoria e Inspetoria','Prefeitura, Câmara, Fórum e Polícia','Comando, RH, Finanças e Saúde','Ouvidoria, Judiciário, MP e Inspetoria'],0],
+['São superiores hierárquicos ao Comando da GCM:',['Governador e Delegado','Prefeito e Superintendente de Segurança Pública e Defesa Social','Presidente da Câmara e Juiz','Secretário de Saúde e RH'],1],
+['O Subcomando deve:',['Somente fiscalizar','Auxiliar o Comando e substituí-lo nas ausências, afastamentos ou impedimentos','Exercer o controle externo','Organizar apenas concursos'],1],
+['O controle interno é exercido pela:',['Ouvidoria','Inspetoria','Corregedoria','Câmara Municipal'],2],
+['O controle externo é exercido pela:',['Corregedoria','Ouvidoria','Comando','Comissão de avaliação'],1],
+['A Corregedoria atua principalmente na apuração de responsabilidade por meio de:',['Sindicâncias e processos administrativos disciplinares','Provas de títulos','Curso de formação','Promoções automáticas'],0],
+['A Inspetoria é composta por Inspetores de:',['3ª e 2ª Classes','1ª e 2ª Classes','Classe Plena e Distinta','Classe Especial apenas'],1],
+['A investidura na carreira depende de:',['Apenas entrevista','Aprovação em todas as etapas do concurso','Somente curso de formação','Indicação política'],1],
+['Quantas fases são enumeradas no concurso do art. 13?',['5','6','8','10'],2],
+['A prova de títulos tem caráter:',['Eliminatório','Classificatório','Disciplinar','Secreto'],1],
+['A CNH categoria B deve ser apresentada em até:',['5 dias após a posse','10 dias após o edital','30 dias do início do curso','90 dias do concurso'],2],
+['A ajuda de custo do Aluno GCM corresponde a:',['20% do salário mínimo','50% do vencimento da 3ª Classe','80% do vencimento-base do GCM 3ª Classe','100% do vencimento da Classe Especial'],2],
+['Durante o curso, a lei afirma que o Aluno GCM:',['Já possui vínculo efetivo','Não possui vínculo ou relação de trabalho com a Administração Municipal','É servidor estável','Recebe gratificação de função'],1],
+['O estágio probatório dura:',['1 ano','2 anos','3 anos de efetivo exercício','5 anos'],2],
+['A avaliação do estágio deve ser concluída:',['5 dias antes do fim','30 dias antes','60 dias antes do prazo final','Após a estabilidade'],2],
+['O prazo de recurso voluntário contra parecer desfavorável no probatório é de:',['3 dias','5 dias','10 dias','15 dias úteis'],1],
+['A carreira possui quantos cargos efetivos de GCM, segundo o art. 28?',['20','30','40','60'],2],
+['A reserva mínima de vagas para candidatas é de:',['10%','15%','20%','30%'],2],
+['O ingresso ocorre como:',['GCM de 1ª Classe','GCM de 2ª Classe','GCM de 3ª Classe','Classe Especial'],2],
+['Qual é a ordem crescente das classes?',['Especial, Distinta, Plena, 1ª, 2ª, 3ª','3ª, 2ª, 1ª, Plena, Distinta, Especial','1ª, 2ª, 3ª, Plena, Especial, Distinta','Plena, 3ª, 2ª, Distinta, 1ª, Especial'],1],
+['Promoção é evolução:',['Horizontal','Vertical','Por sorteio','Sem requisito'],1],
+['A promoção geral ocorre após quantos anos na classe e com qual acréscimo?',['2 anos e 1%','5 anos e 8%','3 anos e 5%','10 anos e 20%'],1],
+['A progressão corresponde a:',['Mudança de classe','Evolução horizontal para padrão imediatamente superior, com 1%','Exoneração','Mudança de município'],1],
+['Para progressão por merecimento, exige-se efetivo exercício de:',['180 dias','365 dias','730 dias na classe','5 anos na classe'],2],
+['Nos seis meses anteriores à progressão, o servidor não pode ter sofrido pena de:',['Advertência verbal','Suspensão','Multa de trânsito','Remoção'],1],
+['O resultado mínimo da avaliação para progressão é de:',['50%','60%','70%','80%'],2],
+['A jornada semanal prevista é de:',['30 horas','36 horas','40 horas','44 horas'],2],
+['O adicional noturno abrange o período de:',['20h às 4h','21h às 6h','22h às 5h','23h às 7h'],2],
+['O trabalho extraordinário pago é limitado a:',['1 hora diária','2 horas diárias','4 horas diárias','6 horas diárias'],1]
+];
+const form=document.getElementById('quiz');qs.forEach((q,i)=>{const d=document.createElement('section');d.className='card';d.innerHTML='<div class="q">'+(i+1)+'. '+q[0]+'</div>'+q[1].map((o,j)=>'<label class="opt"><input required type="radio" name="q'+i+'" value="'+j+'">'+String.fromCharCode(65+j)+') '+o+'</label>').join('');form.appendChild(d)});
+document.getElementById('finish').onclick=()=>{let score=0;qs.forEach((q,i)=>{const a=document.querySelector('input[name=q'+i+']:checked');if(a&&+a.value===q[2])score++});document.getElementById('result').innerHTML='<div class="result">Resultado: '+score+'/30 ('+Math.round(score/30*100)+'%)<br><span class="small">Revise as questões erradas e consulte a redação oficial vigente.</span></div>';window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})};
+</script></body></html>
