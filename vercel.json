@@ -1,52 +1,18 @@
 {
   "version": 2,
   "functions": {
-    "api/dica.js": {
-      "maxDuration": 30
-    },
-    "api/corrigir-discursiva.js": {
-      "maxDuration": 60
-    }
+    "api/dica.js": {"maxDuration": 30},
+    "api/corrigir-discursiva.js": {"maxDuration": 60}
   },
   "rewrites": [
-    {
-      "source": "/analise-edital",
-      "destination": "/analise-edital.html"
-    },
-    {
-      "source": "/apostila-reta-final-gcm-paracatu.html",
-      "destination": "/Apostila_Reta_Final_GCM_Paracatu_WEB.pdf"
-    }
+    {"source": "/analise-edital", "destination": "/analise-edital.html"},
+    {"source": "/questoes", "destination": "/questoes.html"},
+    {"source": "/apostila-reta-final-gcm-paracatu.html", "destination": "/Apostila_Reta_Final_GCM_Paracatu_WEB.pdf"}
   ],
   "headers": [
-    {
-      "source": "/(.*).html",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "index, follow, max-image-preview:large, max-snippet:-1" }
-      ]
-    },
-    {
-      "source": "/",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "index, follow, max-image-preview:large, max-snippet:-1" },
-        { "key": "Link", "value": "<https://materiais-carreiras-policiais.vercel.app/>; rel=\"canonical\"" }
-      ]
-    },
-    {
-      "source": "/Apostila_Reta_Final_GCM_Paracatu_WEB.pdf",
-      "headers": [
-        { "key": "Content-Type", "value": "application/pdf" },
-        { "key": "Content-Disposition", "value": "inline; filename=\"Apostila_Reta_Final_GCM_Paracatu_2026.pdf\"" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" }
-      ]
-    },
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
-      ]
-    }
+    {"source": "/(.*).html", "headers": [{"key": "X-Robots-Tag", "value": "index, follow, max-image-preview:large, max-snippet:-1"}]},
+    {"source": "/", "headers": [{"key": "X-Robots-Tag", "value": "index, follow, max-image-preview:large, max-snippet:-1"}, {"key": "Link", "value": "<https://materiais-carreiras-policiais.vercel.app/>; rel=\"canonical\""}]},
+    {"source": "/Apostila_Reta_Final_GCM_Paracatu_WEB.pdf", "headers": [{"key": "Content-Type", "value": "application/pdf"}, {"key": "Content-Disposition", "value": "inline; filename=\"Apostila_Reta_Final_GCM_Paracatu_2026.pdf\""}, {"key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400"}]},
+    {"source": "/api/(.*)", "headers": [{"key": "X-Robots-Tag", "value": "noindex, nofollow"}, {"key": "X-Content-Type-Options", "value": "nosniff"}, {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"}]}
   ]
 }
