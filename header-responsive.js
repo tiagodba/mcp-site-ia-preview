@@ -24,6 +24,15 @@
   const law=[...nav.querySelectorAll(':scope > a')].find(a=>/^Legislação$/i.test(norm(a.textContent)));
   if(law){law.href='/legislacao-jurisprudencia.html';law.title='Legislação e jurisprudência MCP'}
 
+  // Restaura o atalho antigo de Resumos de Direito Penal.
+  [...nav.querySelectorAll(':scope > a')].forEach(a=>{
+    if(/Resumos? (de )?Direito Penal/i.test(norm(a.textContent)) || /resumos-direito-penal\.html/i.test(a.getAttribute('href')||'')) a.remove();
+  });
+  const penal=document.createElement('a');
+  penal.href='/resumos-direito-penal.html';
+  penal.textContent='Resumos Direito Penal';
+  penal.title='Resumos de Direito Penal MCP';
+
   // Garante uma única aba GCM Guarulhos.
   [...nav.querySelectorAll(':scope > a')].forEach(a=>{
     if(/GCM Guarulhos/i.test(norm(a.textContent)) || /gcm-guarulhos\.html/i.test(a.getAttribute('href')||'')) a.remove();
@@ -36,8 +45,16 @@
   guarulhos.style.fontWeight='900';
 
   const editais=[...nav.querySelectorAll(':scope > a')].find(a=>/^Editais$/i.test(norm(a.textContent)));
-  if(editais)editais.insertAdjacentElement('afterend',guarulhos);
-  else nav.appendChild(guarulhos);
+  if(law){
+    law.insertAdjacentElement('afterend',penal);
+    penal.insertAdjacentElement('afterend',guarulhos);
+  }else if(editais){
+    editais.insertAdjacentElement('afterend',penal);
+    penal.insertAdjacentElement('afterend',guarulhos);
+  }else{
+    nav.appendChild(penal);
+    nav.appendChild(guarulhos);
+  }
 
   // Mantém o menu móvel sincronizado com o menu principal.
   if(mobile){
@@ -57,6 +74,7 @@
     @media (min-width:1551px){
       .header .nav{gap:12px!important}
       .header .nav>a{font-size:12px!important}
+      .header .nav>a[href="/resumos-direito-penal.html"]{display:inline-flex!important}
       .header .nav>a[href="/gcm-guarulhos.html"]{display:inline-flex!important;color:#efbd26!important;font-weight:900!important}
     }
     @media (max-width:1550px){
