@@ -134,6 +134,47 @@
       color: #bfdbfe;
     }
 
+    .library-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:20px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+    .library-kicker{
+      display:inline-block;
+      padding:5px 11px;
+      border-radius:999px;
+      background:rgba(56,189,248,.12);
+      color:#bae6fd;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.05em;
+      text-transform:uppercase;
+    }
+    .card.featured{
+      border-color:rgba(56,189,248,.55);
+      box-shadow:0 18px 38px rgba(2,132,199,.12);
+    }
+    .tag.juris{
+      background:rgba(168,85,247,.14);
+      color:#e9d5ff;
+    }
+    .tag.legis{
+      background:rgba(34,197,94,.15);
+      color:#bbf7d0;
+    }
+    .tag.questoes{
+      background:rgba(245,158,11,.14);
+      color:#fde68a;
+    }
+    .divider{
+      height:1px;
+      background:linear-gradient(90deg,transparent,var(--border),transparent);
+      margin:12px 0 34px;
+    }
+
     .notice {
       margin: 0 0 45px;
       padding: 18px 20px;
@@ -171,7 +212,59 @@
       <a class="button secondary" href="#materiais">Ver materiais ↓</a>
     </div>
 
+    <section id="biblioteca-geral">
+      <div class="library-head">
+        <div>
+          <span class="library-kicker">Conteúdo nacional</span>
+          <h2 class="section-title">Biblioteca Geral das Guardas Municipais</h2>
+          <p class="section-description">Materiais independentes de concurso, cidade ou banca, úteis para preparação de Guardas Municipais em todo o Brasil.</p>
+        </div>
+        <a class="button secondary" href="#materiais">Ir para concursos ↓</a>
+      </div>
+
+      <div class="grid">
+        <article class="card featured">
+          <span class="tag legis">Legislação • Material geral</span>
+          <h3>Lei nº 13.022/2014 Comentada</h3>
+          <p>Estatuto Geral das Guardas Municipais comentado artigo por artigo, com lei seca, jurisprudência, pegadinhas, quadros de revisão e questões.</p>
+          <div class="actions">
+            <a class="button secondary" href="#" onclick="return false" aria-disabled="true">PDF em publicação</a>
+          </div>
+        </article>
+
+        <article class="card featured">
+          <span class="tag juris">Jurisprudência • STF</span>
+          <h3>Tema 656 do STF</h3>
+          <p>Segurança urbana, policiamento ostensivo e comunitário, prisão em flagrante, limites da polícia judiciária e controle externo pelo Ministério Público.</p>
+          <div class="actions">
+            <a class="button secondary" href="#" onclick="return false" aria-disabled="true">PDF em publicação</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <span class="tag juris">Jurisprudência</span>
+          <h3>Jurisprudência para Guardas</h3>
+          <p>Área preparada para ADPF 995, busca pessoal, domicílio, flagrante, prova ilícita, uso da força e novos precedentes relevantes.</p>
+          <div class="actions">
+            <a class="button secondary" href="#biblioteca-geral">Em expansão</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <span class="tag questoes">Questões e simulados</span>
+          <h3>Treino Geral GCM</h3>
+          <p>Espaço para questões gerais, simulados por legislação e exercícios comentados independentes de concurso específico.</p>
+          <div class="actions">
+            <a class="button" href="questoes-gcm-2026.html">Acessar questões</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="divider"></div>
+    </section>
+
     <section id="materiais">
+      <span class="library-kicker">Conteúdo específico</span>
       <h2 class="section-title">Materiais por concurso</h2>
       <p class="section-description">Selecione o concurso para acessar os materiais disponíveis.</p>
 
@@ -224,7 +317,7 @@
     </section>
 
     <div class="notice">
-      <strong>Importante:</strong> esta página será a central GCM 2026. Para adicionar novos materiais, basta criar um novo card e inserir o PDF correspondente no repositório do site.
+      <strong>Organização MCP:</strong> materiais nacionais ficam na Biblioteca Geral; editais, leis locais e apostilas direcionadas permanecem em Materiais por Concurso. Assim o conteúdo geral pode ser reutilizado em qualquer GCM.
     </div>
   </main>
 
