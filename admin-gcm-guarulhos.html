@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acesso Admin — GCM Guarulhos | MCP</title>
+<style>
+:root{--navy:#03162f;--blue:#0b2e5e;--gold:#efbd26;--bg:#eef3f7;--text:#0a2443;--muted:#6b7783;--ok:#177a50;--bad:#a63838}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{width:min(780px,calc(100% - 32px));margin:auto}.header{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:30px 0;border-bottom:4px solid var(--gold)}
+.header h1{margin:4px 0 8px;font-size:34px}.header p{margin:0;color:#dbe6f2}.card{background:#fff;border:1px solid #d8e1e8;border-radius:16px;padding:24px;margin:28px 0;box-shadow:0 10px 30px rgba(3,22,47,.08)}
+label{display:block;font-weight:800;margin:12px 0 6px}input{width:100%;padding:12px;border:1px solid #bfd0db;border-radius:9px;font:inherit}
+button,a.btn{display:inline-block;border:0;border-radius:9px;padding:12px 16px;font-weight:900;text-decoration:none;cursor:pointer}
+.primary{background:var(--navy);color:#fff}.gold{background:var(--gold);color:#102238}.ghost{background:#edf3f7;color:var(--navy);border:1px solid #cbd7df}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.hidden{display:none!important}.msg{margin-top:14px;padding:12px;border-radius:9px;background:#eef4f8}.success{background:#edf9f3;color:#166843}.error{background:#fff0f0;color:#8d2424}
+.small{color:var(--muted);font-size:13px;line-height:1.5}.status{font-weight:800}.filebox{border:2px dashed #ccd8e1;border-radius:12px;padding:18px;margin-top:18px;background:#f9fbfc}
+</style>
+</head>
+<body>
+<header class="header"><div class="wrap"><div style="color:var(--gold);font-weight:900">MCP • ADMIN</div><h1>GCM Guarulhos 2026</h1><p>Upload e download seguro da apostila premium.</p></div></header>
+<main class="wrap">
+<section id="loginCard" class="card">
+<h2>Entrar como administrador</h2>
+<p class="small">Use a mesma conta autorizada do painel MCP.</p>
+<label for="email">E-mail</label><input id="email" type="email" autocomplete="username">
+<label for="password">Senha</label><input id="password" type="password" autocomplete="current-password">
+<div class="actions"><button id="loginBtn" class="primary">Entrar</button><a class="btn ghost" href="/gcm-guarulhos.html">Voltar</a></div>
+<div id="loginMsg"></div>
+</section>
+
+<section id="adminCard" class="card hidden">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+<div><h2 style="margin:0">👑 Acesso administrativo</h2><div id="who" class="small"></div></div>
+<button id="logoutBtn" class="ghost">Sair</button>
+</div>
+
+<div class="filebox">
+<div class="status">Apostila oficial</div>
+<p class="small">O arquivo fica no bucket privado <b>materiais-premium</b>. Apenas contas cadastradas em <b>mcp_admin_users</b> podem acessar.</p>
+<input id="pdfFile" type="file" accept="application/pdf,.pdf">
+<div class="actions">
+<button id="uploadBtn" class="gold">Enviar / substituir apostila</button>
+<button id="downloadBtn" class="primary">👑 Baixar apostila</button>
+</div>
+<div id="adminMsg"></div>
+</div>
+</section>
+</main>
+
+<script type="module">
+import{createClient}from'https://esm.sh/@supabase/supabase-js@2.102.0';
+const sb=createClient('https://hutwrsieqqckvdrdqjyx.supabase.co','sb_publishable_FGUbg9FddhbwtVmZiXYCYA_qR1lqU7Q');
+const BUCKET='materiais-premium';
+const PATH='gcm-guarulhos/Apostila_GCM_Guarulhos_2026_MCP_COMPLETA_APROFUNDADA.pdf';
+const $=id=>document.getElementById(id);
+let user=null;
+function msg(el,text,type=''){el.innerHTML=text?'<div class="msg '+type+'">'+text+'</div>':''}
+async function isAdmin(uid){const{data,error}=await sb.from('mcp_admin_users').select('user_id').eq('user_id',uid).maybeSingle();return !error&&!!data}
+async function showAdmin(){
+  $('loginCard').classList.add('hidden');$('adminCard').classList.remove('hidden');
+  $('who').textContent=user?.email||'Administrador MCP';
+}
+async function boot(){const{data}=await sb.auth.getSession();if(data.session){user=data.session.user;if(await isAdmin(user.id))showAdmin();else await sb.auth.signOut()}}
+async function login(){
+  msg($('loginMsg'),'Entrando...');
+  const{data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+  if(error)return msg($('loginMsg'),error.message,'error');
+  user=data.user;
+  if(!await isAdmin(user.id)){await sb.auth.signOut();return msg($('loginMsg'),'Esta conta não possui permissão administrativa MCP.','error')}
+  msg($('loginMsg'),'');showAdmin();
+}
+async function upload(){
+  const file=$('pdfFile').files[0];
+  if(!file)return msg($('adminMsg'),'Selecione o PDF da apostila.','error');
+  if(file.type!=='application/pdf')return msg($('adminMsg'),'Envie um arquivo PDF.','error');
+  msg($('adminMsg'),'Enviando o arquivo...');
+  const{error}=await sb.storage.from(BUCKET).upload(PATH,file,{upsert:true,contentType:'application/pdf',cacheControl:'3600'});
+  if(error)return msg($('adminMsg'),error.message,'error');
+  msg($('adminMsg'),'Apostila enviada com sucesso para o armazenamento privado.','success');
+}
+async function download(){
+  msg($('adminMsg'),'Gerando link seguro...');
+  const{data,error}=await sb.storage.from(BUCKET).createSignedUrl(PATH,60,{download:'Apostila_GCM_Guarulhos_2026_MCP.pdf'});
+  if(error)return msg($('adminMsg'),'Não foi possível gerar o download: '+error.message,'error');
+  msg($('adminMsg'),'Link liberado por 60 segundos.','success');
+  window.location.href=data.signedUrl;
+}
+$('loginBtn').onclick=login;
+$('uploadBtn').onclick=upload;
+$('downloadBtn').onclick=download;
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+boot();
+</script>
+</body>
+</html>
