@@ -24,15 +24,77 @@ main{padding:26px 0 60px}.empty,.card{background:#fff;border:1px solid #d8e2ea;b
 <script type="module">
 import{createClient}from'https://esm.sh/@supabase/supabase-js@2.102.0';
 const sb=createClient('https://hutwrsieqqckvdrdqjyx.supabase.co','sb_publishable_FGUbg9FddhbwtVmZiXYCYA_qR1lqU7Q');
-const SLUG='gcm-guarulhos-leis-municipais', STORE='mcp-gcm-guarulhos-leis-municipais-progress-v1';
-const $=id=>document.getElementById(id); let all=[], state=JSON.parse(localStorage.getItem(STORE)||'{}'), onlyOpen=false;
+const SLUG='gcm-guarulhos-leis-municipais', STORE='mcp-gcm-guarulhos-leis-municipais-progress-v2';
+const $=id=>document.getElementById(id);
+let all=[],state=JSON.parse(localStorage.getItem(STORE)||'{}'),onlyOpen=false,busy=new Set();
+
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function save(){localStorage.setItem(STORE,JSON.stringify(state)); stats()}
-function stats(){const total=all.length,answered=Object.keys(state).filter(id=>all.some(q=>q.id===id)&&state[id]?.done).length,ok=Object.keys(state).filter(id=>state[id]?.correct&&all.some(q=>q.id===id)).length;$('sTotal').textContent=total;$('sResp').textContent=answered;$('sAcertos').textContent=ok;$('sPct').textContent=answered?Math.round(ok/answered*100)+'%':'0%';$('bar').style.width=(total?answered/total*100:0)+'%'}
-function render(){let rows=all;const c=$('category').value,d=$('difficulty').value;if(c)rows=rows.filter(q=>(q.category||'')===c);if(d)rows=rows.filter(q=>(q.difficulty||'')===d);if(onlyOpen)rows=rows.filter(q=>!state[q.id]?.done);
-if(!rows.length){$('app').className='empty';$('app').innerHTML=all.length?'Nenhuma questão encontrada com esses filtros.':'A plataforma está pronta. As questões serão adicionadas ao banco MCP.';stats();return}
-$('app').className='';$('app').innerHTML=rows.map((q,i)=>{const st=state[q.id]||{};const opts=Array.isArray(q.options)?q.options:[];return '<article class="card" data-id="'+q.id+'"><div class="qmeta"><span class="pill">Questão '+(q.question_number||i+1)+'</span><span class="pill">'+esc(q.category||'Geral')+'</span>'+(q.difficulty?'<span class="pill">'+esc(q.difficulty)+'</span>':'')+'</div><div class="question">'+esc(q.prompt)+'</div><div class="opts">'+opts.map((o,idx)=>'<button class="opt '+(st.selected===idx?'selected ':'')+(st.done?(String.fromCharCode(65+idx)===q.correct_answer?'correct':(st.selected===idx?'wrong':'')):'')+'" data-idx="'+idx+'"><b>'+String.fromCharCode(65+idx)+')</b> '+esc(o)+'</button>').join('')+'</div><button class="smallbtn">Corrigir</button><div class="feedback '+(st.done?'show '+(st.correct?'ok':'bad'):'')+'">'+(st.done?'<b>'+(st.correct?'Acertou!':'Resposta correta: '+esc(q.correct_answer))+'</b><br>'+esc(q.explanation||'')+(q.reference_text?'<br><small>'+esc(q.reference_text)+'</small>':''):'')+'</div></article>'}).join('');
-document.querySelectorAll('.card').forEach(card=>{const id=card.dataset.id,q=all.find(x=>x.id===id);card.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(state[id]?.done)return;state[id]={...(state[id]||{}),selected:Number(b.dataset.idx)};render()});card.querySelector('.smallbtn').onclick=()=>{const st=state[id]||{};if(st.selected==null)return;const chosen=String.fromCharCode(65+st.selected);state[id]={selected:st.selected,done:true,correct:chosen===q.correct_answer};save();render()}});stats()}
-async function load(){let {data,error}=await sb.from('mcp_questions').select('*').eq('collection_slug',SLUG).eq('active',true).order('question_number',{ascending:true});if(error){$('app').textContent='Erro ao carregar as questões: '+error.message;return}all=data||[];const cats=[...new Set(all.map(q=>q.category).filter(Boolean))].sort();$('category').innerHTML='<option value="">Todos os assuntos</option>'+cats.map(c=>'<option>'+esc(c)+'</option>').join('');render()}
-$('category').onchange=render;$('difficulty').onchange=render;$('onlyOpen').onclick=()=>{onlyOpen=!onlyOpen;$('onlyOpen').textContent=onlyOpen?'Mostrar todas':'Só não respondidas';render()};$('reset').onclick=()=>{if(confirm('Reiniciar seu progresso nesta plataforma?')){state={};save();render()}};load();
+function save(){localStorage.setItem(STORE,JSON.stringify(state));stats()}
+function stats(){
+  const total=all.length;
+  const answered=Object.keys(state).filter(id=>all.some(q=>q.id===id)&&state[id]?.done).length;
+  const ok=Object.keys(state).filter(id=>state[id]?.correct&&all.some(q=>q.id===id)).length;
+  $('sTotal').textContent=total;$('sResp').textContent=answered;$('sAcertos').textContent=ok;
+  $('sPct').textContent=answered?Math.round(ok/answered*100)+'%':'0%';
+  $('bar').style.width=(total?answered/total*100:0)+'%';
+}
+function render(){
+  let rows=all;const c=$('category').value,d=$('difficulty').value;
+  if(c)rows=rows.filter(q=>(q.category||'')===c);
+  if(d)rows=rows.filter(q=>(q.difficulty||'')===d);
+  if(onlyOpen)rows=rows.filter(q=>!state[q.id]?.done);
+  if(!rows.length){
+    $('app').className='empty';
+    $('app').innerHTML=all.length?'Nenhuma questão encontrada com esses filtros.':'Nenhuma questão disponível no momento.';
+    stats();return;
+  }
+  $('app').className='';
+  $('app').innerHTML=rows.map((q,i)=>{
+    const st=state[q.id]||{},opts=Array.isArray(q.options)?q.options:[];
+    return '<article class="card" data-id="'+q.id+'"><div class="qmeta"><span class="pill">Questão '+(q.question_number||i+1)+'</span><span class="pill">'+esc(q.category||'Geral')+'</span>'+(q.difficulty?'<span class="pill">'+esc(q.difficulty)+'</span>':'')+'</div><div class="question">'+esc(q.prompt)+'</div><div class="opts">'+opts.map((o,idx)=>{
+      const letter=String.fromCharCode(65+idx);
+      const classes=(st.selected===idx?'selected ':'')+(st.done?(letter===st.correctAnswer?'correct':(st.selected===idx?'wrong':'')):'');
+      return '<button class="opt '+classes+'" data-idx="'+idx+'"><b>'+letter+')</b> '+esc(o)+'</button>';
+    }).join('')+'</div><button class="smallbtn" '+(busy.has(q.id)?'disabled':'')+'>'+(busy.has(q.id)?'Corrigindo...':'Corrigir')+'</button><div class="feedback '+(st.done?'show '+(st.correct?'ok':'bad'):'')+'">'+(st.done?'<b>'+(st.correct?'Acertou!':'Resposta correta: '+esc(st.correctAnswer))+'</b><br>'+esc(st.explanation||'')+(st.referenceText?'<br><small>'+esc(st.referenceText)+'</small>':''):'')+'</div></article>';
+  }).join('');
+  document.querySelectorAll('.card').forEach(card=>{
+    const id=card.dataset.id;
+    card.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      if(state[id]?.done||busy.has(id))return;
+      state[id]={...(state[id]||{}),selected:Number(b.dataset.idx)};
+      render();
+    });
+    card.querySelector('.smallbtn').onclick=async()=>{
+      const st=state[id]||{};
+      if(st.selected==null||st.done||busy.has(id))return;
+      const chosen=String.fromCharCode(65+st.selected);
+      busy.add(id);render();
+      const {data,error}=await sb.rpc('mcp_submit_answer',{p_question_id:id,p_answer:chosen});
+      busy.delete(id);
+      if(error){
+        state[id]={...st,error:error.message};
+        render();
+        alert('Não foi possível corrigir a questão. Tente novamente.');
+        return;
+      }
+      const r=Array.isArray(data)?data[0]:data;
+      state[id]={selected:st.selected,done:true,correct:!!r?.correct,correctAnswer:r?.correct_answer||'',explanation:r?.explanation||'',referenceText:r?.reference_text||''};
+      save();render();
+    };
+  });
+  stats();
+}
+async function load(){
+  const {data,error}=await sb.rpc('mcp_get_question_batch',{p_collection:SLUG,p_source:null,p_banca:null,p_year:null,p_limit:100});
+  if(error){$('app').textContent='Erro ao carregar as questões: '+error.message;return}
+  all=(data||[]).sort((a,b)=>(a.question_number??9999)-(b.question_number??9999));
+  const cats=[...new Set(all.map(q=>q.category).filter(Boolean))].sort();
+  $('category').innerHTML='<option value="">Todos os assuntos</option>'+cats.map(c=>'<option>'+esc(c)+'</option>').join('');
+  render();
+}
+$('category').onchange=render;
+$('difficulty').onchange=render;
+$('onlyOpen').onclick=()=>{onlyOpen=!onlyOpen;$('onlyOpen').textContent=onlyOpen?'Mostrar todas':'Só não respondidas';render()};
+$('reset').onclick=()=>{if(confirm('Reiniciar seu progresso nesta plataforma?')){state={};save();render()}};
+load();
 </script></body></html>
