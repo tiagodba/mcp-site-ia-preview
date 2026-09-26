@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "outputDirectory": "dist",
   "functions": {
     "api/dica.js": {"maxDuration": 30},
     "api/corrigir-discursiva.js": {"maxDuration": 60}
