@@ -36,7 +36,7 @@ function show(number, scroll=true) {
   ui.progress.textContent=`Bloco ${String(item.block).padStart(2,'0')} • Artigo ${number} de 60`;
   ui.title.textContent=`Art. ${number} — ${item.title.charAt(0)+item.title.slice(1).toLocaleLowerCase('pt-BR')}`;
   renderBody(item.body);ui.previous.disabled=number===1;ui.next.disabled=number===60;
-  document.querySelectorAll('.article-link').forEach(link=>{const active=Number(link.dataset.article)===number;link.classList.toggle('current',active);if(active)link.setAttribute('aria-current','true');else link.removeAttribute('aria-current')});
+  document.querySelectorAll('.article-link').forEach(link=>{const active=Number(link.dataset.article)===number;link.classList.toggle('current',active);if(active){link.setAttribute('aria-current','true');link.closest('details').open=true}else link.removeAttribute('aria-current')});
   history.replaceState(null,'',`#art-${number}`);
   if(scroll) document.getElementById('article').scrollIntoView({behavior:'smooth',block:'start'});
 }
