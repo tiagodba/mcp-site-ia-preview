@@ -16,7 +16,7 @@
 <body>
 <header class="header"><div class="wrap header-inner"><a class="brand" href="/">MCP CARREIRAS POLICIAIS</a><nav class="nav" aria-label="Navegação principal"><a href="/">Início</a><a href="/gcm-guarulhos.html">GCM Guarulhos</a><a href="/legislacao-gcm.html">Legislação geral</a></nav></div></header>
 <main><section class="hero"><div class="wrap"><div class="eyebrow">Biblioteca gratuita • GCM Guarulhos</div><h1>Legislação local de Guarulhos</h1><p>Reúna aqui os textos das normas municipais para estudar a legislação específica da Guarda Civil Municipal. Os materiais desta página têm acesso gratuito.</p></div></section>
-<section class="section"><div class="wrap"><h2>Normas municipais</h2><p class="lead">Selecione um material para ler nesta página ou baixe o PDF gratuitamente.</p><div class="grid" id="materials"></div>
+<section class="section"><div class="wrap"><h2>Normas municipais</h2><p class="lead">Estude o decreto na apostila online com sumário e navegação por artigo, ou baixe o PDF gratuitamente.</p><div class="grid" id="materials"></div>
 <section class="reader" id="leitor" aria-label="Leitor de legislação"><div class="reader-head"><div><h2 id="reader-title">Decreto nº 44.264/2026</h2><p id="reader-description">Apostila MCP revisada com índice clicável</p></div><div class="reader-actions"><a class="btn secondary" id="open-pdf" target="_blank" rel="noopener">Abrir em nova guia</a><a class="btn" id="download-pdf" download>Baixar PDF</a></div></div><iframe id="pdf-frame" title="Leitor da apostila do Decreto nº 44.264/2026" loading="lazy"></iframe><p class="reader-help">Se o PDF não aparecer no seu celular, use “Abrir em nova guia” ou “Baixar PDF”.</p></section>
 </div></section></main>
 <footer class="footer"><div class="wrap"><strong>MCP CARREIRAS POLICIAIS</strong><p>@materiaiscarreiraspoliciais</p></div></footer>
@@ -24,7 +24,7 @@
 // Adicione novos materiais aqui; o cartão e o leitor são montados automaticamente.
 const materials = [
   { id: 'lei-7792', category: 'LEI MUNICIPAL', title: 'Lei nº 7.792/2019', description: 'Norma municipal relacionada à carreira da Guarda Civil Municipal de Guarulhos.', pdf: null },
-  { id: 'decreto-44264', category: 'DECRETO MUNICIPAL • GRÁTIS', title: 'Decreto nº 44.264/2026', description: 'Apostila MCP revisada, com índice clicável e comentários para estudo da legislação local.', pdf: '/MCP_Decreto_44264_Guarulhos_Revisada_Indice_Clicavel.pdf' }
+  { id: 'decreto-44264', category: 'DECRETO MUNICIPAL • GRÁTIS', title: 'Decreto nº 44.264/2026', description: 'Apostila MCP revisada, com índice clicável e comentários para estudo da legislação local.', pdf: '/MCP_Decreto_44264_Guarulhos_Revisada_Indice_Clicavel.pdf', online: '/decreto-44264-guarulhos-online.html' }
 ];
 const list = document.getElementById('materials');
 const reader = document.getElementById('leitor');
@@ -47,7 +47,7 @@ for (const item of materials) {
   card.append(tag, title, description);
   if (item.pdf) {
     const actions = document.createElement('div'); actions.className = 'actions';
-    const read = document.createElement('button'); read.className = 'btn'; read.type = 'button'; read.textContent = 'Ler nesta página'; read.addEventListener('click', () => selectMaterial(item));
+    const read = document.createElement('a'); read.className = 'btn'; read.href = item.online || item.pdf; read.textContent = item.online ? 'Estudar no site' : 'Ler PDF';
     const download = document.createElement('a'); download.className = 'btn secondary'; download.href = item.pdf; download.download = ''; download.textContent = 'Baixar PDF';
     actions.append(read, download); card.append(actions);
   } else {
