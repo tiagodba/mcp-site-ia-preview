@@ -222,12 +222,7 @@
   modal.addEventListener('click',e=>{if(e.target===modal)close()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
 
-  const key='mcpLeadPromptSeenV1';
-  try{
-    if(!localStorage.getItem(key)){
-      setTimeout(()=>{open();localStorage.setItem(key,String(Date.now()))},9000);
-    }
-  }catch{}
+  // Open only when the visitor asks to receive material.
 
   const form=modal.querySelector('#mcpLeadForm');
   const status=modal.querySelector('#mcpLeadStatus');

@@ -9,6 +9,7 @@
  const jobs=radar.querySelector('.jobs');
  if(!jobs)return;
  const original=jobs.innerHTML;
+ const fallbackDate=updated?.textContent||'Referência anterior';
  const destaqueQueimados={
    orgao:'Guarda Municipal de Queimados',
    uf:'RJ',
@@ -42,7 +43,7 @@
  async function refresh(){
    if(updated)updated.textContent='Atualizando Radar...';
    try{
-     const r=await fetch('/api/radar',{headers:{Accept:'application/json'}}),d=await r.json();
+     const r=await fetch('/api/radar',{headers:{Accept:'application/json'},signal:AbortSignal.timeout(12000)}),d=await r.json();
      if(!r.ok)throw new Error(d.error||'Falha');
      jobs.innerHTML=renderWithHighlight(d.items);
      radar.dataset.dynamicRadar='1';
@@ -50,8 +51,8 @@
      const result=radar.querySelector('.result');if(result)result.textContent=`${total} oportunidades/movimentações em acompanhamento`;
      if(updated)updated.textContent=`Última consulta: ${formatDate(d.updatedAt||new Date().toISOString())}`;
    }catch(e){
-     jobs.innerHTML=card(destaqueQueimados)+original;
-     if(updated)updated.textContent=`Radar ativo • última tentativa: ${formatDate(new Date().toISOString())}`;
+     jobs.innerHTML=original;
+     if(updated)updated.textContent=`Consulta indisponível. Dados de referência: ${fallbackDate}. Confirme a situação na banca.`;
    }
  }
  refresh();
