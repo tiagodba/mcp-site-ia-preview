@@ -2,7 +2,7 @@
   const main=document.querySelector('main');
   function organize(){
     if(!main)return;
-    const ids=['inicio','materiais','materiais-2026','mcpStudyResources','produzidos','mcpCareerHub','mcpGcmGoiasAnnouncement','mcpSuspStudy','mcpCrimesPessoaGamma','editais','vantagens'];
+    const ids=['inicio','materiais','mcpPcmg2026','materiais-2026','mcpStudyResources','produzidos','mcpCareerHub','mcpGcmGoiasAnnouncement','mcpSuspStudy','mcpCrimesPessoaGamma','editais','vantagens'];
     let previous=null;
     for(const id of ids){const section=document.getElementById(id);if(!section)continue;if(previous&&previous.nextElementSibling!==section)previous.after(section);previous=section}
     document.querySelectorAll('img').forEach(img=>{if(!img.closest('.header,.hero'))img.loading='lazy';img.decoding='async'});
