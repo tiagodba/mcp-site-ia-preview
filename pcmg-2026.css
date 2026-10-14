@@ -4,3 +4,5 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 .free-material-cover{display:flex;justify-content:center;align-items:center;background:#edf1f4;margin:-4px -4px 24px;border-radius:4px;padding:12px}.free-material-cover img{display:block;max-width:100%;height:240px;width:auto;object-fit:contain}.free-resource>.button{margin-top:8px}.free-resource>.text-link{margin-top:12px}
+
+.pcmg-price span{display:block;font-size:10px;letter-spacing:1px;font-weight:700;color:#617286}.pcmg-price strong{display:block;color:#071d35;font:700 35px/1.3 Arial,sans-serif;margin-top:4px}
