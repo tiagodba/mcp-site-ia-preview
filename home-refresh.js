@@ -13,7 +13,7 @@
   }
   if(main&&!document.getElementById('mcpStudyResources')){
     const section=document.createElement('section');section.id='mcpStudyResources';section.className='mcp-study-resources';
-    section.innerHTML='<div class="wrap"><div class="eyebrow">Sua rotina de estudos</div><h2>Leitura e revisão com direção.</h2><div class="mcp-study-grid"><a href="/plano-leitura-medicina-legal-genival.html"><small>MEDICINA LEGAL</small><h3>Cronograma de leitura</h3><p>Acesse seu plano de leitura de Medicina Legal de Genival Veloso e acompanhe os estudos.</p><span>Abrir cronograma</span></a><a href="/resumos-direito-penal.html"><small>DIREITO PENAL</small><h3>Resumos de Direito Penal</h3><p>Retome os resumos e os conteúdos de revisão na sua área de estudos.</p><span>Abrir resumos</span></a></div></div>';
+    section.innerHTML='<div class="wrap"><div class="eyebrow">Sua rotina de estudos</div><h2>Leitura e revisão com direção.</h2><div class="mcp-study-grid"><a href="/simulado-gcm-maua.html"><small>GCM MAUÁ • IBAM • 2026</small><h3>Simulado Linha de Frente</h3><p>40 questões com cronômetro, resultado por matéria e gabarito comentado.</p><span>Resolver simulado →</span></a><a href="/plano-leitura-medicina-legal-genival.html"><small>MEDICINA LEGAL</small><h3>Cronograma de leitura</h3><p>Acesse seu plano de leitura de Medicina Legal de Genival Veloso e acompanhe os estudos.</p><span>Abrir cronograma</span></a><a href="/resumos-direito-penal.html"><small>DIREITO PENAL</small><h3>Resumos de Direito Penal</h3><p>Retome os resumos e os conteúdos de revisão na sua área de estudos.</p><span>Abrir resumos</span></a></div></div>';
     document.getElementById('materiais-2026')?.after(section);
   }
   organize();window.addEventListener('load',organize,{once:true});
