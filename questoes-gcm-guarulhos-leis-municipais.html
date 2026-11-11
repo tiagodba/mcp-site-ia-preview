@@ -10,7 +10,15 @@
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}.stat{background:#ffffff10;border:1px solid #ffffff25;border-radius:10px;padding:14px}.stat strong{display:block;color:var(--gold);font-size:22px}.stat span{font-size:12px;color:#d3deea}
 .controls{background:#fff;border-bottom:1px solid #d6e0e8;box-shadow:0 5px 18px #071a2b12}.controls .wrap{display:flex;gap:10px;align-items:center;padding:12px 0;overflow:auto}.filter,.action,select{font:inherit;border:1px solid #cad6e0;background:#fff;color:#0a2a50;border-radius:8px;padding:10px 13px;font-weight:800}.action{cursor:pointer}.action.primary{background:var(--gold);border-color:var(--gold);color:#06172c}.action.dark{background:var(--navy);color:#fff;border-color:var(--navy)}
 main{padding:26px 0 60px}.empty,.card{background:#fff;border:1px solid #d8e2ea;border-radius:12px;padding:20px;margin:14px 0;box-shadow:0 8px 24px #06172c0b}.empty{text-align:center;color:var(--muted)}
-.qmeta{display:flex;gap:8px;flex-wrap:wrap}.pill{display:inline-block;background:#eaf5fb;color:#075078;border-radius:20px;padding:6px 10px;font-size:11px;font-weight:900}.question{font-weight:800;line-height:1.55;margin:14px 0}.opt{display:block;width:100%;text-align:left;border:1px solid #d7e0e8;background:#fff;border-radius:8px;padding:12px 14px;margin:8px 0;cursor:pointer}.opt.selected{border-color:#0b7bb5;background:#eef8fd}.opt.correct{border-color:#56b983;background:#ecf9f2}.opt.wrong{border-color:#e38d86;background:#fff1ef}.feedback{display:none;margin-top:12px;border-left:4px solid var(--gold);background:#f6f8fa;padding:12px 14px;border-radius:5px;line-height:1.5}.feedback.show{display:block}.feedback.ok{border-left-color:#22a06b}.feedback.bad{border-left-color:#d92d20}.smallbtn{border:0;border-radius:7px;padding:10px 13px;background:#0a2a50;color:#fff;font-weight:800;cursor:pointer;margin-top:10px}.progress{height:9px;background:#dfe7ed;border-radius:9px;overflow:hidden;margin-top:12px}.progress>i{display:block;height:100%;width:0;background:var(--gold)}footer{background:#020f25;color:#9fb0c3;padding:28px 0;text-align:center;font-size:12px}@media(max-width:760px){.hero h1{font-size:34px}.stats{grid-template-columns:1fr 1fr}}</style></head><body>
+.qmeta{display:flex;gap:8px;flex-wrap:wrap}.pill{display:inline-block;background:#eaf5fb;color:#075078;border-radius:20px;padding:6px 10px;font-size:11px;font-weight:900}.question{font-weight:800;line-height:1.55;margin:14px 0}.opt{display:block;width:100%;text-align:left;border:1px solid #d7e0e8;background:#fff;border-radius:8px;padding:12px 14px;margin:8px 0;cursor:pointer}.opt.selected{border-color:#0b7bb5;background:#eef8fd}.opt.correct{border-color:#56b983;background:#ecf9f2}.opt.wrong{border-color:#e38d86;background:#fff1ef}.feedback{display:none;margin-top:12px;border-left:4px solid var(--gold);background:#f6f8fa;padding:12px 14px;border-radius:5px;line-height:1.5}.feedback.show{display:block}.feedback.ok{border-left-color:#22a06b}.feedback.bad{border-left-color:#d92d20}.smallbtn{border:0;border-radius:7px;padding:10px 13px;background:#0a2a50;color:#fff;font-weight:800;cursor:pointer;margin-top:10px}.progress{height:9px;background:#dfe7ed;border-radius:9px;overflow:hidden;margin-top:12px}.progress>i{display:block;height:100%;width:0;background:var(--gold)}footer{background:#020f25;color:#9fb0c3;padding:28px 0;text-align:center;font-size:12px}@media(max-width:760px){.hero h1{font-size:34px}.stats{grid-template-columns:1fr 1fr}}
+/* Keep the page inside the viewport, including at browser zoom. */
+html,body{width:100%;min-width:0}.wrap{max-width:1100px;width:calc(100% - 28px);min-width:0}
+.hero h1{font-size:clamp(28px,4vw,44px);overflow-wrap:anywhere}.hero p,.question,.feedback{overflow-wrap:anywhere}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.stat{min-width:0}
+.controls .wrap{flex-wrap:wrap;overflow:visible}.controls select{min-width:0;max-width:100%}
+.notice{padding:12px 14px;background:#fff8df;border:1px solid #efbd26;border-radius:8px;margin-bottom:14px;line-height:1.5}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.controls select{flex:1 1 220px}.controls .action{flex:1 1 150px}.top .wrap{flex-wrap:wrap}.hero{padding:30px 0}}
+</style></head><body>
 <header class="top"><div class="wrap"><div class="brand"><b>MCP</b> • GCM Guarulhos</div><a href="/gcm-guarulhos.html">← Voltar</a></div></header>
 <section class="hero"><div class="wrap"><div class="kicker">PLATAFORMA DE QUESTÕES • LEGISLAÇÃO MUNICIPAL</div><h1>Questões — Leis Municipais de Guarulhos</h1><p>Banco de questões exclusivo das leis municipais cobradas para a GCM Guarulhos, com correção imediata, filtros e acompanhamento de desempenho.</p>
 <div class="stats"><div class="stat"><strong id="sTotal">0</strong><span>questões</span></div><div class="stat"><strong id="sResp">0</strong><span>respondidas</span></div><div class="stat"><strong id="sAcertos">0</strong><span>acertos</span></div><div class="stat"><strong id="sPct">0%</strong><span>aproveitamento</span></div></div><div class="progress"><i id="bar"></i></div></div></section>
@@ -19,17 +27,29 @@ main{padding:26px 0 60px}.empty,.card{background:#fff;border:1px solid #d8e2ea;b
 <select id="difficulty"><option value="">Todas as dificuldades</option><option>Fácil</option><option>Médio</option><option>Difícil</option><option>Elite</option></select>
 <button class="action dark" id="onlyOpen">Só não respondidas</button><button class="action primary" id="reset">Reiniciar</button>
 </div></div>
-<main><div class="wrap"><div id="app" class="empty">Carregando questões...</div></div></main>
+<main><div class="wrap"><div id="connection" role="status" aria-live="polite"></div><div id="app" class="empty">Carregando questões...</div></div></main>
 <footer><div class="wrap">MCP • Leis Municipais de Guarulhos • GCM Guarulhos 2026</div></footer>
 <script type="module">
-import{createClient}from'https://esm.sh/@supabase/supabase-js@2.102.0';
-const sb=createClient('https://hutwrsieqqckvdrdqjyx.supabase.co','sb_publishable_FGUbg9FddhbwtVmZiXYCYA_qR1lqU7Q');
+// REST requests avoid making startup depend on an external JavaScript CDN.
+const API='https://hutwrsieqqckvdrdqjyx.supabase.co/rest/v1/rpc/';
+const PUBLIC_KEY='sb_publishable_FGUbg9FddhbwtVmZiXYCYA_qR1lqU7Q';
+const sb={async rpc(name,payload){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+  try{
+    const response=await fetch(API+name,{method:'POST',headers:{apikey:PUBLIC_KEY,'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
+    if(!response.ok)throw new Error('Serviço indisponível');
+    return {data:await response.json(),error:null};
+  }catch(error){return {data:null,error};}finally{clearTimeout(timer);}
+}};
 const SLUG='gcm-guarulhos-leis-municipais', STORE='mcp-gcm-guarulhos-leis-municipais-progress-v2';
 const $=id=>document.getElementById(id);
-let all=[],state=JSON.parse(localStorage.getItem(STORE)||'{}'),onlyOpen=false,busy=new Set();
+function readStored(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}}
+const CACHE=STORE+'-questions';
+let all=[],state=readStored(STORE,{}),onlyOpen=false,busy=new Set();
+if(!state||typeof state!=='object'||Array.isArray(state))state={};
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function save(){localStorage.setItem(STORE,JSON.stringify(state));stats()}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(state))}catch{}stats()}
 function stats(){
   const total=all.length;
   const answered=Object.keys(state).filter(id=>all.some(q=>q.id===id)&&state[id]?.done).length;
@@ -85,8 +105,22 @@ function render(){
   stats();
 }
 async function load(){
+  $('app').textContent='Carregando questões...';
   const {data,error}=await sb.rpc('mcp_get_question_batch',{p_collection:SLUG,p_source:null,p_banca:null,p_year:null,p_limit:100});
-  if(error){$('app').textContent='Erro ao carregar as questões: '+error.message;return}
+  if(error){
+    const cached=readStored(CACHE,[]);
+    $('connection').className='notice';
+    $('connection').innerHTML='Não foi possível conectar ao banco de questões. '+(Array.isArray(cached)&&cached.length?'Exibindo a última lista salva neste navegador. A correção precisa de conexão. ':'O serviço pode estar temporariamente indisponível. Seu progresso foi mantido. ')+'<button class="smallbtn" id="retry">Tentar novamente</button>';
+    $('retry').onclick=load;
+    if(Array.isArray(cached)&&cached.length){setQuestions(cached)}else{$('app').className='empty';$('app').textContent='As questões serão exibidas quando a conexão com o banco for restabelecida.';}
+    return;
+  }
+  if(!Array.isArray(data)){$('app').textContent='O banco retornou uma resposta inválida. Recarregue a página para tentar novamente.';return;}
+  $('connection').className='';$('connection').textContent='';
+  try{localStorage.setItem(CACHE,JSON.stringify(data))}catch{}
+  setQuestions(data);
+}
+function setQuestions(data){
   all=(data||[]).sort((a,b)=>(a.question_number??9999)-(b.question_number??9999));
   const cats=[...new Set(all.map(q=>q.category).filter(Boolean))].sort();
   $('category').innerHTML='<option value="">Todos os assuntos</option>'+cats.map(c=>'<option>'+esc(c)+'</option>').join('');
